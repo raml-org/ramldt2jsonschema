@@ -14,5 +14,7 @@
   "author": "Artem Kostiuk <postatum@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "datatype-expansion": "^0.0.6",
+    "yaml-js": "^0.1.4"
   }
 }
