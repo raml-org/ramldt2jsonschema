@@ -137,3 +137,95 @@ types:
           type: object
           minProperties: 1
           maxProperties: 10
+
+  NameXML:
+    type: string
+    xml:
+      attribute: false
+      wrapped: true
+      name: cat
+      prefix: animal
+
+  CatName:
+    type: NameXML
+    default: "regular cat"
+    example: fluffy
+    displayName: Cat
+    description: "Cat name"
+    facets:
+      amazing: boolean
+
+  CatBreed:
+    type: string
+    pattern: "\\w{3,}"
+    examples:
+      dogone: "Cat One"
+      dogtwo: "Cat Two"
+    enum: ["Cat One", "Cat Two", "Cat Three"]
+
+  CatPros:
+    type: array
+    uniqueItems: false
+    items: string
+    minItems: 1
+    maxItems: 100
+
+  CatCons:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+      maxLength: 100
+
+  CatAge:
+    type: number
+    minimum: 1
+    maximum: 50
+    format: int32
+
+  Cat:
+    type: object
+    minProperties: 1
+    maxProperties: 50
+    additionalProperties: false
+    discriminator: breed
+    discriminatorValue: AmazingCat
+    properties:
+      proscons:
+        type: CatPros | CatCons
+        required: false
+      name:
+        type: CatName
+        amazing: true
+      breed:
+        type: CatBreed
+      age: CatAge
+      rating:
+        type: integer
+        multipleOf: 5
+        example:
+          displayName: Cat's rating
+          description: Rating of cat's awesomeness
+          strict: false
+          value: 50
+      year_of_birth: date-only
+      time_of_birth: time-only
+      dt_of_birth: datetime-only
+      addition_date:
+        type: datetime
+        format: rfc2616
+      photo:
+        type: file
+        fileTypes: ['image/jpeg', 'image/png']
+        minLength: 1
+        maxLength: 307200
+      description: nil
+      habits?: string
+      siblings: string[]
+      ratingHistory: (integer | number)[]
+      additionalData:
+        type:
+          type: object
+          properties:
+            weight: number
