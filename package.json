@@ -13,7 +13,11 @@
   ],
   "author": "Artem Kostiuk <postatum@gmail.com>",
   "license": "Apache-2.0",
+  "bin": {
+    "dt2js": "src/dt2js_cli.js"
+  },
   "dependencies": {
+    "commander": "^2.9.0",
     "datatype-expansion": "^0.0.6",
     "yaml-js": "^0.1.4"
   }
