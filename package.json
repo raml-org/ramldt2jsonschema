@@ -1,0 +1,18 @@
+{
+  "name": "ramldt2jsonschema",
+  "version": "0.0.1",
+  "description": "Converts a RAML data type into JSON schema, and back",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "raml",
+    "json",
+    "types"
+  ],
+  "author": "Artem Kostiuk <postatum@gmail.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+  }
+}
