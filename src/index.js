@@ -27,8 +27,8 @@ function dt2js(fileName, typeName, cb) {
 
 function _processArray(val) {
   let accum = [];
-  for (let el in val) {
-    accum = accum.concat(schemaForm(el));
+  for (var i=0; i<val.length; i++) {
+    accum = accum.concat(schemaForm(val[i]));
   }
   return accum;
 }
