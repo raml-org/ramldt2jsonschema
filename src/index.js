@@ -19,8 +19,61 @@ function dt2js(fileName, typeName, cb) {
       console.log(err);
       return;
     }
-    dtexp.canonicalForm(expanded, cb);
+    dtexp.canonicalForm(expanded, function(err, canonical) {
+      cb(err, schemaForm(canonical));
+    });
   });
+}
+
+function _processArray(val) {
+  let accum = [];
+  for (let el in val) {
+    accum = accum.concat(schemaForm(el));
+  }
+  return accum;
+}
+
+function schemaForm(data) {
+  if (!(data instanceof Object)) {
+    return data;
+  }
+  for (let key in data) {
+    let val = data[key];
+
+    if (val instanceof Array) {
+      let accum = _processArray(val);
+      data[key] = accum;
+      continue;
+    }
+
+    if (val instanceof Object) {
+      data[key] = schemaForm(val);
+      continue;
+    }
+
+    if (key === 'type') {
+      switch (val) {
+        case 'union':
+          data[key] = 'object';
+          break;
+        case 'nil':
+          data[key] = 'null';
+          break;
+        case 'date-only':
+          break;
+        case 'time-only':
+          break;
+        case 'datetime-only':
+          break;
+        case 'datetime':
+          break;
+        case 'file':
+          break;
+      }
+    }
+
+  }
+  return data;
 }
 
 module.exports.dt2js = dt2js;
