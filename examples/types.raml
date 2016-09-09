@@ -184,8 +184,13 @@ types:
     maximum: 50
     format: int32
 
+  CatWithAddress:
+    additionalProperties: false
+    properties:
+      address: string
+
   Cat:
-    type: object
+    type: CatWithAddress
     minProperties: 1
     maxProperties: 50
     additionalProperties: false
