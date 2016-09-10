@@ -25,7 +25,7 @@ function dt2js(fileName, typeName, cb) {
   });
 }
 
-function _processArray(val) {
+function processArray(val) {
   let accum = [];
   for (var i=0; i<val.length; i++) {
     accum = accum.concat(schemaForm(val[i]));
@@ -33,47 +33,59 @@ function _processArray(val) {
   return accum;
 }
 
+function mergeObjs(obj, upd) {
+  for (let key in upd) {
+    obj[key] = upd[key];
+  }
+  return obj;
+}
+
+function changeType(typeName, updateWith) {
+  switch (typeName) {
+    case 'union':
+      updateWith['type'] = 'object';
+      break;
+    case 'nil':
+      updateWith['type'] = 'null';
+      break;
+    case 'date-only':
+      break;
+    case 'time-only':
+      break;
+    case 'datetime-only':
+      break;
+    case 'datetime':
+      break;
+    case 'file':
+      break;
+  }
+  return updateWith;
+}
+
 function schemaForm(data) {
   if (!(data instanceof Object)) {
     return data;
   }
+  let updateWith = {};
   for (let key in data) {
     let val = data[key];
 
     if (val instanceof Array) {
-      let accum = _processArray(val);
-      data[key] = accum;
+      let accum = processArray(val);
+      updateWith[key] = accum;
       continue;
     }
 
     if (val instanceof Object) {
-      data[key] = schemaForm(val);
+      updateWith[key] = schemaForm(val);
       continue;
     }
 
     if (key === 'type') {
-      switch (val) {
-        case 'union':
-          data[key] = 'object';
-          break;
-        case 'nil':
-          data[key] = 'null';
-          break;
-        case 'date-only':
-          break;
-        case 'time-only':
-          break;
-        case 'datetime-only':
-          break;
-        case 'datetime':
-          break;
-        case 'file':
-          break;
-      }
+      updateWith = changeType(val, updateWith);
     }
-
   }
-  return data;
+  return mergeObjs(data, updateWith);
 }
 
 module.exports.dt2js = dt2js;
