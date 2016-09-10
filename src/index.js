@@ -20,9 +20,16 @@ function dt2js(fileName, typeName, cb) {
       return;
     }
     dtexp.canonicalForm(expanded, function(err, canonical) {
-      cb(err, schemaForm(canonical));
+      let schema = schemaForm(canonical);
+      schema = addRootKeywords(schema);
+      cb(err, schema);
     });
   });
+}
+
+function addRootKeywords(schema) {
+  schema['$schema'] = 'http://json-schema.org/draft-04/schema#';
+  return schema;
 }
 
 function processArray(val) {
