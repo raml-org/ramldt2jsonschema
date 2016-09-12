@@ -1,3 +1,5 @@
+'use strict';
+
 var yaml = require('yaml-js');
 var fs = require('fs');
 var dtexp = require('datatype-expansion');

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+'use strict';
+
 var index = require('./index.js');
 var program = require('commander');
 var fs = require('fs');
