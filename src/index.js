@@ -49,26 +49,56 @@ function mergeObjs(obj, upd) {
   return obj;
 }
 
-function changeType(typeName, updateWith) {
-  switch (typeName) {
+function changeType(data) {
+  switch (data.type) {
     case 'union':
-      updateWith['type'] = 'object';
+      data['type'] = 'object';
       break;
     case 'nil':
-      updateWith['type'] = 'null';
-      break;
-    case 'date-only':
-      break;
-    case 'time-only':
-      break;
-    case 'datetime-only':
-      break;
-    case 'datetime':
+      data['type'] = 'null';
       break;
     case 'file':
+      data['type'] = 'string';
+      data['media'] = {'binaryEncoding': 'binary'};
       break;
   }
-  return updateWith;
+  return data;
+}
+
+function changeDateType(data) {
+  switch (data.type) {
+    case 'date-only':
+      data['type'] = 'string';
+      data['pattern'] = '^(\d{4})-(\d{2})-(\d{2})$';
+      break;
+    case 'time-only':
+      data['type'] = 'string';
+      data['pattern'] = '^(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?$';
+      break;
+    case 'datetime-only':
+      data['type'] = 'string';
+      data['pattern'] = '^(\d{4})-(\d{2})-(\d{2})T(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?$';
+      break;
+    case 'datetime':
+      data['type'] = 'string';
+      if (data.format === undefined || data.format.toLowerCase() === 'rfc3339') {
+        data['pattern'] = '^(\d{4})-(\d{2})-(\d{2})T(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?(Z|([+-])(\d{2})(:)?(\d{2}))$';
+      } else if (data.format.toLowerCase() === 'rfc2616') {
+        data['pattern'] = '(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), '+
+                          '(?:[0-2][0-9]|3[01]) '+
+                          '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ' +
+                          '\d{4} (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] ' +
+                          'GMT|(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ' +
+                          '(?:[0-2][0-9]|3[01])-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)' +
+                          '-\d{2} (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] ' +
+                          'GMT|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) ' +
+                          '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ' +
+                          '(?:[ 1-2][0-9]|3[01]) (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] \d{4})';
+      }
+      delete data.format;
+      break;
+  }
+  return data;
 }
 
 function schemaForm(data) {
@@ -89,12 +119,14 @@ function schemaForm(data) {
       updateWith[key] = schemaForm(val);
       continue;
     }
-
-    if (key === 'type') {
-      updateWith = changeType(val, updateWith);
-    }
   }
-  return mergeObjs(data, updateWith);
+  data = mergeObjs(data, updateWith);
+
+  if (data.type !== undefined) {
+    data = changeType(data);
+    data = changeDateType(data);
+  }
+  return data;
 }
 
 module.exports.dt2js = dt2js;
