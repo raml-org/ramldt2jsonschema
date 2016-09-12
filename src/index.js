@@ -6,8 +6,8 @@ var dtexp = require('datatype-expansion');
 
 // Get RAML Data Types context from a file named "fileName".
 function getRAMLContext(fileName) {
-  let content = fs.readFileSync(fileName).toString();
-  let yaml_content = yaml.load(content);
+  var content = fs.readFileSync(fileName).toString();
+  var yaml_content = yaml.load(content);
   return yaml_content.types;
 }
 
@@ -15,14 +15,14 @@ function getRAMLContext(fileName) {
 // into JSON schema and call callback "cb" with error if any and
 // result of conversion.
 function dt2js(fileName, typeName, cb) {
-  let ctx = getRAMLContext(fileName);
+  var ctx = getRAMLContext(fileName);
   dtexp.expandedForm(ctx[typeName], ctx, function(err, expanded) {
     if (err) {
       console.log(err);
       return;
     }
     dtexp.canonicalForm(expanded, function(err, canonical) {
-      let schema = schemaForm(canonical);
+      var schema = schemaForm(canonical);
       schema = addRootKeywords(schema);
       cb(err, schema);
     });
@@ -35,7 +35,7 @@ function addRootKeywords(schema) {
 }
 
 function processArray(val) {
-  let accum = [];
+  var accum = [];
   for (var i=0; i<val.length; i++) {
     accum = accum.concat(schemaForm(val[i]));
   }
@@ -43,7 +43,7 @@ function processArray(val) {
 }
 
 function mergeObjs(obj, upd) {
-  for (let key in upd) {
+  for (var key in upd) {
     obj[key] = upd[key];
   }
   return obj;
@@ -75,12 +75,12 @@ function schemaForm(data) {
   if (!(data instanceof Object)) {
     return data;
   }
-  let updateWith = {};
-  for (let key in data) {
-    let val = data[key];
+  var updateWith = {};
+  for (var key in data) {
+    var val = data[key];
 
     if (val instanceof Array) {
-      let accum = processArray(val);
+      var accum = processArray(val);
       updateWith[key] = accum;
       continue;
     }

@@ -11,7 +11,7 @@ function writeToFile(err, schema) {
     console.log(err);
     return;
   }
-  let pretty = JSON.stringify(schema, null, 2)
+  var pretty = JSON.stringify(schema, null, 2)
   fs.writeFileSync('schema.json', pretty);
 }
 
