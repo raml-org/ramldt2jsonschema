@@ -22,7 +22,11 @@ function dt2js(fileName, typeName, cb) {
       return;
     }
     dtexp.canonicalForm(expanded, function(err, canonical) {
-      var schema = schemaForm(canonical);
+      if (err) {
+        console.log(err);
+        return;
+      }
+      var schema = schemaForm(canonical, []);
       schema = addRootKeywords(schema);
       cb(err, schema);
     });
@@ -34,10 +38,10 @@ function addRootKeywords(schema) {
   return schema;
 }
 
-function processArray(val) {
+function processArray(val, reqStack) {
   var accum = [];
   for (var i=0; i<val.length; i++) {
-    accum = accum.concat(schemaForm(val[i]));
+    accum = accum.concat(schemaForm(val[i], reqStack));
   }
   return accum;
 }
@@ -101,26 +105,38 @@ function changeDateType(data) {
   return data;
 }
 
-function schemaForm(data) {
+function schemaForm(data, reqStack, prop) {
   if (!(data instanceof Object)) {
     return data;
   }
+  var lastInd = reqStack.length - 1;
+  if (data.required && reqStack[lastInd] && prop) {
+    reqStack[lastInd] = reqStack[lastInd].concat(prop);
+  }
+  delete data.required;
+  if (data.properties) {
+    reqStack[reqStack.length] = [];
+  }
+
   var updateWith = {};
   for (var key in data) {
     var val = data[key];
 
     if (val instanceof Array) {
-      var accum = processArray(val);
+      var accum = processArray(val, reqStack);
       updateWith[key] = accum;
       continue;
     }
 
     if (val instanceof Object) {
-      updateWith[key] = schemaForm(val);
+      updateWith[key] = schemaForm(val, reqStack, key);
       continue;
     }
   }
   data = mergeObjs(data, updateWith);
+  if (data.properties) {
+    data.required = reqStack.pop();
+  }
 
   if (data.type !== undefined) {
     data = changeType(data);

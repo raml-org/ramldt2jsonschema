@@ -198,7 +198,7 @@ types:
     properties:
       proscons:
         type: CatPros | CatCons
-        required: false
+        required: true
       name:
         type: CatName
         amazing: true
@@ -215,7 +215,9 @@ types:
           value: 50
       year_of_birth: date-only
       time_of_birth: time-only
-      dt_of_birth: datetime-only
+      dt_of_birth:
+        type: datetime-only
+        required: false
       addition_date:
         type: datetime
         format: rfc2616
