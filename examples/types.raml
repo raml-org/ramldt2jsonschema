@@ -126,7 +126,6 @@ types:
           maximum: 99
         dob:
           type: datetime
-          format: rfc2616
         cats:
           type: array
           items: string
@@ -220,6 +219,8 @@ types:
       addition_date:
         type: datetime
         format: rfc2616
+      removal_date:
+        type: datetime
       photo:
         type: file
         fileTypes: ['image/jpeg', 'image/png']
