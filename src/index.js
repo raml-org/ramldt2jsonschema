@@ -105,19 +105,7 @@ function changeDateType(data) {
   return data;
 }
 
-function schemaForm(data, reqStack, prop) {
-  if (!(data instanceof Object)) {
-    return data;
-  }
-  var lastInd = reqStack.length - 1;
-  if (data.required && reqStack[lastInd] && prop) {
-    reqStack[lastInd] = reqStack[lastInd].concat(prop);
-  }
-  delete data.required;
-  if (data.properties) {
-    reqStack[reqStack.length] = [];
-  }
-
+function processNested(data) {
   var updateWith = {};
   for (var key in data) {
     var val = data[key];
@@ -133,6 +121,23 @@ function schemaForm(data, reqStack, prop) {
       continue;
     }
   }
+  return updateWith;
+}
+
+function schemaForm(data, reqStack, prop) {
+  if (!(data instanceof Object)) {
+    return data;
+  }
+  var lastInd = reqStack.length - 1;
+  if (data.required && reqStack[lastInd] && prop) {
+    reqStack[lastInd] = reqStack[lastInd].concat(prop);
+  }
+  delete data.required;
+  if (data.properties) {
+    reqStack[reqStack.length] = [];
+  }
+
+  var updateWith = processNested(date);
   data = mergeObjs(data, updateWith);
   if (data.properties) {
     data.required = reqStack.pop();
