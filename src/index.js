@@ -35,12 +35,12 @@ function dt2js (fileName, typeName, cb) {
   var ctx = getRAMLContext(fileName)
   dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
     if (err) {
-      console.log(err)
+      cb(err, nil)
       return
     }
     dtexp.canonicalForm(expanded, function (err, canonical) {
       if (err) {
-        console.log(err)
+        cb(err, nil)
         return
       }
       var schema = schemaForm(canonical, [])
@@ -83,7 +83,7 @@ function processArray (arr, reqStack) {
  * @param  {Object} upd
  * @returns  {Object}
  */
-function mergeObjs (obj, upd) {
+function updateObjWith (obj, upd) {
   for (var key in upd) {
     obj[key] = upd[key]
   }
@@ -202,7 +202,7 @@ function schemaForm (data, reqStack, prop) {
   }
 
   var updateWith = processNested(data, reqStack)
-  data = mergeObjs(data, updateWith)
+  data = updateObjWith(data, updateWith)
   if (data.properties) {
     data.required = reqStack.pop()
   }
@@ -218,7 +218,7 @@ module.exports.dt2js = dt2js
 module.exports.getRAMLContext = getRAMLContext
 module.exports.addRootKeywords = addRootKeywords
 module.exports.processArray = processArray
-module.exports.mergeObjs = mergeObjs
+module.exports.updateObjWith = updateObjWith
 module.exports.changeType = changeType
 module.exports.changeDateType = changeDateType
 module.exports.processNested = processNested
