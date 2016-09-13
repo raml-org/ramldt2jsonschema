@@ -4,16 +4,33 @@ var yaml = require('yaml-js')
 var fs = require('fs')
 var dtexp = require('datatype-expansion')
 
-// Get RAML Data Types context from a file named "fileName".
+/**
+ * Get RAML Data Types context.
+ *
+ * @param  {string} fileName - File from which to get context.
+ * @returns  {Object} - RAML data types context.
+ */
 function getRAMLContext (fileName) {
   var content = fs.readFileSync(fileName).toString()
   var yaml_content = yaml.load(content)
   return yaml_content.types
 }
 
-// Convert type named "typeName" from RAML file named "fileName"
-// into JSON schema and call callback "cb" with error if any and
-// result of conversion.
+/**
+ * This callback accepts results converting RAML type to JSON schema.
+ *
+ * @callback conversionCallback
+ * @param {Error} err
+ * @param {Object} schema
+ */
+
+/**
+ * Convert RAML type to JSON schema.
+ *
+ * @param  {string} fileName - File in which type is located.
+ * @param  {string} typeName - Name of the type to be converted.
+ * @param  {conversionCallback} cb - Callback to be called with converted value.
+ */
 function dt2js (fileName, typeName, cb) {
   var ctx = getRAMLContext(fileName)
   dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
@@ -33,19 +50,39 @@ function dt2js (fileName, typeName, cb) {
   })
 }
 
+/**
+ * Add missing JSON schema root keywords.
+ *
+ * @param  {Object} schema
+ * @returns  {Object}
+ */
 function addRootKeywords (schema) {
   schema['$schema'] = 'http://json-schema.org/draft-04/schema#'
   return schema
 }
 
-function processArray (val, reqStack) {
+/**
+ * Call `schemaForm` for each element of array.
+ *
+ * @param  {Array} arr
+ * @param  {Array} reqStack - Stack of required properties.
+ * @returns  {Array}
+ */
+function processArray (arr, reqStack) {
   var accum = []
-  for (var i = 0; i < val.length; i++) {
-    accum = accum.concat(schemaForm(val[i], reqStack))
+  for (var i = 0; i < arr.length; i++) {
+    accum = accum.concat(schemaForm(arr[i], reqStack))
   }
   return accum
 }
 
+/**
+ * Merge second object into first one.
+ *
+ * @param  {Object} obj
+ * @param  {Object} upd
+ * @returns  {Object}
+ */
 function mergeObjs (obj, upd) {
   for (var key in upd) {
     obj[key] = upd[key]
@@ -53,6 +90,12 @@ function mergeObjs (obj, upd) {
   return obj
 }
 
+/**
+ * Change RAML type of object to valid JSON schema type.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
 function changeType (data) {
   switch (data.type) {
     case 'union':
@@ -69,6 +112,12 @@ function changeType (data) {
   return data
 }
 
+/**
+ * Change RAML date type of object to valid JSON schema type.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
 function changeDateType (data) {
   switch (data.type) {
     case 'date-only':
@@ -105,6 +154,13 @@ function changeDateType (data) {
   return data
 }
 
+/**
+ * Call `schemaForm` for all nested objects.
+ *
+ * @param  {Object} data
+ * @param  {Array} reqStack - Stack of required properties.
+ * @returns  {Object}
+ */
 function processNested (data, reqStack) {
   var updateWith = {}
   for (var key in data) {
@@ -124,6 +180,14 @@ function processNested (data, reqStack) {
   return updateWith
 }
 
+/**
+ * Convert canonical form of RAML type to valid JSON schema.
+ *
+ * @param  {Object} data - Data to be converted.
+ * @param  {Array} reqStack - Stack of required properties.
+ * @param  {string} [prop] - Property name nested objects of which are processed.
+ * @returns  {Object}
+ */
 function schemaForm (data, reqStack, prop) {
   if (!(data instanceof Object)) {
     return data

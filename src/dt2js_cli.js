@@ -5,7 +5,12 @@ var index = require('./index.js')
 var program = require('commander')
 var fs = require('fs')
 
-// CLI callback that writes JSON schema to a file.
+/**
+ * Callback to write JSON schema to file.
+ *
+ * @param  {Error} err
+ * @param  {Object} schema
+ */
 function writeToFile (err, schema) {
   if (err) {
     console.log(err)
@@ -15,7 +20,12 @@ function writeToFile (err, schema) {
   fs.writeFileSync('schema.json', pretty)
 }
 
-// Just calls dt2js
+/**
+ * Just call dt2js.
+ *
+ * @param  {string} ramlFile
+ * @param  {string} ramlTypeName
+ */
 function dt2jsCLI (ramlFile, ramlTypeName) {
   index.dt2js(ramlFile, ramlTypeName, writeToFile)
 }
