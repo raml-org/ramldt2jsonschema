@@ -70,9 +70,9 @@ function addRootKeywords (schema) {
  */
 function processArray (arr, reqStack) {
   var accum = []
-  for (var i = 0; i < arr.length; i++) {
-    accum = accum.concat(schemaForm(arr[i], reqStack))
-  }
+  arr.forEach(function (el) {
+    accum = accum.concat(schemaForm(el, reqStack))
+  })
   return accum
 }
 
@@ -215,3 +215,11 @@ function schemaForm (data, reqStack, prop) {
 }
 
 module.exports.dt2js = dt2js
+module.exports.getRAMLContext = getRAMLContext
+module.exports.addRootKeywords = addRootKeywords
+module.exports.processArray = processArray
+module.exports.mergeObjs = mergeObjs
+module.exports.changeType = changeType
+module.exports.changeDateType = changeDateType
+module.exports.processNested = processNested
+module.exports.schemaForm = schemaForm
