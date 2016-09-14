@@ -11,13 +11,14 @@ var fs = require('fs')
  * @param  {Error} err
  * @param  {Object} schema
  */
-function writeToFile (err, schema) {
+function writeToFile (err, schema, ramlTypeName) {
   if (err) {
     console.log(err)
     return
   }
   var pretty = JSON.stringify(schema, null, 2)
-  fs.writeFileSync('schema.json', pretty)
+  var filename = ramlTypeName + '.json'
+  fs.writeFileSync(filename, pretty)
 }
 
 /**
@@ -27,7 +28,9 @@ function writeToFile (err, schema) {
  * @param  {string} ramlTypeName
  */
 function dt2jsCLI (ramlFile, ramlTypeName) {
-  index.dt2js(ramlFile, ramlTypeName, writeToFile)
+  index.dt2js(ramlFile, ramlTypeName, function (err, schema) {
+    writeToFile(err, schema, ramlTypeName)
+  })
 }
 
 program
