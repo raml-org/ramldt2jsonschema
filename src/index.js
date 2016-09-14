@@ -35,12 +35,12 @@ function dt2js (fileName, typeName, cb) {
   var ctx = getRAMLContext(fileName)
   dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
     if (err) {
-      cb(err, nil)
+      cb(err, null)
       return
     }
     dtexp.canonicalForm(expanded, function (err, canonical) {
       if (err) {
-        cb(err, nil)
+        cb(err, null)
         return
       }
       var schema = schemaForm(canonical, [])

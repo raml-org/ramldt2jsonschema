@@ -142,3 +142,128 @@ describe('changeDateType()', function () {
     })
   })
 })
+
+describe('processNested()', function () {
+  it('should process nested arrays', function () {
+    var data = {'foo': [{'type': 'union'}]}
+    var result = index.processNested(data, [])
+    expect(result)
+      .to.have.property('foo').and
+      .to.have.lengthOf(1)
+    expect(result).to.have.deep.property('foo[0].type', 'object')
+  })
+  it('should process nested objects', function () {
+    var data = {'foo': {'type': 'union'}}
+    var result = index.processNested(data, [])
+    expect(result)
+      .to.have.property('foo').and
+      .to.have.all.keys('type')
+    expect(result).to.have.deep.property('foo.type', 'object')
+  })
+  it('should return empty object if no nesting is present', function () {
+    var result = index.processNested({'type': 'union'}, [])
+    expect(result).to.be.deep.equal({})
+  })
+})
+
+describe('schemaForm()', function () {
+  it('should return data unchanged if it is not Object', function () {
+    var result = index.schemaForm('foo')
+    expect(result).to.be.equal('foo')
+  })
+  it('should hoist `required` properties param to object root', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'name': {
+          'type': 'string',
+          'required': true
+        },
+        'age': {
+          'type': 'integer',
+          'required': true
+        },
+        'address': {
+          'type': 'string'
+        }
+      }
+    }
+    var schema = index.schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['name', 'age'])
+  })
+  it('should remove `required` properties param while hoisting', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'name': {
+          'type': 'string',
+          'required': true
+        }
+      }
+    }
+    var schema = index.schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['name'])
+    expect(schema).to.not.have.deep.property('properties.name.required')
+  })
+  context('when `required` param is not used properly', function () {
+    it('should not hoist `required` properties param', function () {
+      var data = {
+        'type': 'object',
+        'properties': {
+          'names': {
+            'type': 'array',
+            'items': [{
+              'type': 'object',
+              'required': true
+            }]
+          }
+        }
+      }
+      var schema = index.schemaForm(data, [])
+      expect(schema)
+        .to.have.property('required').and
+        .to.be.deep.empty
+    })
+  })
+  it('should process nested', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'bio': {
+          'type': 'object',
+          'properties': {
+            'event': {'type': 'date-only'}
+          }
+        },
+        'siblings': {
+          'anyOf': [{'type': 'nil'}]
+        }
+      }
+    }
+    var schema = index.schemaForm(data, [])
+    expect(schema).to.have.deep.property(
+      'properties.bio.properties.event.type', 'string')
+    expect(schema).to.have.deep.property(
+      'properties.siblings.anyOf[0].type', 'null')
+  })
+  it('should change types', function () {
+    var data = {
+      'type': 'union',
+      'properties': {
+        'name': {'type': 'nil'},
+        'photo': {'type': 'file'},
+        'dob': {'type': 'date-only'}
+      }
+    }
+    var schema = index.schemaForm(data, [])
+    expect(schema).to.have.property('type', 'object')
+    expect(schema).to.have.deep.property('properties.name.type', 'null')
+    expect(schema).to.have.deep.property('properties.photo.type', 'string')
+    expect(schema).to.have.deep.property('properties.photo.media')
+    expect(schema).to.have.deep.property('properties.dob.type', 'string')
+  })
+})
