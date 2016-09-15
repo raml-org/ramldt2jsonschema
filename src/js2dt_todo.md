@@ -1,5 +1,7 @@
 JS2DT TODO/Notes/Algorithm
+
 Input: JSON object representing valid json schema and describing single RAML data type.
+
 Output: RAML file with one RAML data type.
 
 0. Iterate over `[propname, propval]` pairs of object.
