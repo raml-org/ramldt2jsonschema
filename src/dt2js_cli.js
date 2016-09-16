@@ -3,22 +3,20 @@
 
 var index = require('./index.js')
 var program = require('commander')
-var fs = require('fs')
 
 /**
- * Callback to write JSON schema to file.
+ * Callback to write JSON schema to console.
  *
  * @param  {Error} err
  * @param  {Object} schema
  */
-function writeToFile (err, schema, ramlTypeName) {
+function writeToConsole (err, schema) {
   if (err) {
     console.log(err)
     return
   }
   var pretty = JSON.stringify(schema, null, 2)
-  var filename = ramlTypeName + '.json'
-  fs.writeFileSync(filename, pretty)
+  console.log(pretty)
 }
 
 /**
@@ -28,9 +26,7 @@ function writeToFile (err, schema, ramlTypeName) {
  * @param  {string} ramlTypeName
  */
 function dt2jsCLI (ramlFile, ramlTypeName) {
-  index.dt2js(ramlFile, ramlTypeName, function (err, schema) {
-    writeToFile(err, schema, ramlTypeName)
-  })
+  index.dt2js(ramlFile, ramlTypeName, writeToConsole)
 }
 
 program
