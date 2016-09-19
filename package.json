@@ -2,7 +2,7 @@
   "name": "ramldt2jsonschema",
   "version": "0.0.1",
   "description": "Converts a RAML data type into JSON schema, and back",
-  "main": "src/js/index.js",
+  "main": "src/index.js",
   "author": "MuleSoft, Inc.",
   "license": "Apache-2.0",
   "homepage": "https://github.com/raml-org/ramldt2jsonschema",
@@ -19,7 +19,7 @@
     "url": "https://github.com/raml-org/ramldt2jsonschema/issues"
   },
   "bin": {
-    "dt2js": "src/js/dt2js_cli.js"
+    "dt2js": "src/dt2js_cli.js"
   },
   "scripts": {
     "lint": "standard",
