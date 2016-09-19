@@ -4,13 +4,13 @@
 var js2dt = require('./js2dt.js')
 var program = require('commander')
 
-function js2dtCLI (jsonFileName) {
-  var output = js2dt.js2dt(jsonFileName)
+function js2dtCLI (jsonFileName, ramlTypeName) {
+  var output = js2dt.js2dt(jsonFileName, ramlTypeName)
   console.log(output)
 }
 
 program
-  .arguments('<jsonFileName>')
+  .arguments('<jsonFileName> [ramlTypeName]')
   .description('Convert JSON schema to RAML Data Type. ' +
                'Writes to output.')
   .action(js2dtCLI)
