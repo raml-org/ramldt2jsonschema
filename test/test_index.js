@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect
 var join = require('path').join
-var index = require('../src/index')
+var index = require('../src/js/index')
 
 var RAML_FILE_NAME = join(__dirname, 'test_files/types_example.raml')
 
