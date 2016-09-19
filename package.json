@@ -19,7 +19,8 @@
     "url": "https://github.com/raml-org/ramldt2jsonschema/issues"
   },
   "bin": {
-    "dt2js": "src/dt2js_cli.js"
+    "dt2js": "src/dt2js_cli.js",
+    "js2dt": "src/js2dt_cli.js"
   },
   "scripts": {
     "lint": "standard",

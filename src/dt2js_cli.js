@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict'
 
-var index = require('./index.js')
+var dt2js = require('./dt2js.js')
 var program = require('commander')
 
 /**
@@ -26,7 +26,7 @@ function writeToConsole (err, schema) {
  * @param  {string} ramlTypeName
  */
 function dt2jsCLI (ramlFile, ramlTypeName) {
-  index.dt2js(ramlFile, ramlTypeName, writeToConsole)
+  dt2js.dt2js(ramlFile, ramlTypeName, writeToConsole)
 }
 
 program
