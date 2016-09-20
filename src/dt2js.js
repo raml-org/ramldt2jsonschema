@@ -3,6 +3,7 @@
 var yaml = require('js-yaml')
 var fs = require('fs')
 var dtexp = require('datatype-expansion')
+var constants = require('./constants')
 
 /**
  * Get RAML Data Types context.
@@ -126,31 +127,22 @@ function changeDateType (data) {
   switch (data.type) {
     case 'date-only':
       data['type'] = 'string'
-      data['pattern'] = '^(\d{4})-(\d{2})-(\d{2})$'
+      data['pattern'] = constants.dateOnlyPattern
       break
     case 'time-only':
       data['type'] = 'string'
-      data['pattern'] = '^(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?$'
+      data['pattern'] = constants.timeOnlyPattern
       break
     case 'datetime-only':
       data['type'] = 'string'
-      data['pattern'] = '^(\d{4})-(\d{2})-(\d{2})T(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?$'
+      data['pattern'] = constants.dateTimeOnlyPattern
       break
     case 'datetime':
       data['type'] = 'string'
-      if (data.format === undefined || data.format.toLowerCase() === 'rfc3339') {
-        data['pattern'] = '^(\d{4})-(\d{2})-(\d{2})T(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?(Z|([+-])(\d{2})(:)?(\d{2}))$'
-      } else if (data.format.toLowerCase() === 'rfc2616') {
-        data['pattern'] = '(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), ' +
-                          '(?:[0-2][0-9]|3[01]) ' +
-                          '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ' +
-                          '\d{4} (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] ' +
-                          'GMT|(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ' +
-                          '(?:[0-2][0-9]|3[01])-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)' +
-                          '-\d{2} (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] ' +
-                          'GMT|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) ' +
-                          '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ' +
-                          '(?:[ 1-2][0-9]|3[01]) (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] \d{4})'
+      if (data.format === undefined || data.format.toLowerCase() === constants.RFC3339) {
+        data['pattern'] = constants.RFC3339DatetimePattern
+      } else if (data.format.toLowerCase() === constants.RFC2616) {
+        data['pattern'] = constants.RFC2616DatetimePattern
       }
       delete data.format
       break

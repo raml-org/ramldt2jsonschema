@@ -2,6 +2,7 @@
 
 var yaml = require('js-yaml')
 var fs = require('fs')
+var constants = require('./constants')
 
 function loadJSONFile (jsonFileName) {
   var content = fs.readFileSync(jsonFileName).toString()
@@ -20,7 +21,7 @@ function js2dt (jsonFileName, ramlTypeName, cb) {
   var data = loadJSONFile(jsonFileName)
   try {
     var ramledData = ramlForm(data)
-    ramledData = alterRootKeywords(ramledData)
+    ramledData = alterRootKeywords(ramledData, ramlTypeName)
   } catch (error) {
     cb(error, null)
     return
@@ -28,9 +29,9 @@ function js2dt (jsonFileName, ramlTypeName, cb) {
   cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
 }
 
-function alterRootKeywords (ramledData) {
-
-  return ramledData
+function alterRootKeywords (ramledData, ramlTypeName) {
+  delete ramledData['$schema']
+  return {'types': {ramlTypeName: ramledData}}
 }
 
 function processArray (arr) {
@@ -49,15 +50,37 @@ function updateObjWith (obj, upd) {
 }
 
 function changeType (data) {
-  switch (data.type) {
-
+  if (data.type === 'null') {
+    data['type'] = 'nil'
+  } else if (data.type === 'string' && data.media) {
+    data['type'] = 'file'
+    delete data.media
+  } else if (data.type === 'object' && data.anyOf) {
+    data = handleUnion(data)
   }
   return data
 }
 
 function changeDateType (data) {
-  switch (data.type) {
-
+  if (!(data.type === 'string' && data.pattern)) {
+    return data
+  }
+  var pattern = data.pattern
+  delete data.pattern
+  if (constants.dateOnlyExample.match(pattern)) {
+    data['type'] = 'date-only'
+  } else if (constants.timeOnlyExample.match(pattern)) {
+    data['type'] = 'time-only'
+  } else if (constants.dateTimeOnlyExample.match(pattern)) {
+    data['type'] = 'datetime-only'
+  } else if (constants.RFC3339DatetimeExample.match(pattern)) {
+    data['type'] = 'datetime'
+    data['format'] = constants.RFC3339
+  } else if (constants.RFC2616DatetimeExample.match(pattern)) {
+    data['type'] = 'datetime'
+    data['format'] = constants.RFC2616
+  } else {
+    data['pattern'] = pattern
   }
   return data
 }
@@ -80,7 +103,7 @@ function processNested (data) {
   return updateWith
 }
 
-function ramlForm(data) {
+function ramlForm (data) {
   if (!(data instanceof Object)) {
     return data
   }
@@ -92,6 +115,11 @@ function ramlForm(data) {
     data = changeType(data)
     data = changeDateType(data)
   }
+  return data
+}
+
+function handleUnion (data) {
+  // TODO: Implement
   return data
 }
 
