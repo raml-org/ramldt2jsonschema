@@ -31,7 +31,7 @@
   "dependencies": {
     "commander": "^2.9.0",
     "datatype-expansion": "^0.0.8",
-    "yaml-js": "^0.1.4"
+    "js-yaml": "^3.6.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

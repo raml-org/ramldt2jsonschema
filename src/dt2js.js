@@ -1,6 +1,6 @@
 'use strict'
 
-var yaml = require('yaml-js')
+var yaml = require('js-yaml')
 var fs = require('fs')
 var dtexp = require('datatype-expansion')
 
@@ -12,7 +12,7 @@ var dtexp = require('datatype-expansion')
  */
 function getRAMLContext (fileName) {
   var content = fs.readFileSync(fileName).toString()
-  var yaml_content = yaml.load(content)
+  var yaml_content = yaml.safeLoad(content)
   return yaml_content.types
 }
 

@@ -1,6 +1,6 @@
 'use strict'
 
-var yaml = require('yaml-js')
+var yaml = require('js-yaml')
 var fs = require('fs')
 
 function loadJSONFile (jsonFileName) {
@@ -17,8 +17,11 @@ function js2dt (jsonFileName, ramlTypeName) {
   if (ramlTypeName === undefined) {
     ramlTypeName = inferRamlTypeName(jsonFileName)
   }
-  console.log(ramlTypeName)
   var data = loadJSONFile(jsonFileName)
+
+  // TODO: Data transformation happens here
+
+  return yaml.safeDump(data)
 }
 
 module.exports.js2dt = js2dt
