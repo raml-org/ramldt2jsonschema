@@ -4,14 +4,17 @@
 var js2dt = require('./js2dt.js')
 var program = require('commander')
 
-function writeToConsole (raml) {
+function writeToConsole (err, raml) {
+  if (err) {
+    console.log(err)
+    return
+  }
   console.log('#%RAML 1.0 Library\n')
   console.log(raml)
 }
 
 function js2dtCLI (jsonFileName, ramlTypeName) {
-  var raml = js2dt.js2dt(jsonFileName, ramlTypeName)
-  writeToConsole(raml)
+  var raml = js2dt.js2dt(jsonFileName, ramlTypeName, writeToConsole)
 }
 
 program

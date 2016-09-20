@@ -13,7 +13,8 @@ function inferRamlTypeName (jsonFileName) {
   return filename[0].toUpperCase() + filename.slice(1)
 }
 
-function js2dt (jsonFileName, ramlTypeName) {
+function js2dt (jsonFileName, ramlTypeName, cb) {
+  var err
   if (ramlTypeName === undefined) {
     ramlTypeName = inferRamlTypeName(jsonFileName)
   }
@@ -21,7 +22,7 @@ function js2dt (jsonFileName, ramlTypeName) {
 
   // TODO: Data transformation happens here
 
-  return yaml.safeDump(data)
+  cb(err, yaml.safeDump(data))
 }
 
 module.exports.js2dt = js2dt

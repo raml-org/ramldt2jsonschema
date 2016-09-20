@@ -11,7 +11,7 @@
     "json",
     "types"
   ],
-  "author": "Artem Kostiuk <postatum@gmail.com>",
+  "author": "MuleSoft, Inc.",
   "license": "Apache-2.0",
   "dependencies": {
     "ramldt2jsonschema": "^0.0.1"

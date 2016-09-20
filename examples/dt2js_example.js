@@ -1,9 +1,10 @@
 'use strict'
 var raml2json = require('ramldt2jsonschema')
 
-raml2json.dt2js('types.raml', 'Cat', function (err, schema) {
+raml2json.dt2js('./raml/complex_cat.raml', 'Cat', function (err, schema) {
   if (err) {
     console.log(err)
+    return
   }
   console.log(JSON.stringify(schema, null, 2))
 })
