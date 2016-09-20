@@ -31,7 +31,9 @@ function js2dt (jsonFileName, ramlTypeName, cb) {
 
 function alterRootKeywords (ramledData, ramlTypeName) {
   delete ramledData['$schema']
-  return {'types': {ramlTypeName: ramledData}}
+  var namedData = {}
+  namedData[ramlTypeName] = ramledData
+  return {'types': namedData}
 }
 
 function processArray (arr) {
