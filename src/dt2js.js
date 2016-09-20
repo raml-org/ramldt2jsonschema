@@ -43,8 +43,12 @@ function dt2js (fileName, typeName, cb) {
         cb(err, null)
         return
       }
-      var schema = schemaForm(canonical, [])
-      schema = addRootKeywords(schema)
+      try {
+        var schema = schemaForm(canonical, [])
+        schema = addRootKeywords(schema)
+      } catch (error) {
+        cb(error, null)
+      }
       cb(err, schema)
     })
   })
@@ -167,8 +171,7 @@ function processNested (data, reqStack) {
     var val = data[key]
 
     if (val instanceof Array) {
-      var accum = processArray(val, reqStack)
-      updateWith[key] = accum
+      updateWith[key] = processArray(val, reqStack)
       continue
     }
 
