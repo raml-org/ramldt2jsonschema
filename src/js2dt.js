@@ -65,7 +65,7 @@ function changeDateType (data) {
   if (!(data.type === 'string' && data.pattern)) {
     return data
   }
-  var pattern = data.pattern
+  var pattern = new RegExp(data.pattern)
   delete data.pattern
   if (constants.dateOnlyExample.match(pattern)) {
     data['type'] = 'date-only'

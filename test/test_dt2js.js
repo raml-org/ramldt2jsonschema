@@ -3,6 +3,7 @@
 var expect = require('chai').expect
 var join = require('path').join
 var dt2js = require('../src/dt2js')
+var constants = require('../src/constants')
 
 var RAML_FILE_NAME = join(__dirname, 'test_files/types_example.raml')
 
@@ -91,35 +92,32 @@ describe('changeDateType()', function () {
   it('should change type `date-only` to `string` with pattern', function () {
     var obj = dt2js.changeDateType({'type': 'date-only'})
     expect(obj).to.have.property('type', 'string')
-    expect(obj).to.have.property('pattern', '^(\d{4})-(\d{2})-(\d{2})$')
+    expect(obj).to.have.property('pattern', constants.dateOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
     var obj = dt2js.changeDateType({'type': 'time-only'})
     expect(obj).to.have.property('type', 'string')
-    expect(obj).to.have.property(
-      'pattern', '^(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?$')
+    expect(obj).to.have.property('pattern', constants.timeOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
     var obj = dt2js.changeDateType({'type': 'datetime-only'})
     expect(obj).to.have.property('type', 'string')
-    expect(obj).to.have.property(
-      'pattern',
-      '^(\d{4})-(\d{2})-(\d{2})T(\d{2})(:)(\d{2})(:)(\d{2})(\.\d+)?$')
+    expect(obj).to.have.property('pattern', constants.dateTimeOnlyPattern)
   })
   context('when type is `datetime`', function () {
     var data = [
       {
         'setTo': 'undefined',
         'input': {'type': 'datetime'},
-        'contain': 'Z'
+        'pattern': constants.RFC3339DatetimePattern
       }, {
         'setTo': 'rfc3339',
         'input': {'type': 'datetime', 'format': 'rfc3339'},
-        'contain': 'Z'
+        'pattern': constants.RFC3339DatetimePattern
       }, {
         'setTo': 'rfc2616',
         'input': {'type': 'datetime', 'format': 'rfc2616'},
-        'contain': 'Mon'
+        'pattern': constants.RFC2616DatetimePattern
       }
     ]
     data.forEach(function (el) {
@@ -127,9 +125,7 @@ describe('changeDateType()', function () {
         it('should change type to `string` with pattern', function () {
           var obj = dt2js.changeDateType(el.input)
           expect(obj).to.have.property('type', 'string')
-          expect(obj)
-            .to.have.property('pattern').and
-            .contain(el.contain)
+          expect(obj).to.have.property('pattern', el.pattern)
           expect(obj).to.not.have.property('format')
         })
       })
