@@ -67,22 +67,28 @@ function changeDateType (data) {
   if (!(data.type === 'string' && data.pattern)) {
     return data
   }
-  var pattern = new RegExp(data.pattern)
+  var pattern = data.pattern
   delete data.pattern
-  if (constants.dateOnlyExample.match(pattern)) {
-    data['type'] = 'date-only'
-  } else if (constants.timeOnlyExample.match(pattern)) {
-    data['type'] = 'time-only'
-  } else if (constants.dateTimeOnlyExample.match(pattern)) {
-    data['type'] = 'datetime-only'
-  } else if (constants.RFC3339DatetimeExample.match(pattern)) {
-    data['type'] = 'datetime'
-    data['format'] = constants.RFC3339
-  } else if (constants.RFC2616DatetimeExample.match(pattern)) {
-    data['type'] = 'datetime'
-    data['format'] = constants.RFC2616
-  } else {
-    data['pattern'] = pattern
+  switch (pattern) {
+    case constants.dateOnlyPattern:
+      data['type'] = 'date-only'
+      break
+    case constants.timeOnlyPattern:
+      data['type'] = 'time-only'
+      break
+    case constants.dateTimeOnlyPattern:
+      data['type'] = 'datetime-only'
+      break
+    case constants.RFC3339DatetimePattern:
+      data['type'] = 'datetime'
+      data['format'] = constants.RFC3339
+      break
+    case constants.RFC2616DatetimePattern:
+      data['type'] = 'datetime'
+      data['format'] = constants.RFC2616
+      break
+    default:
+      data['pattern'] = pattern
   }
   return data
 }

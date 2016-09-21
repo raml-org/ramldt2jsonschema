@@ -25,7 +25,7 @@
     "address": {
       "type": "string"
     },
-    "habits?": {
+    "habits": {
       "type": "string"
     },
     "breed": {
