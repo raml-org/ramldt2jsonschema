@@ -188,13 +188,16 @@ function schemaForm (data, reqStack, prop) {
     return data
   }
   var lastInd = reqStack.length - 1
-  if (data.required && reqStack[lastInd] && prop) {
-    reqStack[lastInd].push(prop)
+  if (!data.required && reqStack[lastInd] && prop) {
+    var ind = reqStack[lastInd].indexOf(prop)
+    if (ind > -1) {
+      reqStack[lastInd].splice(ind, 1)
+    }
   }
   delete data.required
   var isObj = data.type === 'object'
   if (isObj) {
-    reqStack.push([])
+    reqStack.push(Object.keys(data.properties || {}))
   }
 
   var updateWith = processNested(data, reqStack)
