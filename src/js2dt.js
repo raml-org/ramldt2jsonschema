@@ -20,7 +20,7 @@ function js2dt (jsonFileName, ramlTypeName, cb) {
   }
   var data = loadJSONFile(jsonFileName)
   try {
-    var ramledData = ramlForm(data)
+    var ramledData = ramlForm(data, [])
     ramledData = alterRootKeywords(ramledData, ramlTypeName)
   } catch (error) {
     cb(error, null)
@@ -36,10 +36,10 @@ function alterRootKeywords (ramledData, ramlTypeName) {
   return {'types': namedData}
 }
 
-function processArray (arr) {
+function processArray (arr, reqStack) {
   var accum = []
   arr.forEach(function (el) {
-    accum = accum.concat(ramlForm(el))
+    accum = accum.concat(ramlForm(el, reqStack))
   })
   return accum
 }
@@ -93,31 +93,44 @@ function changeDateType (data) {
   return data
 }
 
-function processNested (data) {
+function processNested (data, reqStack) {
   var updateWith = {}
   for (var key in data) {
     var val = data[key]
 
     if (val instanceof Array) {
-      updateWith[key] = processArray(val)
+      updateWith[key] = processArray(val, reqStack)
       continue
     }
 
     if (val instanceof Object) {
-      updateWith[key] = ramlForm(val)
+      updateWith[key] = ramlForm(val, reqStack, key)
       continue
     }
   }
   return updateWith
 }
 
-function ramlForm (data) {
+function ramlForm (data, reqStack, prop) {
   if (!(data instanceof Object)) {
     return data
   }
+  var isObj = data.type === 'object'
+  if (isObj) {
+    reqStack.push(data.required || [])
+    delete data.required
+  }
 
-  var updateWith = processNested(data)
+  var updateWith = processNested(data, reqStack)
   data = updateObjWith(data, updateWith)
+
+  if (isObj) {
+    reqStack.pop()
+  }
+  var lastInd = reqStack.length - 1
+  if (reqStack[lastInd] && prop) {
+    data['required'] = reqStack[lastInd].indexOf(prop) > -1
+  }
 
   if (data.type !== undefined) {
     data = changeType(data)
