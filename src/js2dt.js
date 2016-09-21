@@ -3,6 +3,7 @@
 var yaml = require('js-yaml')
 var fs = require('fs')
 var constants = require('./constants')
+var utils = require('./utils')
 
 /**
  * Load JSON file into Object.
@@ -84,20 +85,6 @@ function processArray (arr, reqStack) {
     accum = accum.concat(ramlForm(el, reqStack))
   })
   return accum
-}
-
-/**
- * Merge second object into first one.
- *
- * @param  {Object} obj
- * @param  {Object} upd
- * @returns  {Object}
- */
-function updateObjWith (obj, upd) {
-  for (var key in upd) {
-    obj[key] = upd[key]
-  }
-  return obj
 }
 
 /**
@@ -201,7 +188,7 @@ function ramlForm (data, reqStack, prop) {
   }
 
   var updateWith = processNested(data, reqStack)
-  data = updateObjWith(data, updateWith)
+  data = utils.updateObjWith(data, updateWith)
 
   if (isObj) {
     reqStack.pop()
@@ -230,7 +217,6 @@ module.exports.loadJSONFile = loadJSONFile
 module.exports.inferRamlTypeName = inferRamlTypeName
 module.exports.alterRootKeywords = alterRootKeywords
 module.exports.processArray = processArray
-module.exports.updateObjWith = updateObjWith
 module.exports.changeType = changeType
 module.exports.changeDateType = changeDateType
 module.exports.processNested = processNested

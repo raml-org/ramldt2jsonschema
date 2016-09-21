@@ -56,16 +56,6 @@ describe('processArray()', function () {
   })
 })
 
-describe('updateObjWith()', function () {
-  it('should update first object with second', function () {
-    var obj = dt2js.updateObjWith(
-      {'a': 1, 'b': 2}, {'a': 3, 'c': 4})
-    expect(obj).to.have.property('a', 3)
-    expect(obj).to.have.property('b', 2)
-    expect(obj).to.have.property('c', 4)
-  })
-})
-
 describe('changeType()', function () {
   it('should change type `union` to `object`', function () {
     var obj = dt2js.changeType({'type': 'union'})

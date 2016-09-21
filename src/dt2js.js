@@ -4,6 +4,7 @@ var yaml = require('js-yaml')
 var fs = require('fs')
 var dtexp = require('datatype-expansion')
 var constants = require('./constants')
+var utils = require('./utils')
 
 /**
  * Get RAML Data Types context.
@@ -79,20 +80,6 @@ function processArray (arr, reqStack) {
     accum = accum.concat(schemaForm(el, reqStack))
   })
   return accum
-}
-
-/**
- * Merge second object into first one.
- *
- * @param  {Object} obj
- * @param  {Object} upd
- * @returns  {Object}
- */
-function updateObjWith (obj, upd) {
-  for (var key in upd) {
-    obj[key] = upd[key]
-  }
-  return obj
 }
 
 /**
@@ -203,7 +190,7 @@ function schemaForm (data, reqStack, prop) {
   }
 
   var updateWith = processNested(data, reqStack)
-  data = updateObjWith(data, updateWith)
+  data = utils.updateObjWith(data, updateWith)
   if (isObj) {
     data.required = reqStack.pop().reqs
   }
@@ -219,7 +206,6 @@ module.exports.dt2js = dt2js
 module.exports.getRAMLContext = getRAMLContext
 module.exports.addRootKeywords = addRootKeywords
 module.exports.processArray = processArray
-module.exports.updateObjWith = updateObjWith
 module.exports.changeType = changeType
 module.exports.changeDateType = changeDateType
 module.exports.processNested = processNested
