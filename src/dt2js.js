@@ -18,7 +18,7 @@ function getRAMLContext (fileName) {
 }
 
 /**
- * This callback accepts results converting RAML type to JSON schema.
+ * This callback accepts results converting RAML data type to JSON schema.
  *
  * @callback conversionCallback
  * @param {Error} err
@@ -26,7 +26,7 @@ function getRAMLContext (fileName) {
  */
 
 /**
- * Convert RAML type to JSON schema.
+ * Convert RAML data type to JSON schema.
  *
  * @param  {string} fileName - File in which type is located.
  * @param  {string} typeName - Name of the type to be converted.
@@ -96,7 +96,7 @@ function updateObjWith (obj, upd) {
 }
 
 /**
- * Change RAML type of object to valid JSON schema type.
+ * Change RAML type of data to valid JSON schema type.
  *
  * @param  {Object} data
  * @returns  {Object}
@@ -118,7 +118,7 @@ function changeType (data) {
 }
 
 /**
- * Change RAML date type of object to valid JSON schema type.
+ * Change RAML date type of data to valid JSON schema type.
  *
  * @param  {Object} data
  * @returns  {Object}
@@ -187,25 +187,25 @@ function schemaForm (data, reqStack, prop) {
   if (!(data instanceof Object)) {
     return data
   }
-  var lastInd = reqStack.length - 1
-  if (reqStack[lastInd] && prop) {
-    var ind = reqStack[lastInd].indexOf(prop)
-    if (ind > -1) {
-      if (!data.required) {
-        reqStack[lastInd].splice(ind, 1)
-      }
-      delete data.required
+  var lastEl = reqStack[reqStack.length - 1]
+  if (data.required && lastEl && prop) {
+    if (lastEl.props.indexOf(prop) > -1) {
+      lastEl.reqs.push(prop)
     }
   }
+  delete data.required
   var isObj = data.type === 'object'
   if (isObj) {
-    reqStack.push(Object.keys(data.properties || {}))
+    reqStack.push({
+      'reqs': [],
+      'props': Object.keys(data.properties || {})
+    })
   }
 
   var updateWith = processNested(data, reqStack)
   data = updateObjWith(data, updateWith)
   if (isObj) {
-    data.required = reqStack.pop()
+    data.required = reqStack.pop().reqs
   }
 
   if (data.type !== undefined) {

@@ -4,6 +4,12 @@
 var js2dt = require('./js2dt.js')
 var program = require('commander')
 
+/**
+ * Callback to write RAML data to console.
+ *
+ * @param  {Error} err
+ * @param  {string} raml
+ */
 function writeToConsole (err, raml) {
   if (err) {
     console.log(err)
@@ -13,12 +19,18 @@ function writeToConsole (err, raml) {
   console.log(raml)
 }
 
-function js2dtCLI (jsonFileName, ramlTypeName) {
-  var raml = js2dt.js2dt(jsonFileName, ramlTypeName, writeToConsole)
+/**
+ * Just call js2dt.
+ *
+ * @param  {string} jsonFile
+ * @param  {string} ramlTypeName
+ */
+function js2dtCLI (jsonFile, ramlTypeName) {
+  js2dt.js2dt(jsonFile, ramlTypeName, writeToConsole)
 }
 
 program
-  .arguments('<jsonFileName> [ramlTypeName]')
+  .arguments('<jsonFile> [ramlTypeName]')
   .description('Convert JSON schema to RAML Data Type. ' +
                'Writes to output.')
   .action(js2dtCLI)
