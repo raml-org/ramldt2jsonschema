@@ -7,14 +7,14 @@ var constants = require('../src/constants')
 
 var RAML_FILE_NAME = join(__dirname, 'test_files/types_example.raml')
 
-describe('getRAMLContext()', function () {
+describe('dt2js.getRAMLContext()', function () {
   it('should get raml data types context from file', function () {
     var ctx = dt2js.getRAMLContext(RAML_FILE_NAME)
     expect(ctx).to.be.an('object').and.contain.keys('Cat')
   })
 })
 
-describe('dt2js()', function () {
+describe('dt2js.dt2js()', function () {
   context('when applied to valid type', function () {
     it('should produce valid JSON schema', function () {
       dt2js.dt2js(RAML_FILE_NAME, 'Cat', function (err, schema) {
@@ -36,7 +36,7 @@ describe('dt2js()', function () {
   })
 })
 
-describe('addRootKeywords()', function () {
+describe('dt2js.addRootKeywords()', function () {
   it('should add missing root keywords', function () {
     var schema = dt2js.addRootKeywords({})
     expect(schema)
@@ -46,7 +46,7 @@ describe('addRootKeywords()', function () {
   })
 })
 
-describe('processArray()', function () {
+describe('dt2js.processArray()', function () {
   it('should transform each element of array', function () {
     var result = dt2js.processArray(
       [{'type': 'union'}, {'type': 'nil'}], [])
@@ -56,7 +56,7 @@ describe('processArray()', function () {
   })
 })
 
-describe('changeType()', function () {
+describe('dt2js.changeType()', function () {
   it('should change type `union` to `object`', function () {
     var obj = dt2js.changeType({'type': 'union'})
     expect(obj).to.deep.equal({'type': 'object'})
@@ -78,7 +78,7 @@ describe('changeType()', function () {
   })
 })
 
-describe('changeDateType()', function () {
+describe('dt2js.changeDateType()', function () {
   it('should change type `date-only` to `string` with pattern', function () {
     var obj = dt2js.changeDateType({'type': 'date-only'})
     expect(obj).to.have.property('type', 'string')
@@ -129,7 +129,7 @@ describe('changeDateType()', function () {
   })
 })
 
-describe('processNested()', function () {
+describe('dt2js.processNested()', function () {
   it('should process nested arrays', function () {
     var data = {'foo': [{'type': 'union'}]}
     var result = dt2js.processNested(data, [])
@@ -152,7 +152,7 @@ describe('processNested()', function () {
   })
 })
 
-describe('schemaForm()', function () {
+describe('dt2js.schemaForm()', function () {
   it('should return data unchanged if it is not Object', function () {
     var result = dt2js.schemaForm('foo')
     expect(result).to.be.equal('foo')

@@ -47,8 +47,8 @@ function js2dt (fileName, typeName, cb) {
   if (typeName === undefined) {
     typeName = inferRamlTypeName(fileName)
   }
-  var data = loadJSONFile(fileName)
   try {
+    var data = loadJSONFile(fileName)
     var ramledData = ramlForm(data, [])
     ramledData = alterRootKeywords(ramledData, typeName)
   } catch (error) {

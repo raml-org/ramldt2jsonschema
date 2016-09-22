@@ -3,7 +3,7 @@
 var expect = require('chai').expect
 var utils = require('../src/utils')
 
-describe('updateObjWith()', function () {
+describe('utils.updateObjWith()', function () {
   it('should update first object with second', function () {
     var obj = utils.updateObjWith(
       {'a': 1, 'b': 2}, {'a': 3, 'c': 4})
