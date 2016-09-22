@@ -34,6 +34,14 @@ describe('dt2js.dt2js()', function () {
       })
     })
   })
+  context('when applied to not existing file', function () {
+    it('should return error and null', function () {
+      dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
+        expect(schema).to.be.nil
+        expect(err).to.not.be.nil
+      })
+    })
+  })
 })
 
 describe('dt2js.addRootKeywords()', function () {
