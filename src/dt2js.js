@@ -34,7 +34,12 @@ function getRAMLContext (fileName) {
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
 function dt2js (fileName, typeName, cb) {
-  var ctx = getRAMLContext(fileName)
+  try {
+    var ctx = getRAMLContext(fileName)
+  } catch (error) {
+    cb(error, null)
+    return
+  }
   dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
     if (err) {
       cb(err, null)
