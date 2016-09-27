@@ -57,9 +57,11 @@ describe('js2dt.js2dt()', function () {
 
 describe('js2dt.alterRootKeywords()', function () {
   it('should remove and add proper root keywords', function () {
-    var data = {'$schema': 'asdad', 'foo': 'bar'}
-    var altered = js2dt.alterRootKeywords(data, 'Cat')
+    var defsData = {'Dog': {'bar': 1}}
+    var mainData = {'$schema': 'asdad', 'foo': 'bar'}
+    var altered = js2dt.alterRootKeywords(defsData, mainData, 'Cat')
     expect(altered).to.have.deep.property('types.Cat.foo', 'bar')
+    expect(altered).to.have.deep.property('types.Dog.bar', 1)
     expect(altered).to.not.have.deep.property('types.Cat.$schema')
   })
 })

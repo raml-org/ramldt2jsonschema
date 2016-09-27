@@ -49,8 +49,11 @@ function js2dt (fileName, typeName, cb) {
   }
   try {
     var data = loadJSONFile(fileName)
-    var ramledData = ramlForm(data, [])
-    ramledData = alterRootKeywords(ramledData, typeName)
+    var defs = data.definitions
+    delete data.definitions
+    var defsData = processDefinitions(defs)
+    var mainTypeData = ramlForm(data, [])
+    var ramledData = alterRootKeywords(defsData, mainTypeData, typeName)
   } catch (error) {
     cb(error, null)
     return
@@ -58,18 +61,28 @@ function js2dt (fileName, typeName, cb) {
   cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
 }
 
+function processDefinitions (defs) {
+  var defsData = {}
+  if (!defs) {
+    return defsData
+  }
+
+  // TODO: handle
+  return defsData
+}
+
 /**
+ * TODO: Fix docstrings
  * Alter root keywords.
  *
- * @param  {Object} ramledData
+ * @param  {Object} mainTypeData
  * @param  {Object} typeName - RAML data type name to hold all data.
  * @returns  {Object}
  */
-function alterRootKeywords (ramledData, typeName) {
-  delete ramledData['$schema']
-  var namedData = {}
-  namedData[typeName] = ramledData
-  return {'types': namedData}
+function alterRootKeywords (defsData, mainTypeData, typeName) {
+  delete mainTypeData['$schema']
+  defsData[typeName] = mainTypeData
+  return {'types': defsData}
 }
 
 /**
