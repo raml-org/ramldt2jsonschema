@@ -14,4 +14,9 @@ function updateObjWith (obj, upd) {
   return obj
 }
 
+function title (str) {
+  return str[0].toUpperCase() + str.slice(1)
+}
+
 module.exports.updateObjWith = updateObjWith
+module.exports.title = title

@@ -25,7 +25,7 @@ function loadJSONFile (fileName) {
 function inferRamlTypeName (fileName) {
   var cleanName = fileName.replace(/^.*[\\\/]/, '')
   var filename = cleanName.split('.')[0]
-  return filename[0].toUpperCase() + filename.slice(1)
+  return utils.title(filename)
 }
 
 /**
@@ -66,8 +66,9 @@ function processDefinitions (defs) {
   if (!defs) {
     return defsData
   }
-
-  // TODO: handle
+  for (var key in defs) {
+    defsData[utils.title(key)] = ramlForm(defs[key], [])
+  }
   return defsData
 }
 
