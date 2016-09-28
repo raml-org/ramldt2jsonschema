@@ -12,3 +12,19 @@ describe('utils.updateObjWith()', function () {
     expect(obj).to.have.property('c', 4)
   })
 })
+
+describe('utils.title()', function () {
+  it('should title a string', function () {
+    expect(utils.title('foo')).to.be.equal('Foo')
+    expect(utils.title('foo-bar')).to.be.equal('Foo-bar')
+    expect(utils.title('foo bar')).to.be.equal('Foo bar')
+  })
+})
+
+describe('utils.typeNameFromRef()', function () {
+  it('should get type name from $ref string', function () {
+    expect(utils.typeNameFromRef('foo')).to.be.equal('Foo')
+    expect(utils.typeNameFromRef('#/definitions/address'))
+        .to.be.equal('Address')
+  })
+})

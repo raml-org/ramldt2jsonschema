@@ -14,9 +14,27 @@ function updateObjWith (obj, upd) {
   return obj
 }
 
+/**
+ * Title string.
+ *
+ * @param  {String} str
+ * @returns  {string}
+ */
 function title (str) {
   return str[0].toUpperCase() + str.slice(1)
 }
 
+/**
+ * Get RAML type name from $ref string.
+ *
+ * @param  {String} ref
+ * @returns  {string}
+ */
+function typeNameFromRef (ref) {
+  var name = ref.replace(/^.*[\\\/]/, '')
+  return title(name)
+}
+
 module.exports.updateObjWith = updateObjWith
 module.exports.title = title
+module.exports.typeNameFromRef = typeNameFromRef

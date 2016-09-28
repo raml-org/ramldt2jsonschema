@@ -33,6 +33,17 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.not.have.property('$schema')
       })
     })
+    it('should handle JSON definitions and refs', function () {
+      js2dt.js2dt(JSON_FILE_NAME, 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Address.properties.planet.type', 'nil')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.madeIn.type', 'Address')
+        expect(data).to.not.have.property('definitions')
+      })
+    })
   })
   context('when type name is not provided', function () {
     it('should infer type name', function () {
@@ -51,6 +62,36 @@ describe('js2dt.js2dt()', function () {
         expect(raml).to.be.nil
         expect(err).to.not.be.nil
       })
+    })
+  })
+})
+
+describe('js2dt.processDefinitions()', function () {
+  context('when input has false value', function () {
+    it('should return empty object', function () {
+      expect(js2dt.processDefinitions(undefined))
+        .to.be.deep.equal({})
+    })
+  })
+  context('when input is not empty', function () {
+    it('should convert definitions to RAML data types', function () {
+      var defs = {
+        'address': {
+          'type': 'object',
+          'properties': {
+            'street': {'type': 'string'},
+            'city': {'type': 'null'}
+          },
+          'required': ['street']
+        }
+      }
+      var res = js2dt.processDefinitions(defs)
+      expect(res)
+        .to.have.deep.property('Address.properties.street.required').and
+        .to.be.true
+      expect(res).to.have.deep.property(
+        'Address.properties.city.type', 'nil')
+      expect(res).to.not.have.deep.property('Address.required')
     })
   })
 })
@@ -182,9 +223,11 @@ describe('js2dt.processNested()', function () {
 })
 
 describe('js2dt.ramlForm()', function () {
-  it('should return data unchanged if it is not Object', function () {
-    var result = js2dt.ramlForm('foo')
-    expect(result).to.be.equal('foo')
+  context('when input is not an Object', function () {
+    it('should return data unchanged', function () {
+      var result = js2dt.ramlForm('foo')
+      expect(result).to.be.equal('foo')
+    })
   })
   it('should spread `required` root value across properties', function () {
     var data = {
@@ -274,19 +317,36 @@ describe('js2dt.ramlForm()', function () {
     expect(raml).to.have.deep.property(
       'properties.siblings.anyOf[0].type', 'nil')
   })
-  it('should change types', function () {
-    var data = {
-      'properties': {
-        'name': {'type': 'null'},
-        'photo': {'type': 'string', 'media': 'asd'},
-        'dob': {'type': 'string', 'pattern': constants.dateOnlyPattern}
+  context('when $ref IS present in input data', function () {
+    it('should replace $ref with defined type name', function () {
+      var data = {'$ref': '#/definitions/username'}
+      var raml = js2dt.ramlForm(data, [])
+      expect(raml).to.be.deep.equal({'type': 'Username'})
+    })
+  })
+  context('when $ref IS NOT present in input data', function () {
+    it('should change types', function () {
+      var data = {
+        'properties': {
+          'name': {'type': 'null'},
+          'photo': {'type': 'string', 'media': 'asd'},
+          'dob': {'type': 'string', 'pattern': constants.dateOnlyPattern}
+        }
       }
-    }
-    var raml = js2dt.ramlForm(data, [])
-    expect(raml).to.have.deep.property('properties.name.type', 'nil')
-    expect(raml).to.have.deep.property('properties.photo.type', 'file')
-    expect(raml).to.not.have.deep.property('properties.photo.media')
-    expect(raml).to.have.deep.property('properties.dob.type', 'date-only')
-    expect(raml).to.not.have.deep.property('properties.dob.pattern')
+      var raml = js2dt.ramlForm(data, [])
+      expect(raml).to.have.deep.property('properties.name.type', 'nil')
+      expect(raml).to.have.deep.property('properties.photo.type', 'file')
+      expect(raml).to.not.have.deep.property('properties.photo.media')
+      expect(raml).to.have.deep.property('properties.dob.type', 'date-only')
+      expect(raml).to.not.have.deep.property('properties.dob.pattern')
+    })
+  })
+})
+
+describe('js2dt.replaceRef()', function () {
+  it('should replace $ref with type name', function () {
+    var data = {'$ref': '#/definitions/username'}
+    var raml = js2dt.replaceRef(data)
+    expect(raml).to.be.deep.equal({'type': 'Username'})
   })
 })

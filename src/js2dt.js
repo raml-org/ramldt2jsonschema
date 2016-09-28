@@ -61,6 +61,13 @@ function js2dt (fileName, typeName, cb) {
   cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
 }
 
+/**
+ * Process definitions the same way main type is processed
+ * (using ramlForm).
+ *
+ * @param  {Object} defs - JSON 'definitions' object.
+ * @returns  {Object}
+ */
 function processDefinitions (defs) {
   var defsData = {}
   if (!defs) {
@@ -73,11 +80,11 @@ function processDefinitions (defs) {
 }
 
 /**
- * TODO: Fix docstrings
- * Alter root keywords.
+ * Alter/restructure root keywords.
  *
- * @param  {Object} mainTypeData
- * @param  {Object} typeName - RAML data type name to hold all data.
+ * @param  {Object} defsData - Only definitions data.
+ * @param  {Object} mainTypeData - Main type and schema data.
+ * @param  {Object} typeName - RAML data type name to hold main data.
  * @returns  {Object}
  */
 function alterRootKeywords (defsData, mainTypeData, typeName) {
@@ -214,10 +221,25 @@ function ramlForm (data, reqStack, prop) {
     }
   }
 
-  if (data.type !== undefined) {
+  if (data['$ref']) {
+    data = replaceRef(data)
+  } else if (data.type !== undefined) {
     data = changeType(data)
     data = changeDateType(data)
   }
+  return data
+}
+
+/**
+ * Replace $ref in data with defined type name.
+ * Type presence in 'definitions' is not validated.
+ *
+ * @param  {Object} data - Data containing $ref.
+ * @returns  {Object}
+ */
+function replaceRef (data) {
+  data['type'] = utils.typeNameFromRef(data['$ref'])
+  delete data['$ref']
   return data
 }
 
@@ -229,9 +251,11 @@ function handleUnion (data) {
 module.exports.js2dt = js2dt
 module.exports.loadJSONFile = loadJSONFile
 module.exports.inferRamlTypeName = inferRamlTypeName
+module.exports.processDefinitions = processDefinitions
 module.exports.alterRootKeywords = alterRootKeywords
 module.exports.processArray = processArray
 module.exports.changeType = changeType
 module.exports.changeDateType = changeDateType
 module.exports.processNested = processNested
 module.exports.ramlForm = ramlForm
+module.exports.replaceRef = replaceRef

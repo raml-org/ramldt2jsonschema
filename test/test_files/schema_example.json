@@ -3,6 +3,17 @@
   "title": "Product",
   "description": "A product from Acme's catalog",
   "type": "object",
+  "definitions": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "city":           {"type": "string"},
+        "state":          {"type": "string"},
+        "planet":         {"type": "null"}
+      },
+      "required": ["street_address", "city", "state"]
+    }
+  },
   "properties": {
     "id": {
       "description": "The unique identifier for a product",
@@ -24,7 +35,8 @@
       },
       "minItems": 1,
       "uniqueItems": true
-    }
+    },
+    "madeIn": {"$ref": "#/definitions/address"}
   },
   "required": ["id", "name", "price"]
 }
