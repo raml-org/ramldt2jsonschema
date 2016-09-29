@@ -35,6 +35,17 @@ function typeNameFromRef (ref) {
   return title(name)
 }
 
+/**
+ * Clone object.
+ *
+ * @param  {Object} obj
+ * @returns  {Object}
+ */
+function cloneObj (obj) {
+    return JSON.parse(JSON.stringify(obj))
+}
+
 module.exports.updateObjWith = updateObjWith
 module.exports.title = title
 module.exports.typeNameFromRef = typeNameFromRef
+module.exports.cloneObj = cloneObj

@@ -103,7 +103,7 @@ function alterRootKeywords (defsData, mainTypeData, typeName) {
 function processArray (arr, reqStack) {
   var accum = []
   arr.forEach(function (el) {
-    accum = accum.concat(ramlForm(el, reqStack))
+    accum.push(ramlForm(el, reqStack))
   })
   return accum
 }
@@ -120,8 +120,6 @@ function changeType (data) {
   } else if (data.type === 'string' && data.media) {
     data['type'] = 'file'
     delete data.media
-  } else if (data.type === 'object' && data.anyOf) {
-    data = handleUnion(data)
   }
   return data
 }
@@ -208,6 +206,11 @@ function ramlForm (data, reqStack, prop) {
     delete data.required
   }
 
+  var combsKey = getCombinationsKey(data)
+  if (combsKey && data.type) {
+    data = addCombinationsType(data, combsKey)
+  }
+
   var updateWith = processNested(data, reqStack)
   data = utils.updateObjWith(data, updateWith)
 
@@ -221,13 +224,42 @@ function ramlForm (data, reqStack, prop) {
     }
   }
 
+  if (combsKey) {
+    data = processCombinations(data, combsKey)
+  }
   if (data['$ref']) {
     data = replaceRef(data)
-  } else if (data.type !== undefined) {
+  } else if (data.type) {
     data = changeType(data)
     data = changeDateType(data)
   }
   return data
+}
+
+function getCombinationsKey (data) {
+  if (data.anyOf) {
+    return 'anyOf'
+  } else if (data.allOf) {
+    return 'allOf'
+  } else if (data.oneOf) {
+    return 'oneOf'
+  }
+}
+
+function addCombinationsType (data, combsKey) {
+  data[combsKey].forEach(function (el) {
+    if (!el.type) {
+      el.type = data.type
+    }
+  })
+  return data
+}
+
+function processCombinations (data, combsKey) {
+  return data
+  // var combSchemas = data[combsKey]
+  // delete data[combsKey]
+  // return data
 }
 
 /**
@@ -240,11 +272,6 @@ function ramlForm (data, reqStack, prop) {
 function replaceRef (data) {
   data['type'] = utils.typeNameFromRef(data['$ref'])
   delete data['$ref']
-  return data
-}
-
-function handleUnion (data) {
-  // TODO: Implement
   return data
 }
 

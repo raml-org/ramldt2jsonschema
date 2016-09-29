@@ -82,7 +82,7 @@ function addRootKeywords (schema) {
 function processArray (arr, reqStack) {
   var accum = []
   arr.forEach(function (el) {
-    accum = accum.concat(schemaForm(el, reqStack))
+    accum.push(schemaForm(el, reqStack))
   })
   return accum
 }
@@ -200,7 +200,7 @@ function schemaForm (data, reqStack, prop) {
     data.required = reqStack.pop().reqs
   }
 
-  if (data.type !== undefined) {
+  if (data.type) {
     data = changeType(data)
     data = changeDateType(data)
   }
