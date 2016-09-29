@@ -47,13 +47,18 @@ types:
     maximum: 50
     format: int32
 
+  CatWithCity:
+    additionalProperties: false
+    properties:
+      city:
+
   CatWithAddress:
     additionalProperties: false
     properties:
       address: string
 
   Cat:
-    type: CatWithAddress
+    type: [CatWithAddress, CatWithCity]
     minProperties: 1
     maxProperties: 50
     additionalProperties: false
@@ -94,7 +99,9 @@ types:
         maxLength: 307200
       description: nil
       habits?: string
+      character: nil | string
       siblings: string[]
+      parents: CatName[]
       ratingHistory: (integer | number)[]
       additionalData:
         type:
