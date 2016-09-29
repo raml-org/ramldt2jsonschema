@@ -249,13 +249,3 @@ function handleUnion (data) {
 }
 
 module.exports.js2dt = js2dt
-module.exports.loadJSONFile = loadJSONFile
-module.exports.inferRamlTypeName = inferRamlTypeName
-module.exports.processDefinitions = processDefinitions
-module.exports.alterRootKeywords = alterRootKeywords
-module.exports.processArray = processArray
-module.exports.changeType = changeType
-module.exports.changeDateType = changeDateType
-module.exports.processNested = processNested
-module.exports.ramlForm = ramlForm
-module.exports.replaceRef = replaceRef

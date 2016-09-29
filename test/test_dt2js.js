@@ -2,14 +2,16 @@
 
 var expect = require('chai').expect
 var join = require('path').join
-var dt2js = require('../src/dt2js')
+var rewire = require("rewire");
+var dt2js = rewire('../src/dt2js')
 var constants = require('../src/constants')
 
 var RAML_FILE_NAME = join(__dirname, 'test_files/types_example.raml')
 
 describe('dt2js.getRAMLContext()', function () {
+  var getRAMLContext = dt2js.__get__('getRAMLContext')
   it('should get raml data types context from file', function () {
-    var ctx = dt2js.getRAMLContext(RAML_FILE_NAME)
+    var ctx = getRAMLContext(RAML_FILE_NAME)
     expect(ctx).to.be.an('object').and.contain.keys('Cat')
   })
 })
@@ -45,8 +47,9 @@ describe('dt2js.dt2js()', function () {
 })
 
 describe('dt2js.addRootKeywords()', function () {
+  var addRootKeywords = dt2js.__get__('addRootKeywords')
   it('should add missing root keywords', function () {
-    var schema = dt2js.addRootKeywords({})
+    var schema = addRootKeywords({})
     expect(schema)
       .to.be.an('object').and
       .to.have.property(
@@ -55,8 +58,9 @@ describe('dt2js.addRootKeywords()', function () {
 })
 
 describe('dt2js.processArray()', function () {
+  var processArray = dt2js.__get__('processArray')
   it('should transform each element of array', function () {
-    var result = dt2js.processArray(
+    var result = processArray(
       [{'type': 'union'}, {'type': 'nil'}], [])
     expect(result).to.have.lengthOf(2)
     expect(result).to.have.deep.property('[0].type', 'object')
@@ -65,40 +69,42 @@ describe('dt2js.processArray()', function () {
 })
 
 describe('dt2js.changeType()', function () {
+  var changeType = dt2js.__get__('changeType')
   it('should change type `union` to `object`', function () {
-    var obj = dt2js.changeType({'type': 'union'})
+    var obj = changeType({'type': 'union'})
     expect(obj).to.deep.equal({'type': 'object'})
   })
   it('should change type `nil` to `null`', function () {
-    var obj = dt2js.changeType({'type': 'nil'})
+    var obj = changeType({'type': 'nil'})
     expect(obj).to.deep.equal({'type': 'null'})
   })
   it('should change type `file` to `string` with `media` keyword', function () {
-    var obj = dt2js.changeType({'type': 'file'})
+    var obj = changeType({'type': 'file'})
     expect(obj).to.deep.equal(
       {'type': 'string', 'media': {'binaryEncoding': 'binary'}})
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      var obj = dt2js.changeType({'type': 'foobar'})
+      var obj = changeType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
     })
   })
 })
 
 describe('dt2js.changeDateType()', function () {
+  var changeDateType = dt2js.__get__('changeDateType')
   it('should change type `date-only` to `string` with pattern', function () {
-    var obj = dt2js.changeDateType({'type': 'date-only'})
+    var obj = changeDateType({'type': 'date-only'})
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.dateOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
-    var obj = dt2js.changeDateType({'type': 'time-only'})
+    var obj = changeDateType({'type': 'time-only'})
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.timeOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
-    var obj = dt2js.changeDateType({'type': 'datetime-only'})
+    var obj = changeDateType({'type': 'datetime-only'})
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.dateTimeOnlyPattern)
   })
@@ -121,7 +127,7 @@ describe('dt2js.changeDateType()', function () {
     data.forEach(function (el) {
       context('when `format` is set to ' + el.setTo, function () {
         it('should change type to `string` with pattern', function () {
-          var obj = dt2js.changeDateType(el.input)
+          var obj = changeDateType(el.input)
           expect(obj).to.have.property('type', 'string')
           expect(obj).to.have.property('pattern', el.pattern)
           expect(obj).to.not.have.property('format')
@@ -131,16 +137,17 @@ describe('dt2js.changeDateType()', function () {
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      var obj = dt2js.changeDateType({'type': 'foobar'})
+      var obj = changeDateType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
     })
   })
 })
 
 describe('dt2js.processNested()', function () {
+  var processNested = dt2js.__get__('processNested')
   it('should process nested arrays', function () {
     var data = {'foo': [{'type': 'union'}]}
-    var result = dt2js.processNested(data, [])
+    var result = processNested(data, [])
     expect(result)
       .to.have.property('foo').and
       .to.have.lengthOf(1)
@@ -148,21 +155,22 @@ describe('dt2js.processNested()', function () {
   })
   it('should process nested objects', function () {
     var data = {'foo': {'type': 'union'}}
-    var result = dt2js.processNested(data, [])
+    var result = processNested(data, [])
     expect(result)
       .to.have.property('foo').and
       .to.have.all.keys('type')
     expect(result).to.have.deep.property('foo.type', 'object')
   })
   it('should return empty object if no nesting is present', function () {
-    var result = dt2js.processNested({'type': 'union'}, [])
+    var result = processNested({'type': 'union'}, [])
     expect(result).to.be.deep.equal({})
   })
 })
 
 describe('dt2js.schemaForm()', function () {
+  var schemaForm = dt2js.__get__('schemaForm')
   it('should return data unchanged if it is not Object', function () {
-    var result = dt2js.schemaForm('foo')
+    var result = schemaForm('foo')
     expect(result).to.be.equal('foo')
   })
   it('should hoist `required` properties param to object root', function () {
@@ -182,7 +190,7 @@ describe('dt2js.schemaForm()', function () {
         }
       }
     }
-    var schema = dt2js.schemaForm(data, [])
+    var schema = schemaForm(data, [])
     expect(schema)
       .to.have.property('required').and
       .to.be.deep.equal(['name', 'age'])
@@ -197,7 +205,7 @@ describe('dt2js.schemaForm()', function () {
         }
       }
     }
-    var schema = dt2js.schemaForm(data, [])
+    var schema = schemaForm(data, [])
     expect(schema)
       .to.have.property('required').and
       .to.be.deep.equal(['name'])
@@ -217,7 +225,7 @@ describe('dt2js.schemaForm()', function () {
           }
         }
       }
-      var schema = dt2js.schemaForm(data, [])
+      var schema = schemaForm(data, [])
       expect(schema)
         .to.have.property('required').and
         .to.be.deep.empty
@@ -238,7 +246,7 @@ describe('dt2js.schemaForm()', function () {
         }
       }
     }
-    var schema = dt2js.schemaForm(data, [])
+    var schema = schemaForm(data, [])
     expect(schema).to.have.deep.property(
       'properties.bio.properties.event.type', 'string')
     expect(schema).to.have.deep.property(
@@ -253,7 +261,7 @@ describe('dt2js.schemaForm()', function () {
         'dob': {'type': 'date-only'}
       }
     }
-    var schema = dt2js.schemaForm(data, [])
+    var schema = schemaForm(data, [])
     expect(schema).to.have.property('type', 'object')
     expect(schema).to.have.deep.property('properties.name.type', 'null')
     expect(schema).to.have.deep.property('properties.photo.type', 'string')

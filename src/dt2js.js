@@ -208,10 +208,3 @@ function schemaForm (data, reqStack, prop) {
 }
 
 module.exports.dt2js = dt2js
-module.exports.getRAMLContext = getRAMLContext
-module.exports.addRootKeywords = addRootKeywords
-module.exports.processArray = processArray
-module.exports.changeType = changeType
-module.exports.changeDateType = changeDateType
-module.exports.processNested = processNested
-module.exports.schemaForm = schemaForm
