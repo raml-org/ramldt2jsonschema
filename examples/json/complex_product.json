@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "anyOf": [
+    {
+      "title": "Imported Product",
+      "description": "A product from Acme's catalog",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier for a product",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Name of the product",
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true
+        },
+        "importedAt": {
+          "allOf": [
+            {"type": "string", "pattern": "^(\\d{2})(:)(\\d{2})(:)(\\d{2})(\\.\\d+)?$"},
+            {"type": "string", "minLength": 3}
+          ]
+        }
+      },
+      "required": ["id", "name", "price"]
+    }, {
+      "title": "Exported Product",
+      "description": "A product from Acme's catalog",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier for a product",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Name of the product",
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true
+        },
+        "edporterName": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "null"}
+          ]
+        },
+        "exporterId": {
+          "type": "number",
+          "oneOf": [
+            {"multipleOf": 5},
+            {"multipleOf": 3}
+          ]
+        }
+      },
+      "required": ["id", "name", "price"]
+    }
+  ]
+}
