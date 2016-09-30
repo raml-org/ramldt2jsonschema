@@ -3,7 +3,7 @@
 var expect = require('chai').expect
 var yaml = require('js-yaml')
 var join = require('path').join
-var rewire = require("rewire");
+var rewire = require('rewire')
 var js2dt = rewire('../src/js2dt')
 var constants = require('../src/constants')
 
@@ -470,8 +470,8 @@ describe('js2dt.RAMLEmitter.processCombinations()', function () {
       .to.have.property('types').and
       .to.be.deep.equal({})
     var newData = emitter.processCombinations(data, 'anyOf', 'cat')
-    expect(data).to.have.property('type', 'CatParentType0 | CatParentType1')
-    expect(data).to.not.have.property('anyOf')
+    expect(newData).to.have.property('type', 'CatParentType0 | CatParentType1')
+    expect(newData).to.not.have.property('anyOf')
     expect(emitter).to.have.deep.property(
       'types.CatParentType0.type', 'string')
     expect(emitter).to.have.deep.property(
@@ -489,8 +489,8 @@ describe('js2dt.RAMLEmitter.processCombinations()', function () {
       .to.have.property('types').and
       .to.be.deep.equal({})
     var newData = emitter.processCombinations(data, 'oneOf', 'cat')
-    expect(data).to.have.property('type', 'CatParentType0 | CatParentType1')
-    expect(data).to.not.have.property('oneOf')
+    expect(newData).to.have.property('type', 'CatParentType0 | CatParentType1')
+    expect(newData).to.not.have.property('oneOf')
     expect(emitter).to.have.deep.property(
       'types.CatParentType0.type', 'string')
     expect(emitter).to.have.deep.property(
@@ -508,10 +508,10 @@ describe('js2dt.RAMLEmitter.processCombinations()', function () {
       .to.have.property('types').and
       .to.be.deep.equal({})
     var newData = emitter.processCombinations(data, 'allOf', 'cat')
-    expect(data)
+    expect(newData)
       .to.have.property('type').and
       .to.be.deep.equal(['CatParentType0', 'CatParentType1'])
-    expect(data).to.not.have.property('allOf')
+    expect(newData).to.not.have.property('allOf')
     expect(emitter).to.have.deep.property(
       'types.CatParentType0.type', 'string')
     expect(emitter).to.have.deep.property(
@@ -519,23 +519,23 @@ describe('js2dt.RAMLEmitter.processCombinations()', function () {
   })
   context('when prop name is not provided', function () {
     it('should use main type name', function () {
-    var data = {
-      'anyOf': [
-        {'type': 'string'},
-        {'type': 'number'}
-      ]
-    }
-    var emitter = new RAMLEmitter(data, 'Cat')
-    expect(emitter)
-      .to.have.property('types').and
-      .to.be.deep.equal({})
-    var newData = emitter.processCombinations(data, 'anyOf')
-    expect(data).to.have.property('type', 'CatParentType0 | CatParentType1')
-    expect(data).to.not.have.property('anyOf')
-    expect(emitter).to.have.deep.property(
-      'types.CatParentType0.type', 'string')
-    expect(emitter).to.have.deep.property(
-      'types.CatParentType1.type', 'number')
+      var data = {
+        'anyOf': [
+          {'type': 'string'},
+          {'type': 'number'}
+        ]
+      }
+      var emitter = new RAMLEmitter(data, 'Cat')
+      expect(emitter)
+        .to.have.property('types').and
+        .to.be.deep.equal({})
+      var newData = emitter.processCombinations(data, 'anyOf')
+      expect(newData).to.have.property('type', 'CatParentType0 | CatParentType1')
+      expect(newData).to.not.have.property('anyOf')
+      expect(emitter).to.have.deep.property(
+        'types.CatParentType0.type', 'string')
+      expect(emitter).to.have.deep.property(
+        'types.CatParentType1.type', 'number')
     })
   })
 })
@@ -550,6 +550,45 @@ describe('js2dt.getCombinationsKey()', function () {
   context('when object does not contain any combinations prop', function () {
     it('should return undefined', function () {
       expect(getCombinationsKey({})).to.be.undefined
+    })
+  })
+})
+
+describe('js2dt.addCombinationsType()', function () {
+  var addCombinationsType = js2dt.__get__('addCombinationsType')
+  it('should add object type to all combination schemas missing type', function () {
+    var data = {
+      'type': 'string',
+      'anyOf': [
+        {'pattern': 'x'},
+        {'type': 'number'}
+      ]
+    }
+    var res = addCombinationsType(data, 'anyOf')
+    expect(res).to.have.property('type', 'string')
+    expect(res).to.have.deep.property('anyOf[0].type', 'string')
+    expect(res).to.have.deep.property('anyOf[1].type', 'number')
+  })
+})
+
+describe('js2dt.addCombinationsType()', function () {
+  var getCombinationType = js2dt.__get__('getCombinationType')
+  context('when input key is allOf', function () {
+    it('should return types as is', function () {
+      var res = getCombinationType(['x', 'y'], 'allOf')
+      expect(res).to.be.deep.equal(['x', 'y'])
+    })
+  })
+  context('when input key is oneOf', function () {
+    it('should return types joined by pipe (|)', function () {
+      var res = getCombinationType(['x', 'y'], 'oneOf')
+      expect(res).to.be.equal('x | y')
+    })
+  })
+  context('when input key is anyOf', function () {
+    it('should return types joined by pipe (|)', function () {
+      var res = getCombinationType(['x', 'y'], 'anyOf')
+      expect(res).to.be.equal('x | y')
     })
   })
 })

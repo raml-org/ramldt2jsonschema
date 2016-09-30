@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect
 var join = require('path').join
-var rewire = require("rewire");
+var rewire = require('rewire')
 var dt2js = rewire('../src/dt2js')
 var constants = require('../src/constants')
 

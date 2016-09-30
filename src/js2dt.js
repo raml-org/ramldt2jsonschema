@@ -34,22 +34,38 @@ function js2dt (fileName, typeName, cb) {
   cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
 }
 
+/**
+ * Holds functions to convert JSON schema to RAML data type.
+ *
+ * @param  {Object} data
+ * @param  {string} typeName - Name of RAML data type to hold converted data.
+ */
 function RAMLEmitter (data, typeName) {
   this.data = data
   this.mainTypeName = typeName
   this.types = {}
 
+  /**
+   * Process definitions, delete them from data and add processed
+   * values to `this.types`.
+   */
   this.processDefinitions = function () {
     var defsData = this._processDefinitions(this.data.definitions)
     delete this.data.definitions
     this.types = utils.updateObjWith(this.types, defsData)
   }
 
+  /**
+   * Process main data and save result in `this.types`.
+   */
   this.processMainData = function () {
     delete this.data['$schema']
     this.types[this.mainTypeName] = this.ramlForm(this.data, [])
   }
 
+  /**
+   * Run conversion process and emit results.
+   */
   this.emit = function () {
     this.processDefinitions()
     this.processMainData()
@@ -293,7 +309,6 @@ function getCombinationType (types, combsKey) {
   } else if (combsKey === 'oneOf' || combsKey === 'anyOf') {
     return types.join(' | ')
   }
-  return types
 }
 
 module.exports.js2dt = js2dt

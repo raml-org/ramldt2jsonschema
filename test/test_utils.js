@@ -28,3 +28,12 @@ describe('utils.typeNameFromRef()', function () {
         .to.be.equal('Address')
   })
 })
+
+describe('utils.cloneObj()', function () {
+  it('should clone object', function () {
+    var obj = {'a': 1}
+    var res = utils.cloneObj(obj)
+    expect(res).to.be.not.equal(obj)
+    expect(res).to.be.deep.equal(obj)
+  })
+})
