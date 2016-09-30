@@ -6,29 +6,6 @@ var constants = require('./constants')
 var utils = require('./utils')
 
 /**
- * Load JSON file into Object.
- *
- * @param  {string} fileName - File from which to load.
- * @returns  {Object} - JSON data from file.
- */
-function loadJSONFile (fileName) {
-  var content = fs.readFileSync(fileName).toString()
-  return JSON.parse(content)
-}
-
-/**
- * Infer RAML type name from file name
- *
- * @param  {string} fileName - File in which type is located.
- * @returns  {string}
- */
-function inferRamlTypeName (fileName) {
-  var cleanName = fileName.replace(/^.*[\\\/]/, '')
-  var filename = cleanName.split('.')[0]
-  return utils.title(filename)
-}
-
-/**
  * This callback accepts results converting JSON schema to RAML data type.
  *
  * @callback conversionCallback
@@ -45,15 +22,11 @@ function inferRamlTypeName (fileName) {
  */
 function js2dt (fileName, typeName, cb) {
   if (typeName === undefined) {
-    typeName = inferRamlTypeName(fileName)
+    typeName = inferRAMLTypeName(fileName)
   }
   try {
-    var data = loadJSONFile(fileName)
-    var defs = data.definitions
-    delete data.definitions
-    var defsData = processDefinitions(defs)
-    var mainTypeData = ramlForm(data, [])
-    var ramledData = alterRootKeywords(defsData, mainTypeData, typeName)
+    var emitter = new RAMLEmitter(loadJSONFile(fileName), typeName)
+    var ramledData = emitter.emit()
   } catch (error) {
     cb(error, null)
     return
@@ -61,51 +34,182 @@ function js2dt (fileName, typeName, cb) {
   cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
 }
 
-/**
- * Process definitions the same way main type is processed
- * (using ramlForm).
- *
- * @param  {Object} defs - JSON 'definitions' object.
- * @returns  {Object}
- */
-function processDefinitions (defs) {
-  var defsData = {}
-  if (!defs) {
+function RAMLEmitter (data, typeName) {
+  this.data = data
+  this.mainTypeName = typeName
+  this.types = {}
+
+  this.processDefinitions = function () {
+    var defsData = this._processDefinitions(this.data.definitions)
+    delete this.data.definitions
+    this.types = utils.updateObjWith(this.types, defsData)
+  }
+
+  this.processMainData = function () {
+    delete this.data['$schema']
+    this.types[this.mainTypeName] = this.ramlForm(this.data, [])
+  }
+
+  this.emit = function () {
+    this.processDefinitions()
+    this.processMainData()
+    return {'types': this.types}
+  }
+
+  /**
+   * Convert JSON schema to a library with RAML data type.
+   *
+   * @param  {Object} data - Data to be converted.
+   * @param  {Array} reqStack - Stack of required properties.
+   * @param  {string} [prop] - Property name nested objects of which are processed.
+   * @returns  {Object}
+   */
+  this.ramlForm = function (data, reqStack, prop) {
+    if (!(data instanceof Object)) {
+      return data
+    }
+    var isObj = data.type === 'object'
+    if (isObj) {
+      reqStack.push({
+        'reqs': data.required || [],
+        'props': Object.keys(data.properties || {})
+      })
+      delete data.required
+    }
+
+    var combsKey = getCombinationsKey(data)
+    if (combsKey && data.type) {
+      data = addCombinationsType(data, combsKey)
+    }
+
+    var updateWith = this.processNested(data, reqStack)
+    data = utils.updateObjWith(data, updateWith)
+
+    if (isObj) {
+      reqStack.pop()
+    }
+    var lastEl = reqStack[reqStack.length - 1]
+    if (lastEl && prop) {
+      if (lastEl.props.indexOf(prop) > -1) {
+        data['required'] = lastEl.reqs.indexOf(prop) > -1
+      }
+    }
+
+    if (combsKey) {
+      data = this.processCombinations(data, combsKey, prop)
+    }
+    if (data['$ref']) {
+      data = replaceRef(data)
+    } else if (data.type) {
+      data = changeType(data)
+      data = changeDateType(data)
+    }
+    return data
+  }
+
+  /**
+   * Process definitions the same way main type is processed
+   * (using ramlForm).
+   *
+   * @param  {Object} defs - JSON 'definitions' object.
+   * @returns  {Object}
+   */
+  this._processDefinitions = function (defs) {
+    var defsData = {}
+    if (!defs) {
+      return defsData
+    }
+    for (var key in defs) {
+      defsData[utils.title(key)] = this.ramlForm(defs[key], [])
+    }
     return defsData
   }
-  for (var key in defs) {
-    defsData[utils.title(key)] = ramlForm(defs[key], [])
+
+  /**
+   * Call `ramlForm` for each element of array.
+   *
+   * @param  {Array} arr
+   * @param  {Array} reqStack - Stack of required properties.
+   * @returns  {Array}
+   */
+  this.processArray = function (arr, reqStack) {
+    var accum = []
+    arr.forEach(function (el) {
+      accum.push(this.ramlForm(el, reqStack))
+    }.bind(this))
+    return accum
   }
-  return defsData
+
+  /**
+   * Call `ramlForm` for all nested objects.
+   *
+   * @param  {Object} data
+   * @param  {Array} reqStack - Stack of required properties.
+   * @returns  {Object}
+   */
+  this.processNested = function (data, reqStack) {
+    var updateWith = {}
+    for (var key in data) {
+      var val = data[key]
+
+      if (val instanceof Array) {
+        updateWith[key] = this.processArray(val, reqStack)
+        continue
+      }
+
+      if (val instanceof Object) {
+        updateWith[key] = this.ramlForm(val, reqStack, key)
+        continue
+      }
+    }
+    return updateWith
+  }
+
+  this.processCombinations = function (data, combsKey, prop) {
+    prop = prop ? utils.title(prop) : this.mainTypeName
+    var combSchemas = data[combsKey]
+    var superTypes = []
+    combSchemas.forEach(function (el, ind) {
+      var name = prop + "ParentType" + ind.toString()
+      superTypes.push(name)
+      this.types[name] = el
+    }.bind(this))
+    delete data[combsKey]
+    data.type = getCombinationType(superTypes, combsKey)
+    return data
+  }
+}
+
+function getCombinationType (types, combsKey) {
+  if (combsKey === 'allOf') {
+    return types
+  } else if (combsKey === 'oneOf' || combsKey === 'anyOf') {
+    return types.join(' | ')
+  }
+  return types
 }
 
 /**
- * Alter/restructure root keywords.
+ * Load JSON file into Object.
  *
- * @param  {Object} defsData - Only definitions data.
- * @param  {Object} mainTypeData - Main type and schema data.
- * @param  {Object} typeName - RAML data type name to hold main data.
- * @returns  {Object}
+ * @param  {string} fileName - File from which to load.
+ * @returns  {Object} - JSON data from file.
  */
-function alterRootKeywords (defsData, mainTypeData, typeName) {
-  delete mainTypeData['$schema']
-  defsData[typeName] = mainTypeData
-  return {'types': defsData}
+function loadJSONFile (fileName) {
+  var content = fs.readFileSync(fileName).toString()
+  return JSON.parse(content)
 }
 
 /**
- * Call `ramlForm` for each element of array.
+ * Infer RAML type name from file name
  *
- * @param  {Array} arr
- * @param  {Array} reqStack - Stack of required properties.
- * @returns  {Array}
+ * @param  {string} fileName - File in which type is located.
+ * @returns  {string}
  */
-function processArray (arr, reqStack) {
-  var accum = []
-  arr.forEach(function (el) {
-    accum.push(ramlForm(el, reqStack))
-  })
-  return accum
+function inferRAMLTypeName (fileName) {
+  var cleanName = fileName.replace(/^.*[\\\/]/, '')
+  var filename = cleanName.split('.')[0]
+  return utils.title(filename)
 }
 
 /**
@@ -160,81 +264,6 @@ function changeDateType (data) {
   return data
 }
 
-/**
- * Call `ramlForm` for all nested objects.
- *
- * @param  {Object} data
- * @param  {Array} reqStack - Stack of required properties.
- * @returns  {Object}
- */
-function processNested (data, reqStack) {
-  var updateWith = {}
-  for (var key in data) {
-    var val = data[key]
-
-    if (val instanceof Array) {
-      updateWith[key] = processArray(val, reqStack)
-      continue
-    }
-
-    if (val instanceof Object) {
-      updateWith[key] = ramlForm(val, reqStack, key)
-      continue
-    }
-  }
-  return updateWith
-}
-
-/**
- * Convert JSON schema to a library with RAML data type.
- *
- * @param  {Object} data - Data to be converted.
- * @param  {Array} reqStack - Stack of required properties.
- * @param  {string} [prop] - Property name nested objects of which are processed.
- * @returns  {Object}
- */
-function ramlForm (data, reqStack, prop) {
-  if (!(data instanceof Object)) {
-    return data
-  }
-  var isObj = data.type === 'object'
-  if (isObj) {
-    reqStack.push({
-      'reqs': data.required || [],
-      'props': Object.keys(data.properties || {})
-    })
-    delete data.required
-  }
-
-  var combsKey = getCombinationsKey(data)
-  if (combsKey && data.type) {
-    data = addCombinationsType(data, combsKey)
-  }
-
-  var updateWith = processNested(data, reqStack)
-  data = utils.updateObjWith(data, updateWith)
-
-  if (isObj) {
-    reqStack.pop()
-  }
-  var lastEl = reqStack[reqStack.length - 1]
-  if (lastEl && prop) {
-    if (lastEl.props.indexOf(prop) > -1) {
-      data['required'] = lastEl.reqs.indexOf(prop) > -1
-    }
-  }
-
-  if (combsKey) {
-    data = processCombinations(data, combsKey)
-  }
-  if (data['$ref']) {
-    data = replaceRef(data)
-  } else if (data.type) {
-    data = changeType(data)
-    data = changeDateType(data)
-  }
-  return data
-}
 
 function getCombinationsKey (data) {
   if (data.anyOf) {
@@ -253,13 +282,6 @@ function addCombinationsType (data, combsKey) {
     }
   })
   return data
-}
-
-function processCombinations (data, combsKey) {
-  return data
-  // var combSchemas = data[combsKey]
-  // delete data[combsKey]
-  // return data
 }
 
 /**

@@ -17,10 +17,10 @@ describe('js2dt.loadJSONFile()', function () {
   })
 })
 
-describe('js2dt.inferRamlTypeName()', function () {
-  var inferRamlTypeName = js2dt.__get__('inferRamlTypeName')
+describe('js2dt.inferRAMLTypeName()', function () {
+  var inferRAMLTypeName = js2dt.__get__('inferRAMLTypeName')
   it('should infer type name from file name', function () {
-    var name = inferRamlTypeName('docs/json/cat.json')
+    var name = inferRAMLTypeName('docs/json/cat.json')
     expect(name).to.be.equal('Cat')
   })
 })
@@ -69,11 +69,11 @@ describe('js2dt.js2dt()', function () {
   })
 })
 
-describe('js2dt.processDefinitions()', function () {
-  var processDefinitions = js2dt.__get__('processDefinitions')
+describe('js2dt._processDefinitions()', function () {
+  var _processDefinitions = js2dt.__get__('_processDefinitions')
   context('when input has false value', function () {
     it('should return empty object', function () {
-      expect(processDefinitions(undefined))
+      expect(_processDefinitions(undefined))
         .to.be.deep.equal({})
     })
   })
@@ -89,7 +89,7 @@ describe('js2dt.processDefinitions()', function () {
           'required': ['street']
         }
       }
-      var res = processDefinitions(defs)
+      var res = _processDefinitions(defs)
       expect(res)
         .to.have.deep.property('Address.properties.street.required').and
         .to.be.true
@@ -97,18 +97,6 @@ describe('js2dt.processDefinitions()', function () {
         'Address.properties.city.type', 'nil')
       expect(res).to.not.have.deep.property('Address.required')
     })
-  })
-})
-
-describe('js2dt.alterRootKeywords()', function () {
-  var alterRootKeywords = js2dt.__get__('alterRootKeywords')
-  it('should remove and add proper root keywords', function () {
-    var defsData = {'Dog': {'bar': 1}}
-    var mainData = {'$schema': 'asdad', 'foo': 'bar'}
-    var altered = alterRootKeywords(defsData, mainData, 'Cat')
-    expect(altered).to.have.deep.property('types.Cat.foo', 'bar')
-    expect(altered).to.have.deep.property('types.Dog.bar', 1)
-    expect(altered).to.not.have.deep.property('types.Cat.$schema')
   })
 })
 

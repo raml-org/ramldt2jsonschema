@@ -52,7 +52,7 @@
           "minimum": 0,
           "exclusiveMinimum": true
         },
-        "edporterName": {
+        "exporterName": {
           "oneOf": [
             {"type": "string"},
             {"type": "null"}
@@ -66,7 +66,7 @@
           ]
         }
       },
-      "required": ["id", "name", "price"]
+      "required": ["id", "name", "price", "exporterId"]
     }
   ]
 }
