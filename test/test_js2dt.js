@@ -8,22 +8,7 @@ var js2dt = rewire('../src/js2dt')
 var constants = require('../src/constants')
 
 var JSON_FILE_NAME = join(__dirname, 'test_files/schema_example.json')
-
-describe('js2dt.loadJSONFile()', function () {
-  var loadJSONFile = js2dt.__get__('loadJSONFile')
-  it('should load and parse JSON file', function () {
-    var data = loadJSONFile(JSON_FILE_NAME)
-    expect(data).to.be.an('object').and.contain.keys('$schema')
-  })
-})
-
-describe('js2dt.inferRAMLTypeName()', function () {
-  var inferRAMLTypeName = js2dt.__get__('inferRAMLTypeName')
-  it('should infer type name from file name', function () {
-    var name = inferRAMLTypeName('docs/json/cat.json')
-    expect(name).to.be.equal('Cat')
-  })
-})
+var RAMLEmitter = js2dt.__get__('RAMLEmitter')
 
 describe('js2dt.js2dt()', function () {
   context('when applied to valid schema', function () {
@@ -69,48 +54,6 @@ describe('js2dt.js2dt()', function () {
   })
 })
 
-describe('js2dt._processDefinitions()', function () {
-  var _processDefinitions = js2dt.__get__('_processDefinitions')
-  context('when input has false value', function () {
-    it('should return empty object', function () {
-      expect(_processDefinitions(undefined))
-        .to.be.deep.equal({})
-    })
-  })
-  context('when input is not empty', function () {
-    it('should convert definitions to RAML data types', function () {
-      var defs = {
-        'address': {
-          'type': 'object',
-          'properties': {
-            'street': {'type': 'string'},
-            'city': {'type': 'null'}
-          },
-          'required': ['street']
-        }
-      }
-      var res = _processDefinitions(defs)
-      expect(res)
-        .to.have.deep.property('Address.properties.street.required').and
-        .to.be.true
-      expect(res).to.have.deep.property(
-        'Address.properties.city.type', 'nil')
-      expect(res).to.not.have.deep.property('Address.required')
-    })
-  })
-})
-
-describe('js2dt.processArray()', function () {
-  var processArray = js2dt.__get__('processArray')
-  it('should transform each element of array', function () {
-    var result = processArray(
-      [{'type': 'null'}, {'type': 'string', 'media': 'adasd'}], [])
-    expect(result).to.have.lengthOf(2)
-    expect(result).to.have.deep.property('[0].type', 'nil')
-    expect(result).to.have.deep.property('[1].type', 'file')
-  })
-})
-
 describe('js2dt.changeType()', function () {
   var changeType = js2dt.__get__('changeType')
   it('should change type `null` to `nil`', function () {
@@ -126,6 +69,22 @@ describe('js2dt.changeType()', function () {
       var obj = changeType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
     })
+  })
+})
+
+describe('js2dt.loadJSONFile()', function () {
+  var loadJSONFile = js2dt.__get__('loadJSONFile')
+  it('should load and parse JSON file', function () {
+    var data = loadJSONFile(JSON_FILE_NAME)
+    expect(data).to.be.an('object').and.contain.keys('$schema')
+  })
+})
+
+describe('js2dt.inferRAMLTypeName()', function () {
+  var inferRAMLTypeName = js2dt.__get__('inferRAMLTypeName')
+  it('should infer type name from file name', function () {
+    var name = inferRAMLTypeName('docs/json/cat.json')
+    expect(name).to.be.equal('Cat')
   })
 })
 
@@ -195,39 +154,25 @@ describe('js2dt.changeDateType()', function () {
   })
 })
 
-describe('js2dt.processNested()', function () {
-  var processNested = js2dt.__get__('processNested')
-  it('should process nested arrays', function () {
-    var data = {'foo': [{'type': 'null'}]}
-    var result = processNested(data, [])
-    expect(result)
-      .to.have.property('foo').and
-      .to.have.lengthOf(1)
-    expect(result).to.have.deep.property('foo[0].type', 'nil')
-  })
-  it('should process nested objects', function () {
-    var data = {'foo': {'type': 'null'}}
-    var result = processNested(data, [])
-    expect(result)
-      .to.have.property('foo').and
-      .to.have.all.keys('type')
-    expect(result).to.have.deep.property('foo.type', 'nil')
-  })
-  it('should return empty object if no nesting is present', function () {
-    var result = processNested({'type': 'null'}, [])
-    expect(result).to.be.deep.equal({})
+describe('js2dt.replaceRef()', function () {
+  var replaceRef = js2dt.__get__('replaceRef')
+  it('should replace $ref with type name', function () {
+    var data = {'$ref': '#/definitions/username'}
+    var raml = replaceRef(data)
+    expect(raml).to.be.deep.equal({'type': 'Username'})
   })
 })
 
-describe('js2dt.ramlForm()', function () {
-  var ramlForm = js2dt.__get__('ramlForm')
+describe('js2dt.RAMLEmitter.ramlForm()', function () {
   context('when input is not an Object', function () {
+    var emitter = new RAMLEmitter()
     it('should return data unchanged', function () {
-      var result = ramlForm('foo')
+      var result = emitter.ramlForm('foo')
       expect(result).to.be.equal('foo')
     })
   })
   it('should spread `required` root value across properties', function () {
+    var emitter = new RAMLEmitter()
     var data = {
       'type': 'object',
       'properties': {
@@ -240,7 +185,7 @@ describe('js2dt.ramlForm()', function () {
       },
       'required': ['name', 'address']
     }
-    var raml = ramlForm(data, [])
+    var raml = emitter.ramlForm(data, [])
     expect(raml)
       .to.have.deep.property('properties.name.required').and
       .to.be.true
@@ -249,6 +194,7 @@ describe('js2dt.ramlForm()', function () {
       .to.be.true
   })
   it('should make properties not present in `required` required=false', function () {
+    var emitter = new RAMLEmitter()
     var data = {
       'type': 'object',
       'properties': {
@@ -258,12 +204,13 @@ describe('js2dt.ramlForm()', function () {
       },
       'required': []
     }
-    var raml = ramlForm(data, [])
+    var raml = emitter.ramlForm(data, [])
     expect(raml)
       .to.have.deep.property('properties.address.required').and
       .to.be.false
   })
   it('should remove root `required` keyword while hoisting', function () {
+    var emitter = new RAMLEmitter()
     var data = {
       'type': 'object',
       'required': ['name'],
@@ -273,10 +220,11 @@ describe('js2dt.ramlForm()', function () {
         }
       }
     }
-    var raml = ramlForm(data, [])
+    var raml = emitter.ramlForm(data, [])
     expect(raml).to.not.have.property('required')
   })
   it('should not spread non-property names', function () {
+    var emitter = new RAMLEmitter()
     var data = {
       'type': 'object',
       'required': ['xml'],
@@ -287,12 +235,13 @@ describe('js2dt.ramlForm()', function () {
         }
       }
     }
-    var raml = ramlForm(data, [])
+    var raml = emitter.ramlForm(data, [])
     expect(raml).to.not.have.property('required')
     expect(raml).to.not.have.deep.property(
       'properties.name.xml.required')
   })
   it('should process nested', function () {
+    var emitter = new RAMLEmitter()
     var data = {
       'type': 'object',
       'properties': {
@@ -303,26 +252,28 @@ describe('js2dt.ramlForm()', function () {
           }
         },
         'siblings': {
-          'anyOf': [{'type': 'null'}]
+          'foo': [{'type': 'null'}]
         }
       }
     }
-    var raml = ramlForm(data, [])
+    var raml = emitter.ramlForm(data, [])
     expect(raml).to.have.deep.property(
       'properties.bio.properties.event.type', 'file')
     expect(raml).to.not.have.deep.property(
       'properties.bio.properties.event.media')
     expect(raml).to.have.deep.property(
-      'properties.siblings.anyOf[0].type', 'nil')
+      'properties.siblings.foo[0].type', 'nil')
   })
   context('when $ref IS present in input data', function () {
+    var emitter = new RAMLEmitter()
     it('should replace $ref with defined type name', function () {
       var data = {'$ref': '#/definitions/username'}
-      var raml = ramlForm(data, [])
+      var raml = emitter.ramlForm(data, [])
       expect(raml).to.be.deep.equal({'type': 'Username'})
     })
   })
   context('when $ref IS NOT present in input data', function () {
+    var emitter = new RAMLEmitter()
     it('should change types', function () {
       var data = {
         'properties': {
@@ -331,7 +282,7 @@ describe('js2dt.ramlForm()', function () {
           'dob': {'type': 'string', 'pattern': constants.dateOnlyPattern}
         }
       }
-      var raml = ramlForm(data, [])
+      var raml = emitter.ramlForm(data, [])
       expect(raml).to.have.deep.property('properties.name.type', 'nil')
       expect(raml).to.have.deep.property('properties.photo.type', 'file')
       expect(raml).to.not.have.deep.property('properties.photo.media')
@@ -339,13 +290,266 @@ describe('js2dt.ramlForm()', function () {
       expect(raml).to.not.have.deep.property('properties.dob.pattern')
     })
   })
+  context('when combinations (allOf/anyOf/oneOf) are used', function () {
+    var emitter = new RAMLEmitter()
+    it('should convert then properly', function () {
+      var data = {
+        'type': 'string',
+        'anyOf': [
+          {'pattern': 'foo'},
+          {'pattern': 'bar'}
+        ]
+      }
+      expect(emitter)
+        .to.have.property('types').and
+        .to.be.deep.equal({})
+      var raml = emitter.ramlForm(data, [], 'foo')
+      expect(raml).to.have.property('type', 'FooParentType0 | FooParentType1')
+      expect(raml).to.not.have.property('anyOf')
+      expect(emitter).to.have.deep.property(
+        'types.FooParentType0.type', 'string')
+      expect(emitter).to.have.deep.property(
+        'types.FooParentType0.pattern', 'foo')
+      expect(emitter).to.have.deep.property(
+        'types.FooParentType1.type', 'string')
+      expect(emitter).to.have.deep.property(
+        'types.FooParentType1.pattern', 'bar')
+    })
+  })
 })
 
-describe('js2dt.replaceRef()', function () {
-  var replaceRef = js2dt.__get__('replaceRef')
-  it('should replace $ref with type name', function () {
-    var data = {'$ref': '#/definitions/username'}
-    var raml = replaceRef(data)
-    expect(raml).to.be.deep.equal({'type': 'Username'})
+describe('js2dt.RAMLEmitter._processDefinitions()', function () {
+  context('when input has false value', function () {
+    var emitter = new RAMLEmitter()
+    it('should return empty object', function () {
+      expect(emitter._processDefinitions(undefined))
+        .to.be.deep.equal({})
+    })
+  })
+  context('when input is not empty', function () {
+    var emitter = new RAMLEmitter()
+    it('should convert definitions to RAML data types', function () {
+      var defs = {
+        'address': {
+          'type': 'object',
+          'properties': {
+            'street': {'type': 'string'},
+            'city': {'type': 'null'}
+          },
+          'required': ['street']
+        }
+      }
+      var res = emitter._processDefinitions(defs)
+      expect(res)
+        .to.have.deep.property('Address.properties.street.required').and
+        .to.be.true
+      expect(res).to.have.deep.property(
+        'Address.properties.city.type', 'nil')
+      expect(res).to.not.have.deep.property('Address.required')
+    })
+  })
+})
+
+describe('js2dt.RAMLEmitter.processArray()', function () {
+  var emitter = new RAMLEmitter()
+  it('should transform each element of array', function () {
+    var result = emitter.processArray(
+      [{'type': 'null'}, {'type': 'string', 'media': 'adasd'}], [])
+    expect(result).to.have.lengthOf(2)
+    expect(result).to.have.deep.property('[0].type', 'nil')
+    expect(result).to.have.deep.property('[1].type', 'file')
+  })
+})
+
+describe('js2dt.RAMLEmitter.processNested()', function () {
+  it('should process nested arrays', function () {
+    var emitter = new RAMLEmitter()
+    var data = {'foo': [{'type': 'null'}]}
+    var result = emitter.processNested(data, [])
+    expect(result)
+      .to.have.property('foo').and
+      .to.have.lengthOf(1)
+    expect(result).to.have.deep.property('foo[0].type', 'nil')
+  })
+  it('should process nested objects', function () {
+    var emitter = new RAMLEmitter()
+    var data = {'foo': {'type': 'null'}}
+    var result = emitter.processNested(data, [])
+    expect(result)
+      .to.have.property('foo').and
+      .to.have.all.keys('type')
+    expect(result).to.have.deep.property('foo.type', 'nil')
+  })
+  it('should return empty object if no nesting is present', function () {
+    var emitter = new RAMLEmitter()
+    var result = emitter.processNested({'type': 'null'}, [])
+    expect(result).to.be.deep.equal({})
+  })
+})
+
+describe('js2dt.RAMLEmitter() init', function () {
+  it('should assign properties properly', function () {
+    var emitter = new RAMLEmitter({'foo': 1}, 'Bar')
+    expect(emitter).to.have.property('mainTypeName', 'Bar')
+    expect(emitter)
+      .to.have.property('types').and
+      .to.be.deep.equal({})
+    expect(emitter)
+      .to.have.property('data').and
+      .to.be.deep.equal({'foo': 1})
+  })
+})
+
+describe('js2dt.RAMLEmitter.processDefinitions()', function () {
+  it('should process definitions and update types', function () {
+    var data = {
+      'definitions': {
+        'address': {
+          'type': 'object',
+          'properties': {
+            'city': {'type': 'null'}
+          }
+        }
+      }
+    }
+    var emitter = new RAMLEmitter(data)
+    expect(emitter)
+      .to.have.property('types').and
+      .to.be.deep.equal({})
+    expect(emitter).to.have.deep.property('data.definitions')
+    emitter.processDefinitions()
+    expect(emitter).to.have.deep.property(
+      'types.Address.properties.city.type', 'nil')
+    expect(emitter).to.not.have.deep.property('data.definitions')
+  })
+})
+
+describe('js2dt.RAMLEmitter.processMainData()', function () {
+  it('should delete $schema, process main data and update types', function () {
+    var data = {
+      '$schema': '23123123',
+      'type': 'object',
+      'properties': {
+        'city': {'type': 'null'}
+      }
+    }
+    var emitter = new RAMLEmitter(data, 'Address')
+    emitter.processMainData()
+    expect(emitter).to.have.deep.property(
+      'types.Address.properties.city.type', 'nil')
+    expect(emitter).to.not.have.deep.property(
+      'types.Address.$schema')
+  })
+})
+
+describe('js2dt.RAMLEmitter.emit()', function () {
+  it('should run convertion process and return results', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'city': {'type': 'null'}
+      }
+    }
+    var emitter = new RAMLEmitter(data, 'Address')
+    var types = emitter.emit()
+    expect(types).to.have.deep.property(
+      'types.Address.properties.city.type', 'nil')
+  })
+})
+
+describe('js2dt.RAMLEmitter.processCombinations()', function () {
+  it('should convert anyOf into RAML union', function () {
+    var data = {
+      'anyOf': [
+        {'type': 'string'},
+        {'type': 'number'}
+      ]
+    }
+    var emitter = new RAMLEmitter(data)
+    expect(emitter)
+      .to.have.property('types').and
+      .to.be.deep.equal({})
+    var newData = emitter.processCombinations(data, 'anyOf', 'cat')
+    expect(data).to.have.property('type', 'CatParentType0 | CatParentType1')
+    expect(data).to.not.have.property('anyOf')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType0.type', 'string')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType1.type', 'number')
+  })
+  it('should convert oneOf into RAML union', function () {
+    var data = {
+      'oneOf': [
+        {'type': 'string'},
+        {'type': 'number'}
+      ]
+    }
+    var emitter = new RAMLEmitter(data)
+    expect(emitter)
+      .to.have.property('types').and
+      .to.be.deep.equal({})
+    var newData = emitter.processCombinations(data, 'oneOf', 'cat')
+    expect(data).to.have.property('type', 'CatParentType0 | CatParentType1')
+    expect(data).to.not.have.property('oneOf')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType0.type', 'string')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType1.type', 'number')
+  })
+  it('should convert allOf into RAML multiple inheritance', function () {
+    var data = {
+      'allOf': [
+        {'type': 'string'},
+        {'type': 'number'}
+      ]
+    }
+    var emitter = new RAMLEmitter(data)
+    expect(emitter)
+      .to.have.property('types').and
+      .to.be.deep.equal({})
+    var newData = emitter.processCombinations(data, 'allOf', 'cat')
+    expect(data)
+      .to.have.property('type').and
+      .to.be.deep.equal(['CatParentType0', 'CatParentType1'])
+    expect(data).to.not.have.property('allOf')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType0.type', 'string')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType1.type', 'number')
+  })
+  context('when prop name is not provided', function () {
+    it('should use main type name', function () {
+    var data = {
+      'anyOf': [
+        {'type': 'string'},
+        {'type': 'number'}
+      ]
+    }
+    var emitter = new RAMLEmitter(data, 'Cat')
+    expect(emitter)
+      .to.have.property('types').and
+      .to.be.deep.equal({})
+    var newData = emitter.processCombinations(data, 'anyOf')
+    expect(data).to.have.property('type', 'CatParentType0 | CatParentType1')
+    expect(data).to.not.have.property('anyOf')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType0.type', 'string')
+    expect(emitter).to.have.deep.property(
+      'types.CatParentType1.type', 'number')
+    })
+  })
+})
+
+describe('js2dt.getCombinationsKey()', function () {
+  var getCombinationsKey = js2dt.__get__('getCombinationsKey')
+  it('should return proper combinations key', function () {
+    expect(getCombinationsKey({'anyOf': 1})).to.be.equal('anyOf')
+    expect(getCombinationsKey({'allOf': 1})).to.be.equal('allOf')
+    expect(getCombinationsKey({'oneOf': 1})).to.be.equal('oneOf')
+  })
+  context('when object does not contain any combinations prop', function () {
+    it('should return undefined', function () {
+      expect(getCombinationsKey({})).to.be.undefined
+    })
   })
 })

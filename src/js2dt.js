@@ -170,7 +170,7 @@ function RAMLEmitter (data, typeName) {
     var combSchemas = data[combsKey]
     var superTypes = []
     combSchemas.forEach(function (el, ind) {
-      var name = prop + "ParentType" + ind.toString()
+      var name = prop + 'ParentType' + ind.toString()
       superTypes.push(name)
       this.types[name] = el
     }.bind(this))
@@ -178,15 +178,6 @@ function RAMLEmitter (data, typeName) {
     data.type = getCombinationType(superTypes, combsKey)
     return data
   }
-}
-
-function getCombinationType (types, combsKey) {
-  if (combsKey === 'allOf') {
-    return types
-  } else if (combsKey === 'oneOf' || combsKey === 'anyOf') {
-    return types.join(' | ')
-  }
-  return types
 }
 
 /**
@@ -264,6 +255,18 @@ function changeDateType (data) {
   return data
 }
 
+/**
+ * Replace $ref in data with defined type name.
+ * Type presence in 'definitions' is not validated.
+ *
+ * @param  {Object} data - Data containing $ref.
+ * @returns  {Object}
+ */
+function replaceRef (data) {
+  data['type'] = utils.typeNameFromRef(data['$ref'])
+  delete data['$ref']
+  return data
+}
 
 function getCombinationsKey (data) {
   if (data.anyOf) {
@@ -284,17 +287,13 @@ function addCombinationsType (data, combsKey) {
   return data
 }
 
-/**
- * Replace $ref in data with defined type name.
- * Type presence in 'definitions' is not validated.
- *
- * @param  {Object} data - Data containing $ref.
- * @returns  {Object}
- */
-function replaceRef (data) {
-  data['type'] = utils.typeNameFromRef(data['$ref'])
-  delete data['$ref']
-  return data
+function getCombinationType (types, combsKey) {
+  if (combsKey === 'allOf') {
+    return types
+  } else if (combsKey === 'oneOf' || combsKey === 'anyOf') {
+    return types.join(' | ')
+  }
+  return types
 }
 
 module.exports.js2dt = js2dt
