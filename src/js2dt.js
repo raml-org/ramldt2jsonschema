@@ -98,6 +98,10 @@ function RAMLEmitter (data, typeName) {
       data = addCombinationsType(data, combsKey)
     }
 
+    if (isFileType(data)) {
+      data = changeFileType(data)
+    }
+
     var updateWith = this.processNested(data, reqStack)
     data = utils.updateObjWith(data, updateWith)
 
@@ -220,7 +224,8 @@ function inferRAMLTypeName (fileName) {
 }
 
 /**
- * Change JSON type of data to valid RAML type.
+ * Change JSON types of data to valid RAML type.
+ * Performs simple changes of types.
  *
  * @param  {Object} data
  * @returns  {Object}
@@ -228,8 +233,6 @@ function inferRAMLTypeName (fileName) {
 function changeType (data) {
   if (data.type === 'null') {
     data['type'] = 'nil'
-  } else if (isFileType(data)) {
-    data = changeFileType(data)
   }
   return data
 }

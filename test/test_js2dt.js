@@ -40,9 +40,10 @@ describe('js2dt.js2dt()', function () {
           'types.Product.properties.photo.type', 'file')
         expect(data).to.not.have.deep.property(
           'types.Product.properties.photo.media')
-        expect(data).to.have.deep.property(
-          'types.Product.properties.photo.fileTypes',
-          ['image/jpeg', 'image/png'])
+        expect(data)
+          .to.have.deep.property(
+            'types.Product.properties.photo.fileTypes').and
+          .be.equal(['image/jpeg', 'image/png'])
       })
     })
   })
@@ -72,19 +73,6 @@ describe('js2dt.changeType()', function () {
   it('should change type `null` to `nil`', function () {
     var obj = changeType({'type': 'null'})
     expect(obj).to.deep.equal({'type': 'nil'})
-  })
-  it('should change type `string` with `media` keyword to `file`', function () {
-    var obj = changeType({
-      'type': 'string',
-      'media': {
-        'binaryEncoding': 'binary',
-        'anyOf': [{'mediaType': 'image/jpeg'}, {'mediaType': 'image/png'}]
-      }
-    })
-    expect(obj).to.deep.equal({
-      'type': 'file',
-      'fileTypes': ['image/jpeg', 'image/png']
-    })
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
