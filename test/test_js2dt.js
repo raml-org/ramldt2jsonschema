@@ -7,7 +7,7 @@ var rewire = require('rewire')
 var js2dt = rewire('../src/js2dt')
 var constants = require('../src/constants')
 
-var JSON_FILE_NAME = join(__dirname, 'test_files/schema_example.json')
+var JSON_FILE_NAME = join(__dirname, 'examples/schema_example.json')
 var RAMLEmitter = js2dt.__get__('RAMLEmitter')
 
 describe('js2dt.js2dt()', function () {

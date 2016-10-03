@@ -6,7 +6,7 @@ var rewire = require('rewire')
 var dt2js = rewire('../src/dt2js')
 var constants = require('../src/constants')
 
-var RAML_FILE_NAME = join(__dirname, 'test_files/types_example.raml')
+var RAML_FILE_NAME = join(__dirname, 'examples/types_example.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var getRAMLContext = dt2js.__get__('getRAMLContext')
