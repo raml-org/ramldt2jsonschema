@@ -111,14 +111,14 @@ function RAMLEmitter (data, typeName) {
       }
     }
 
-    if (combsKey) {
-      data = this.processCombinations(data, combsKey, prop)
-    }
     if (data['$ref']) {
       data = replaceRef(data)
     } else if (data.type) {
       data = changeType(data)
       data = changeDateType(data)
+    }
+    if (combsKey) {
+      data = this.processCombinations(data, combsKey, prop)
     }
     return data
   }
@@ -228,10 +228,45 @@ function inferRAMLTypeName (fileName) {
 function changeType (data) {
   if (data.type === 'null') {
     data['type'] = 'nil'
-  } else if (data.type === 'string' && data.media) {
-    data['type'] = 'file'
-    delete data.media
+  } else if (isFileType(data)) {
+    data = changeFileType(data)
   }
+  return data
+}
+
+/**
+ * Determine whether data is of RAML type `file`.
+ *
+ * @param  {Object} data
+ * @returns  {boolean}
+ */
+function isFileType (data) {
+  return (!!(data.type === 'string' &&
+          data.media &&
+          data.media.binaryEncoding === 'binary'))
+}
+
+/**
+ * Change JSON type to RAML file type.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function changeFileType (data) {
+  data['type'] = 'file'
+  var anyOf = data.media.anyOf
+  if (anyOf && anyOf.length > 0) {
+    data['fileTypes'] = []
+    anyOf.forEach(function (el) {
+      if (el.mediaType) {
+        data.fileTypes.push(el.mediaType)
+      }
+    })
+    if (data.fileTypes.length < 1) {
+      delete data.fileTypes
+    }
+  }
+  delete data.media
   return data
 }
 

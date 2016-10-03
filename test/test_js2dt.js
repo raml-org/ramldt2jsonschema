@@ -61,13 +61,92 @@ describe('js2dt.changeType()', function () {
     expect(obj).to.deep.equal({'type': 'nil'})
   })
   it('should change type `string` with `media` keyword to `file`', function () {
-    var obj = changeType({'type': 'string', 'media': 'asd'})
+    var obj = changeType({
+      'type': 'string',
+      'media': {'binaryEncoding': 'binary'}
+    })
     expect(obj).to.deep.equal({'type': 'file'})
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
       var obj = changeType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
+    })
+  })
+})
+
+describe('js2dt.isFileType()', function () {
+  var isFileType = js2dt.__get__('isFileType')
+  it('should return true for valid file types', function () {
+    var data = {
+      'type': 'string',
+      'media': {'binaryEncoding': 'binary'}
+    }
+    expect(isFileType(data)).to.be.true
+  })
+  context('when type is not string', function () {
+    it('should return false', function () {
+      var data = {
+        'type': 'asd',
+        'media': {'binaryEncoding': 'binary'}
+      }
+      expect(isFileType(data)).to.be.false
+    })
+  })
+  context('when no media is set', function () {
+    it('should return false', function () {
+      var data = {
+        'type': 'string'
+      }
+      expect(isFileType(data)).to.be.false
+    })
+  })
+  context('when binaryEncoding is not `binary`', function () {
+    it('should return false', function () {
+      var data = {
+        'type': 'asd',
+        'media': {'binaryEncoding': 'asdasd'}
+      }
+      expect(isFileType(data)).to.be.false
+    })
+  })
+})
+
+describe('js2dt.changeFileType()', function () {
+  var changeFileType = js2dt.__get__('changeFileType')
+  it('should just change type to `file` and remove media', function () {
+    var res = changeFileType({'type': 'foo', 'media': 1})
+    expect(res).to.be.deep.equal({'type': 'file'})
+  })
+  context('when anyOf contains data', function () {
+    it('should move mediaTypes to fileTypes', function () {
+      var res = changeFileType({
+        'type': 'foo',
+        'media': {
+          'anyOf': [
+            {'mediaType': 'image/png'},
+            {'mediaType': 'image/jpeg'},
+            {'foo': 'bar'}
+          ]
+        }
+      })
+      expect(res).to.be.deep.equal({
+        'type': 'file',
+        'fileTypes': ['image/png', 'image/jpeg']
+      })
+    })
+    context('when no medaiTypes were moved to fileTypes', function () {
+      it('should remove fileTypes', function () {
+        var res = changeFileType({
+          'type': 'foo',
+          'media': {
+            'anyOf': [
+              {'foo': 'bar'}
+            ]
+          }
+        })
+        expect(res).to.be.deep.equal({'type': 'file'})
+      })
     })
   })
 })
@@ -248,7 +327,10 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
         'bio': {
           'type': 'object',
           'properties': {
-            'event': {'type': 'string', 'media': 'asd'}
+            'event': {
+              'type': 'string',
+              'media': {'binaryEncoding': 'binary'}
+            }
           }
         },
         'siblings': {
@@ -278,7 +360,10 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
       var data = {
         'properties': {
           'name': {'type': 'null'},
-          'photo': {'type': 'string', 'media': 'asd'},
+          'photo': {
+            'type': 'string',
+            'media': {'binaryEncoding': 'binary'}
+          },
           'dob': {'type': 'string', 'pattern': constants.dateOnlyPattern}
         }
       }
@@ -354,7 +439,8 @@ describe('js2dt.RAMLEmitter.processArray()', function () {
   var emitter = new RAMLEmitter()
   it('should transform each element of array', function () {
     var result = emitter.processArray(
-      [{'type': 'null'}, {'type': 'string', 'media': 'adasd'}], [])
+      [{'type': 'null'},
+       {'type': 'string', 'media': {'binaryEncoding': 'binary'}}], [])
     expect(result).to.have.lengthOf(2)
     expect(result).to.have.deep.property('[0].type', 'nil')
     expect(result).to.have.deep.property('[1].type', 'file')

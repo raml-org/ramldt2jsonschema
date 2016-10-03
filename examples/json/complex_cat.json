@@ -103,13 +103,13 @@
     "photo": {
       "type": "string",
       "minLength": 1,
-      "fileTypes": [
-        "image/jpeg",
-        "image/png"
-      ],
       "maxLength": 307200,
       "media": {
-        "binaryEncoding": "binary"
+        "binaryEncoding": "binary",
+        "anyOf": [
+          {"mediaType": "image/jpeg"},
+          {"mediaType": "image/png"}
+        ]
       }
     },
     "year_of_birth": {
