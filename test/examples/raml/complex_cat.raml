@@ -22,9 +22,9 @@ types:
     type: string
     pattern: "\\w{3,}"
     examples:
-      dogone: "Cat One"
-      dogtwo: "Cat Two"
-    enum: ["Cat One", "Cat Two", "Cat Three"]
+      dogone: "CatOne"
+      dogtwo: "CatTwo"
+    enum: ["CatOne", "CatTwo", "CatThree"]
 
   CatPros:
     type: array
@@ -63,7 +63,7 @@ types:
     maxProperties: 50
     additionalProperties: false
     discriminator: breed
-    discriminatorValue: AmazingCat
+    discriminatorValue: CatOne
     properties:
       proscons:
         type: CatPros | CatCons

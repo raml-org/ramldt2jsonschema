@@ -32,6 +32,19 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.not.have.property('definitions')
       })
     })
+    it('should handle anyOf in files properly', function () {
+      js2dt.js2dt(JSON_FILE_NAME, 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.photo.type', 'file')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.photo.media')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.photo.fileTypes',
+          ['image/jpeg', 'image/png'])
+      })
+    })
   })
   context('when type name is not provided', function () {
     it('should infer type name', function () {
@@ -63,9 +76,15 @@ describe('js2dt.changeType()', function () {
   it('should change type `string` with `media` keyword to `file`', function () {
     var obj = changeType({
       'type': 'string',
-      'media': {'binaryEncoding': 'binary'}
+      'media': {
+        'binaryEncoding': 'binary',
+        'anyOf': [{'mediaType': 'image/jpeg'}, {'mediaType': 'image/png'}]
+      }
     })
-    expect(obj).to.deep.equal({'type': 'file'})
+    expect(obj).to.deep.equal({
+      'type': 'file',
+      'fileTypes': ['image/jpeg', 'image/png']
+    })
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {

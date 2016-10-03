@@ -1,5 +1,5 @@
 {
-  "discriminatorValue": "AmazingCat",
+  "discriminatorValue": "CatOne",
   "additionalProperties": false,
   "maxProperties": 50,
   "type": "object",
@@ -30,14 +30,14 @@
     },
     "breed": {
       "enum": [
-        "Cat One",
-        "Cat Two",
-        "Cat Three"
+        "CatOne",
+        "CatTwo",
+        "CatThree"
       ],
       "type": "string",
       "examples": {
-        "dogone": "Cat One",
-        "dogtwo": "Cat Two"
+        "dogone": "CatOne",
+        "dogtwo": "CatTwo"
       },
       "pattern": "\\w{3,}"
     },
