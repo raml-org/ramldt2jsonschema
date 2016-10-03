@@ -102,9 +102,27 @@ function changeType (data) {
       data['type'] = 'null'
       break
     case 'file':
-      data['type'] = 'string'
-      data['media'] = {'binaryEncoding': 'binary'}
+      data = changeFileType(data)
       break
+  }
+  return data
+}
+
+/**
+ * Change RAML `file` type to proper JSON type.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function changeFileType (data) {
+  data['type'] = 'string'
+  data['media'] = {'binaryEncoding': 'binary'}
+  if (data.fileTypes) {
+    data['media']['anyOf'] = []
+    data.fileTypes.forEach(function (el) {
+      data['media']['anyOf'].push({'mediaType': el})
+    })
+    delete data.fileTypes
   }
   return data
 }

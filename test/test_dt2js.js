@@ -91,6 +91,34 @@ describe('dt2js.changeType()', function () {
   })
 })
 
+describe('dt2js.changeFileType()', function () {
+  var changeFileType = dt2js.__get__('changeFileType')
+  it('should change type `file` to `string` with `media` keyword', function () {
+    var expected = {'type': 'string', 'media': {'binaryEncoding': 'binary'}}
+    var obj = changeFileType({'type': 'file'})
+    expect(obj).to.deep.equal(expected)
+  })
+  context('when data contains `fileTypes` param', function () {
+    it('should move its elements to anyOf and delete `fileTypes`', function () {
+      var expected = {
+        'type': 'string',
+        'media': {
+          'binaryEncoding': 'binary',
+          'anyOf': [
+            {'mediaType': 'image/jpeg'},
+            {'mediaType': 'image/png'}
+          ]
+        }
+      }
+      var obj = changeFileType({
+        'type': 'file',
+        'fileTypes': ['image/jpeg', 'image/png']
+      })
+      expect(obj).to.deep.equal(expected)
+    })
+  })
+})
+
 describe('dt2js.changeDateType()', function () {
   var changeDateType = dt2js.__get__('changeDateType')
   it('should change type `date-only` to `string` with pattern', function () {
