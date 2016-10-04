@@ -1,20 +1,60 @@
 'use strict'
 
-var raml2json = require('ramldt2jsonschema')
+var js2dt = require('../../src/js2dt')
 var helpers = require('./helpers')
+var parser = require('raml-1-parser')
+var path = require('path')
 
-var EXAMPLES_FOLDER = '../examples/json'
+var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples','json')
 
+/**
+ * Integration testing module (js2dt).
+ * Runs js2dt script for each file from EXAMPLES_FOLDER and
+ * performs validation of output RAML by parsing it with
+ * raml-1-parser.
+ *
+ * Errors are output to console in a form:
+ *  FAIL (type of fail):
+ *  - Error message [optional line.column range]
+ *
+ * If test passes it will just log 'OK'.
+ *
+ * Tests are launched by running this file with nodejs.
+ */
+
+/**
+ * Test file by running js2dt script on it and then validating
+ * with raml-1-parser.
+ */
 function testFile (filepath) {
-  console.log('Testing: ', filepath)
-  raml2json.js2dt(filepath, 'TestType', function (err, raml) {
+  console.log('\nTesting', filepath)
+  js2dt.js2dt(filepath, 'TestType', function (err, raml) {
     if (err) {
-      console.log('Error in ', filepath, ':', err)
+      console.log('FAIL (script):')
+      console.log('-', err)
       return
     }
+    try {
+      raml = '#%RAML 1.0 Library\n' + raml
+      parser.parseRAMLSync(raml, {'rejectOnErrors': true})
+    } catch (error) {
+      logValidationError(error)
+      return
+    }
+    console.log('OK')
+  })
+}
 
-    // Validate with raml-1-parser
-
+/**
+ * Log RAML validation error.
+ */
+function logValidationError (error) {
+  console.log('FAIL (RAML validation):')
+  error.parserErrors.forEach(function (el) {
+    var errMessage = '- ' + el.message + ' [' +
+      el.range.start.line + '.' + el.range.start.column + ':' +
+      el.range.end.line + '.' + el.range.end.column + ']'
+    console.log(errMessage)
   })
 }
 

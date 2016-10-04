@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict'
 
-var dt2js = require('./dt2js.js')
+var dt2js = require('./dt2js')
 var program = require('commander')
 
 /**

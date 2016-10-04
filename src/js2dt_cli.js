@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict'
 
-var js2dt = require('./js2dt.js')
+var js2dt = require('./js2dt')
+var js2dt = require('./js2dt')
 var program = require('commander')
 
 /**
