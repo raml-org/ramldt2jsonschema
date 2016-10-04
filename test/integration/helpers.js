@@ -10,16 +10,16 @@ var fs = require('fs')
  * @param  {Array} fileList
  * @returns  {Array}
  */
-function getFiles (dir, fileList){
+function getFiles (dir, fileList) {
   fileList = fileList || []
 
   var files = fs.readdirSync(dir)
-  for (var i in files){
+  for (var i in files) {
     if (!files.hasOwnProperty(i)) {
       continue
     }
     var name = dir + '/' + files[i]
-    if (fs.statSync(name).isDirectory()){
+    if (fs.statSync(name).isDirectory()) {
       getFiles(name, fileList)
     } else {
       fileList.push(name)

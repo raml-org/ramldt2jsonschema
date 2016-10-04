@@ -1,17 +1,9 @@
 'use strict'
 
-var js2dt = require('../../src/js2dt')
-var helpers = require('./helpers')
-var parser = require('raml-1-parser')
-var path = require('path')
-
-var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples','json')
-
 /**
  * Integration testing module (js2dt).
  * Runs js2dt script for each file from EXAMPLES_FOLDER and
- * performs validation of output RAML by parsing it with
- * raml-1-parser.
+ * performs validation of output RAML.
  *
  * Errors are output to console in a form:
  *  FAIL (type of fail):
@@ -22,13 +14,21 @@ var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples','json')
  * Tests are launched by running this file with nodejs.
  */
 
+var js2dt = require('../../src/js2dt')
+var helpers = require('./helpers')
+var path = require('path')
+var parser = require('raml-1-parser')
+
+var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'json')
+
 /**
  * Test file by running js2dt script on it and then validating
  * with raml-1-parser.
  */
 function testFile (filepath) {
   console.log('\nTesting', filepath)
-  js2dt.js2dt(filepath, 'TestType', function (err, raml) {
+  var typeName = 'TestType'
+  js2dt.js2dt(filepath, typeName, function (err, raml) {
     if (err) {
       console.log('FAIL (script):')
       console.log('-', err)
