@@ -38,6 +38,7 @@
     "istanbul": "^0.4.5",
     "mocha": "^2.5.3",
     "rewire": "^2.5.2",
-    "standard": "^6.0.8"
+    "standard": "^6.0.8",
+    "raml-1-parser": "^1.1.4"
   }
 }
