@@ -14,34 +14,50 @@
  * Tests are launched by running this file with nodejs.
  */
 
-var dt2js = require('../../src/dt2js')
 var helpers = require('./helpers')
 var path = require('path')
+var rewire = require('rewire')
+var dt2js = rewire('../../src/dt2js')
+var getRAMLContext = dt2js.__get__('getRAMLContext')
 
 var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'raml')
 
 /**
- * Test file by running dt2js script on it and then validating
- * output JSON.
+ * Test file by running dt2js script for each type from it and
+ * then validating output JSON.
  */
 function testFile (filepath) {
   console.log('\nTesting', filepath)
-  // TODO: Determine this type name
-  var typeName = 'TestType'
-  dt2js.dt2js(filepath, typeName, function (err, schema) {
-    if (err) {
-      console.log('FAIL (script):')
-      console.log('-', err)
-      return
-    }
-    try {
-      // TODO: Validate JSON schemas against main draft4 JSON schema
-    } catch (error) {
-      logValidationError(error)
-      return
-    }
-    console.log('OK')
-  })
+  try {
+    var ctx = getRAMLContext(filepath)
+  } catch (error) {
+    console.log('FAIL (RAML parsing):', error.message)
+    return
+  }
+  for (var typeName in ctx) {
+    testType(filepath, typeName)
+  }
+}
+
+/**
+ * Test single RAML type from file.
+ */
+function testType (filepath, typeName) {
+  console.log('Testing type:', typeName)
+  // dt2js.dt2js(filepath, typeName, function (err, schema) {
+  //   if (err) {
+  //     console.log('FAIL (script):')
+  //     console.log('-', err)
+  //     return
+  //   }
+  //   try {
+  //     // TODO: Validate JSON schemas against main draft4 JSON schema
+  //   } catch (error) {
+  //     logValidationError(error)
+  //     return
+  //   }
+  //   console.log('OK')
+  // })
 }
 
 /**
