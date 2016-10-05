@@ -17,25 +17,38 @@
 var helpers = require('./helpers')
 var path = require('path')
 var rewire = require('rewire')
+var Ajv = require('ajv')
+
 var dt2js = rewire('../../src/dt2js')
 var getRAMLContext = dt2js.__get__('getRAMLContext')
+var js2dt = rewire('../../src/js2dt')
+var loadJSONFile = js2dt.__get__('loadJSONFile')
 
 var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'raml')
+
+var ajv = new Ajv({'allErrors': true})
+var draft4schema = loadJSONFile(path.join(__dirname, 'draft4schema.json'))
+var validate = ajv.compile(draft4schema)
 
 /**
  * Test file by running dt2js script for each type from it and
  * then validating output JSON.
  */
 function testFile (filepath) {
-  console.log('\nTesting', filepath)
   try {
     var ctx = getRAMLContext(filepath)
   } catch (error) {
-    console.log('FAIL (RAML parsing):', error.message)
+    console.log('\nLoading', filepath)
+    console.log('FAIL (RAML parsing):', '\n-', error.message)
     return
   }
   for (var typeName in ctx) {
-    testType(filepath, typeName)
+    try {
+      testType(filepath, typeName)
+    } catch (err) {
+      console.log('\nTesting', filepath)
+      console.log('FAIL (script):', '\n-', err.message)
+    }
   }
 }
 
@@ -43,31 +56,37 @@ function testFile (filepath) {
  * Test single RAML type from file.
  */
 function testType (filepath, typeName) {
-  console.log('Testing type:', typeName)
-  // dt2js.dt2js(filepath, typeName, function (err, schema) {
-  //   if (err) {
-  //     console.log('FAIL (script):')
-  //     console.log('-', err)
-  //     return
-  //   }
-  //   try {
-  //     // TODO: Validate JSON schemas against main draft4 JSON schema
-  //   } catch (error) {
-  //     logValidationError(error)
-  //     return
-  //   }
-  //   console.log('OK')
-  // })
+  dt2js.dt2js(filepath, typeName, function (err, schema) {
+    console.log('\nTesting', filepath, 'Type:', typeName)
+    if (err) {
+      console.log('FAIL (script):', '\n-', err.message)
+      return
+    }
+    try {
+      var valid = validate(schema)
+      if (!valid) {
+        logValidationError()
+        return
+      }
+    } catch (error) {
+      console.log('FAIL (JSON validation):', '\n-', error.message)
+      return
+    }
+    console.log('OK')
+  })
 }
 
 /**
- * Log JSON validation error.
+ * Log JSON validation errors.
  */
-function logValidationError (error) {
+function logValidationError () {
+  var sep = '||'
+  var errorsText = ajv.errorsText(validate.errors, {'separator': sep})
+  var errors = errorsText.split(sep)
   console.log('FAIL (JSON validation):')
-  // TODO: Compost error message
-  var errMessage = '- ' + error.message
-  console.log(errMessage)
+  errors.forEach(function (el) {
+    console.log('-', el)
+  })
 }
 
 helpers.forEachFileIn(EXAMPLES_FOLDER, testFile)
