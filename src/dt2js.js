@@ -14,8 +14,8 @@ var utils = require('./utils')
  */
 function getRAMLContext (fileName) {
   var content = fs.readFileSync(fileName).toString()
-  var yaml_content = yaml.safeLoad(content)
-  return yaml_content.types
+  var yamlContent = yaml.safeLoad(content)
+  return yamlContent.types
 }
 
 /**
