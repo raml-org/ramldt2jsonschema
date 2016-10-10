@@ -59,15 +59,15 @@ describe('js2dt.js2dt()', function () {
   })
 })
 
-describe('js2dt.changeType()', function () {
-  var changeType = js2dt.__get__('changeType')
+describe('js2dt.convertType()', function () {
+  var convertType = js2dt.__get__('convertType')
   it('should change type `null` to `nil`', function () {
-    var obj = changeType({'type': 'null'})
+    var obj = convertType({'type': 'null'})
     expect(obj).to.deep.equal({'type': 'nil'})
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      var obj = changeType({'type': 'foobar'})
+      var obj = convertType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
     })
   })
@@ -110,15 +110,15 @@ describe('js2dt.isFileType()', function () {
   })
 })
 
-describe('js2dt.changeFileType()', function () {
-  var changeFileType = js2dt.__get__('changeFileType')
+describe('js2dt.convertFileType()', function () {
+  var convertFileType = js2dt.__get__('convertFileType')
   it('should just change type to `file` and remove media', function () {
-    var res = changeFileType({'type': 'foo', 'media': 1})
+    var res = convertFileType({'type': 'foo', 'media': 1})
     expect(res).to.be.deep.equal({'type': 'file'})
   })
   context('when anyOf contains data', function () {
     it('should move mediaTypes to fileTypes', function () {
-      var res = changeFileType({
+      var res = convertFileType({
         'type': 'foo',
         'media': {
           'anyOf': [
@@ -135,7 +135,7 @@ describe('js2dt.changeFileType()', function () {
     })
     context('when no medaiTypes were moved to fileTypes', function () {
       it('should remove fileTypes', function () {
-        var res = changeFileType({
+        var res = convertFileType({
           'type': 'foo',
           'media': {
             'anyOf': [
@@ -149,12 +149,12 @@ describe('js2dt.changeFileType()', function () {
   })
 })
 
-describe('js2dt.changeDateType()', function () {
-  var changeDateType = js2dt.__get__('changeDateType')
+describe('js2dt.convertDateType()', function () {
+  var convertDateType = js2dt.__get__('convertDateType')
   context('when type is `string` and `pattern` is present', function () {
     context('when pattern matches date-only', function () {
       it('should change type to `date-only` and remove pattern', function () {
-        var obj = changeDateType({
+        var obj = convertDateType({
           'type': 'string', 'pattern': constants.dateOnlyPattern})
         expect(obj).to.have.property('type', 'date-only')
         expect(obj).to.not.have.property('pattern')
@@ -162,7 +162,7 @@ describe('js2dt.changeDateType()', function () {
     })
     context('when pattern matches time-only', function () {
       it('should change type to `time-only` and remove pattern', function () {
-        var obj = changeDateType({
+        var obj = convertDateType({
           'type': 'string', 'pattern': constants.timeOnlyPattern})
         expect(obj).to.have.property('type', 'time-only')
         expect(obj).to.not.have.property('pattern')
@@ -170,7 +170,7 @@ describe('js2dt.changeDateType()', function () {
     })
     context('when pattern matches datetime-only', function () {
       it('should change type to `datetime-only` and remove pattern', function () {
-        var obj = changeDateType({
+        var obj = convertDateType({
           'type': 'string', 'pattern': constants.dateTimeOnlyPattern})
         expect(obj).to.have.property('type', 'datetime-only')
         expect(obj).to.not.have.property('pattern')
@@ -178,7 +178,7 @@ describe('js2dt.changeDateType()', function () {
     })
     context('when pattern matches datetime and format is rfc3339', function () {
       it('should change type to `datetime` with `format` of rfc3339 and del pattern', function () {
-        var obj = changeDateType({
+        var obj = convertDateType({
           'type': 'string', 'pattern': constants.RFC3339DatetimePattern})
         expect(obj).to.have.property('type', 'datetime')
         expect(obj).to.have.property('format', constants.RFC3339)
@@ -187,7 +187,7 @@ describe('js2dt.changeDateType()', function () {
     })
     context('when pattern matches datetime and format is rfc2616', function () {
       it('should change type to `datetime` with `format` of rfc2616 and del pattern', function () {
-        var obj = changeDateType({
+        var obj = convertDateType({
           'type': 'string', 'pattern': constants.RFC2616DatetimePattern})
         expect(obj).to.have.property('type', 'datetime')
         expect(obj).to.have.property('format', constants.RFC2616)
@@ -197,29 +197,29 @@ describe('js2dt.changeDateType()', function () {
   })
   context('when type is not string', function () {
     it('should return object not changed', function () {
-      var obj = changeDateType({'type': 'foobar', 'pattern': 'asd'})
+      var obj = convertDateType({'type': 'foobar', 'pattern': 'asd'})
       expect(obj).to.deep.equal({'type': 'foobar', 'pattern': 'asd'})
     })
   })
   context('when no pattern present', function () {
     it('should return object not changed', function () {
-      var obj = changeDateType({'type': 'string'})
+      var obj = convertDateType({'type': 'string'})
       expect(obj).to.deep.equal({'type': 'string'})
     })
   })
   context('pattern does not match date[time]', function () {
     it('should return object not changed', function () {
-      var obj = changeDateType({'type': 'string', 'pattern': 'asd'})
+      var obj = convertDateType({'type': 'string', 'pattern': 'asd'})
       expect(obj).to.deep.equal({'type': 'string', 'pattern': 'asd'})
     })
   })
 })
 
-describe('js2dt.replaceRef()', function () {
-  var replaceRef = js2dt.__get__('replaceRef')
+describe('js2dt.convertRef()', function () {
+  var convertRef = js2dt.__get__('convertRef')
   it('should replace $ref with type name', function () {
     var data = {'$ref': '#/definitions/username'}
-    var raml = replaceRef(data)
+    var raml = convertRef(data)
     expect(raml).to.be.deep.equal({'type': 'Username'})
   })
 })
@@ -385,11 +385,11 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
   })
 })
 
-describe('js2dt.RAMLEmitter._processDefinitions()', function () {
+describe('js2dt.RAMLEmitter.translateDefinitions()', function () {
   context('when input has false value', function () {
     var emitter = new RAMLEmitter()
     it('should return empty object', function () {
-      expect(emitter._processDefinitions(undefined))
+      expect(emitter.translateDefinitions(undefined))
         .to.be.deep.equal({})
     })
   })
@@ -406,7 +406,7 @@ describe('js2dt.RAMLEmitter._processDefinitions()', function () {
           'required': ['street']
         }
       }
-      var res = emitter._processDefinitions(defs)
+      var res = emitter.translateDefinitions(defs)
       expect(res)
         .to.have.deep.property('Address.properties.street.required').and
         .to.be.true
@@ -622,8 +622,8 @@ describe('js2dt.getCombinationsKey()', function () {
   })
 })
 
-describe('js2dt.addCombinationsType()', function () {
-  var addCombinationsType = js2dt.__get__('addCombinationsType')
+describe('js2dt.setCombinationsTypes()', function () {
+  var setCombinationsTypes = js2dt.__get__('setCombinationsTypes')
   it('should add object type to all combination schemas missing type', function () {
     var data = {
       'type': 'string',
@@ -632,30 +632,30 @@ describe('js2dt.addCombinationsType()', function () {
         {'type': 'number'}
       ]
     }
-    var res = addCombinationsType(data, 'anyOf')
+    var res = setCombinationsTypes(data, 'anyOf')
     expect(res).to.have.property('type', 'string')
     expect(res).to.have.deep.property('anyOf[0].type', 'string')
     expect(res).to.have.deep.property('anyOf[1].type', 'number')
   })
 })
 
-describe('js2dt.addCombinationsType()', function () {
-  var getCombinationType = js2dt.__get__('getCombinationType')
+describe('js2dt.getCombinationTypes()', function () {
+  var getCombinationTypes = js2dt.__get__('getCombinationTypes')
   context('when input key is allOf', function () {
     it('should return types as is', function () {
-      var res = getCombinationType(['x', 'y'], 'allOf')
+      var res = getCombinationTypes(['x', 'y'], 'allOf')
       expect(res).to.be.deep.equal(['x', 'y'])
     })
   })
   context('when input key is oneOf', function () {
     it('should return types joined by pipe (|)', function () {
-      var res = getCombinationType(['x', 'y'], 'oneOf')
+      var res = getCombinationTypes(['x', 'y'], 'oneOf')
       expect(res).to.be.equal('x | y')
     })
   })
   context('when input key is anyOf', function () {
     it('should return types joined by pipe (|)', function () {
-      var res = getCombinationType(['x', 'y'], 'anyOf')
+      var res = getCombinationTypes(['x', 'y'], 'anyOf')
       expect(res).to.be.equal('x | y')
     })
   })

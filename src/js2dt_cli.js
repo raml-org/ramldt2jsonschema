@@ -22,18 +22,6 @@ function writeToConsole (err, raml) {
 }
 
 /**
- * Infer RAML type name from file name
- *
- * @param  {string} fileName - File in which type is located.
- * @returns  {string}
- */
-function inferRAMLTypeName (fileName) {
-  var cleanName = fileName.replace(/^.*[\\\/]/, '')
-  var filename = cleanName.split('.')[0]
-  return utils.title(filename)
-}
-
-/**
  * Just call js2dt.
  *
  * @param  {string} jsonFile
@@ -42,7 +30,7 @@ function inferRAMLTypeName (fileName) {
 function js2dtCLI (jsonFile, ramlTypeName) {
   var jsonData = fs.readFileSync(jsonFile).toString()
   if (ramlTypeName === undefined) {
-    ramlTypeName = inferRAMLTypeName(jsonFile)
+    ramlTypeName = utils.inferRAMLTypeName(jsonFile)
   }
   js2dt.js2dt(jsonData, ramlTypeName, writeToConsole)
 }

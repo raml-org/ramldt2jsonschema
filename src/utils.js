@@ -15,12 +15,12 @@ function updateObjWith (obj, upd) {
 }
 
 /**
- * Title string.
+ * Capitalize string.
  *
  * @param  {String} str
  * @returns  {string}
  */
-function title (str) {
+function capitalize (str) {
   return str[0].toUpperCase() + str.slice(1)
 }
 
@@ -32,9 +32,22 @@ function title (str) {
  */
 function typeNameFromRef (ref) {
   var name = ref.replace(/^.*[\\\/]/, '')
-  return title(name)
+  return capitalize(name)
+}
+
+/**
+ * Infer RAML type name from file name
+ *
+ * @param  {string} fileName - File in which type is located.
+ * @returns  {string}
+ */
+function inferRAMLTypeName (fileName) {
+  var cleanName = fileName.replace(/^.*[\\\/]/, '')
+  var filename = cleanName.split('.')[0]
+  return capitalize(filename)
 }
 
 module.exports.updateObjWith = updateObjWith
-module.exports.title = title
+module.exports.capitalize = capitalize
 module.exports.typeNameFromRef = typeNameFromRef
+module.exports.inferRAMLTypeName = inferRAMLTypeName

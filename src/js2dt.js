@@ -46,7 +46,7 @@ function RAMLEmitter (data, typeName) {
    * values to `this.types`.
    */
   this.processDefinitions = function () {
-    var defsData = this._processDefinitions(this.data.definitions)
+    var defsData = this.translateDefinitions(this.data.definitions)
     delete this.data.definitions
     this.types = utils.updateObjWith(this.types, defsData)
   }
@@ -91,11 +91,11 @@ function RAMLEmitter (data, typeName) {
 
     var combsKey = getCombinationsKey(data)
     if (combsKey && data.type) {
-      data = addCombinationsType(data, combsKey)
+      data = setCombinationsTypes(data, combsKey)
     }
 
     if (isFileType(data)) {
-      data = changeFileType(data)
+      data = convertFileType(data)
     }
 
     var updateWith = this.processNested(data, reqStack)
@@ -112,10 +112,10 @@ function RAMLEmitter (data, typeName) {
     }
 
     if (data['$ref']) {
-      data = replaceRef(data)
+      data = convertRef(data)
     } else if (data.type) {
-      data = changeType(data)
-      data = changeDateType(data)
+      data = convertType(data)
+      data = convertDateType(data)
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
@@ -130,13 +130,13 @@ function RAMLEmitter (data, typeName) {
    * @param  {Object} defs - JSON 'definitions' object.
    * @returns  {Object}
    */
-  this._processDefinitions = function (defs) {
+  this.translateDefinitions = function (defs) {
     var defsData = {}
     if (!defs) {
       return defsData
     }
     for (var key in defs) {
-      defsData[utils.title(key)] = this.ramlForm(defs[key], [])
+      defsData[utils.capitalize(key)] = this.ramlForm(defs[key], [])
     }
     return defsData
   }
@@ -182,7 +182,7 @@ function RAMLEmitter (data, typeName) {
   }
 
   this.processCombinations = function (data, combsKey, prop) {
-    prop = prop ? utils.title(prop) : this.mainTypeName
+    prop = prop ? utils.capitalize(prop) : this.mainTypeName
     var combSchemas = data[combsKey]
     var superTypes = []
     combSchemas.forEach(function (el, ind) {
@@ -191,19 +191,19 @@ function RAMLEmitter (data, typeName) {
       this.types[name] = el
     }.bind(this))
     delete data[combsKey]
-    data.type = getCombinationType(superTypes, combsKey)
+    data.type = getCombinationTypes(superTypes, combsKey)
     return data
   }
 }
 
 /**
  * Change JSON types of data to valid RAML type.
- * Performs simple changes of types.
+ * Performs simple conversions of types.
  *
  * @param  {Object} data
  * @returns  {Object}
  */
-function changeType (data) {
+function convertType (data) {
   if (data.type === 'null') {
     data['type'] = 'nil'
   }
@@ -228,7 +228,7 @@ function isFileType (data) {
  * @param  {Object} data
  * @returns  {Object}
  */
-function changeFileType (data) {
+function convertFileType (data) {
   data['type'] = 'file'
   var anyOf = data.media.anyOf
   if (anyOf && anyOf.length > 0) {
@@ -252,7 +252,7 @@ function changeFileType (data) {
  * @param  {Object} data
  * @returns  {Object}
  */
-function changeDateType (data) {
+function convertDateType (data) {
   if (!(data.type === 'string' && data.pattern)) {
     return data
   }
@@ -289,7 +289,7 @@ function changeDateType (data) {
  * @param  {Object} data - Data containing $ref.
  * @returns  {Object}
  */
-function replaceRef (data) {
+function convertRef (data) {
   data['type'] = utils.typeNameFromRef(data['$ref'])
   delete data['$ref']
   return data
@@ -305,7 +305,7 @@ function getCombinationsKey (data) {
   }
 }
 
-function addCombinationsType (data, combsKey) {
+function setCombinationsTypes (data, combsKey) {
   data[combsKey].forEach(function (el) {
     if (!el.type) {
       el.type = data.type
@@ -314,7 +314,7 @@ function addCombinationsType (data, combsKey) {
   return data
 }
 
-function getCombinationType (types, combsKey) {
+function getCombinationTypes (types, combsKey) {
   if (combsKey === 'allOf') {
     return types
   } else if (combsKey === 'oneOf' || combsKey === 'anyOf') {

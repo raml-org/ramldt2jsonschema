@@ -95,7 +95,7 @@ function processArray (arr, reqStack) {
  * @param  {Object} data
  * @returns  {Object}
  */
-function changeType (data) {
+function convertType (data) {
   switch (data.type) {
     case 'union':
       data['type'] = 'object'
@@ -104,7 +104,7 @@ function changeType (data) {
       data['type'] = 'null'
       break
     case 'file':
-      data = changeFileType(data)
+      data = convertFileType(data)
       break
   }
   return data
@@ -116,7 +116,7 @@ function changeType (data) {
  * @param  {Object} data
  * @returns  {Object}
  */
-function changeFileType (data) {
+function convertFileType (data) {
   data['type'] = 'string'
   data['media'] = {'binaryEncoding': 'binary'}
   if (data.fileTypes) {
@@ -135,7 +135,7 @@ function changeFileType (data) {
  * @param  {Object} data
  * @returns  {Object}
  */
-function changeDateType (data) {
+function convertDateType (data) {
   switch (data.type) {
     case 'date-only':
       data['type'] = 'string'
@@ -221,8 +221,8 @@ function schemaForm (data, reqStack, prop) {
   }
 
   if (data.type) {
-    data = changeType(data)
-    data = changeDateType(data)
+    data = convertType(data)
+    data = convertDateType(data)
   }
   return data
 }

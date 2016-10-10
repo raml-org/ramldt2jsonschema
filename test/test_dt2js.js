@@ -71,34 +71,34 @@ describe('dt2js.processArray()', function () {
   })
 })
 
-describe('dt2js.changeType()', function () {
-  var changeType = dt2js.__get__('changeType')
+describe('dt2js.convertType()', function () {
+  var convertType = dt2js.__get__('convertType')
   it('should change type `union` to `object`', function () {
-    var obj = changeType({'type': 'union'})
+    var obj = convertType({'type': 'union'})
     expect(obj).to.deep.equal({'type': 'object'})
   })
   it('should change type `nil` to `null`', function () {
-    var obj = changeType({'type': 'nil'})
+    var obj = convertType({'type': 'nil'})
     expect(obj).to.deep.equal({'type': 'null'})
   })
   it('should change type `file` to `string` with `media` keyword', function () {
-    var obj = changeType({'type': 'file'})
+    var obj = convertType({'type': 'file'})
     expect(obj).to.deep.equal(
       {'type': 'string', 'media': {'binaryEncoding': 'binary'}})
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      var obj = changeType({'type': 'foobar'})
+      var obj = convertType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
     })
   })
 })
 
-describe('dt2js.changeFileType()', function () {
-  var changeFileType = dt2js.__get__('changeFileType')
+describe('dt2js.convertFileType()', function () {
+  var convertFileType = dt2js.__get__('convertFileType')
   it('should change type `file` to `string` with `media` keyword', function () {
     var expected = {'type': 'string', 'media': {'binaryEncoding': 'binary'}}
-    var obj = changeFileType({'type': 'file'})
+    var obj = convertFileType({'type': 'file'})
     expect(obj).to.deep.equal(expected)
   })
   context('when data contains `fileTypes` param', function () {
@@ -113,7 +113,7 @@ describe('dt2js.changeFileType()', function () {
           ]
         }
       }
-      var obj = changeFileType({
+      var obj = convertFileType({
         'type': 'file',
         'fileTypes': ['image/jpeg', 'image/png']
       })
@@ -122,20 +122,20 @@ describe('dt2js.changeFileType()', function () {
   })
 })
 
-describe('dt2js.changeDateType()', function () {
-  var changeDateType = dt2js.__get__('changeDateType')
+describe('dt2js.convertDateType()', function () {
+  var convertDateType = dt2js.__get__('convertDateType')
   it('should change type `date-only` to `string` with pattern', function () {
-    var obj = changeDateType({'type': 'date-only'})
+    var obj = convertDateType({'type': 'date-only'})
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.dateOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
-    var obj = changeDateType({'type': 'time-only'})
+    var obj = convertDateType({'type': 'time-only'})
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.timeOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
-    var obj = changeDateType({'type': 'datetime-only'})
+    var obj = convertDateType({'type': 'datetime-only'})
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.dateTimeOnlyPattern)
   })
@@ -158,7 +158,7 @@ describe('dt2js.changeDateType()', function () {
     data.forEach(function (el) {
       context('when `format` is set to ' + el.setTo, function () {
         it('should change type to `string` with pattern', function () {
-          var obj = changeDateType(el.input)
+          var obj = convertDateType(el.input)
           expect(obj).to.have.property('type', 'string')
           expect(obj).to.have.property('pattern', el.pattern)
           expect(obj).to.not.have.property('format')
@@ -168,7 +168,7 @@ describe('dt2js.changeDateType()', function () {
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      var obj = changeDateType({'type': 'foobar'})
+      var obj = convertDateType({'type': 'foobar'})
       expect(obj).to.deep.equal({'type': 'foobar'})
     })
   })

@@ -13,11 +13,11 @@ describe('utils.updateObjWith()', function () {
   })
 })
 
-describe('utils.title()', function () {
-  it('should title a string', function () {
-    expect(utils.title('foo')).to.be.equal('Foo')
-    expect(utils.title('foo-bar')).to.be.equal('Foo-bar')
-    expect(utils.title('foo bar')).to.be.equal('Foo bar')
+describe('utils.capitalize()', function () {
+  it('should capitalize a string', function () {
+    expect(utils.capitalize('foo')).to.be.equal('Foo')
+    expect(utils.capitalize('foo-bar')).to.be.equal('Foo-bar')
+    expect(utils.capitalize('foo bar')).to.be.equal('Foo bar')
   })
 })
 
@@ -26,5 +26,12 @@ describe('utils.typeNameFromRef()', function () {
     expect(utils.typeNameFromRef('foo')).to.be.equal('Foo')
     expect(utils.typeNameFromRef('#/definitions/address'))
         .to.be.equal('Address')
+  })
+})
+
+describe('utils.inferRAMLTypeName()', function () {
+  it('should infer type name from file name', function () {
+    var name = utils.inferRAMLTypeName('docs/json/cat.json')
+    expect(name).to.be.equal('Cat')
   })
 })
