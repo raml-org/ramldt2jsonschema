@@ -5,21 +5,24 @@ var join = require('path').join
 var rewire = require('rewire')
 var dt2js = rewire('../src/dt2js')
 var constants = require('../src/constants')
+var fs = require('fs')
 
 var RAML_FILE_NAME = join(__dirname, 'examples/types_example.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var getRAMLContext = dt2js.__get__('getRAMLContext')
-  it('should get raml data types context from file', function () {
-    var ctx = getRAMLContext(RAML_FILE_NAME)
+  it('should get raml data types context from RAML content', function () {
+    var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
+    var ctx = getRAMLContext(ramlData)
     expect(ctx).to.be.an('object').and.contain.keys('Cat')
   })
 })
 
 describe('dt2js.dt2js()', function () {
+  var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
   context('when applied to valid type', function () {
     it('should produce valid JSON schema', function () {
-      dt2js.dt2js(RAML_FILE_NAME, 'Cat', function (err, schema) {
+      dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
         expect(schema).to.have.property('type', 'object')
@@ -29,17 +32,18 @@ describe('dt2js.dt2js()', function () {
   })
   context('when applied to invalid type', function () {
     it('should not produce valid JSON schema', function () {
-      dt2js.dt2js(RAML_FILE_NAME, 'InvalidCat', function (err, schema) {
+      dt2js.dt2js(ramlData, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
       })
     })
   })
-  context('when applied to not existing file', function () {
+  context('when applied to invalid RAML data', function () {
     it('should return error and null', function () {
       dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
+        expect(err).to.have.property('message', 'Invalid RAML data')
       })
     })
   })

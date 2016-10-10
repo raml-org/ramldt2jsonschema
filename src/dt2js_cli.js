@@ -3,6 +3,7 @@
 
 var dt2js = require('./dt2js')
 var program = require('commander')
+var fs = require('fs')
 
 /**
  * Callback to write JSON schema to console.
@@ -26,7 +27,8 @@ function writeToConsole (err, schema) {
  * @param  {string} ramlTypeName
  */
 function dt2jsCLI (ramlFile, ramlTypeName) {
-  dt2js.dt2js(ramlFile, ramlTypeName, writeToConsole)
+  var ramlData = fs.readFileSync(ramlFile).toString()
+  dt2js.dt2js(ramlData, ramlTypeName, writeToConsole)
 }
 
 program

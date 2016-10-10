@@ -1,7 +1,6 @@
 'use strict'
 
 var yaml = require('js-yaml')
-var fs = require('fs')
 var dtexp = require('datatype-expansion')
 var constants = require('./constants')
 var utils = require('./utils')
@@ -9,12 +8,11 @@ var utils = require('./utils')
 /**
  * Get RAML Data Types context.
  *
- * @param  {string} fileName - File from which to get context.
+ * @param  {string} ramlData - RAML file content.
  * @returns  {Object} - RAML data types context.
  */
-function getRAMLContext (fileName) {
-  var content = fs.readFileSync(fileName).toString()
-  var yamlContent = yaml.safeLoad(content)
+function getRAMLContext (ramlData) {
+  var yamlContent = yaml.safeLoad(ramlData)
   return yamlContent.types
 }
 
@@ -29,15 +27,19 @@ function getRAMLContext (fileName) {
 /**
  * Convert RAML data type to JSON schema.
  *
- * @param  {string} fileName - File in which type is located.
+ * @param  {string} ramlData - RAML file content.
  * @param  {string} typeName - Name of the type to be converted.
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function dt2js (fileName, typeName, cb) {
+function dt2js (ramlData, typeName, cb) {
   try {
-    var ctx = getRAMLContext(fileName)
+    var ctx = getRAMLContext(ramlData)
   } catch (error) {
     cb(error, null)
+    return
+  }
+  if (!(ctx instanceof Object)) {
+    cb(new Error('Invalid RAML data'), null)
     return
   }
   dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
