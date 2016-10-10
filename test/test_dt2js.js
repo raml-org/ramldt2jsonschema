@@ -20,10 +20,9 @@ describe('dt2js.dt2js()', function () {
   context('when applied to valid type', function () {
     it('should produce valid JSON schema', function () {
       dt2js.dt2js(RAML_FILE_NAME, 'Cat', function (err, schema) {
-        expect(schema)
-          .to.have.property(
+        expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
-          .to.have.property('type', 'object')
+        expect(schema).to.have.property('type', 'object')
         expect(err).to.be.nil
       })
     })
@@ -32,7 +31,7 @@ describe('dt2js.dt2js()', function () {
     it('should not produce valid JSON schema', function () {
       dt2js.dt2js(RAML_FILE_NAME, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.be.an(Error)
+        expect(err).to.not.be.nil
       })
     })
   })
