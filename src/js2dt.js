@@ -1,7 +1,6 @@
 'use strict'
 
 var yaml = require('js-yaml')
-var fs = require('fs')
 var constants = require('./constants')
 var utils = require('./utils')
 
@@ -16,16 +15,13 @@ var utils = require('./utils')
 /**
  * Convert JSON schema to RAML data type.
  *
- * @param  {string} fileName - File in which JSON schema is located.
+ * @param  {string} jsonData - JSON file content.
  * @param  {string} typeName - Name of RAML data type to hold converted data.
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function js2dt (fileName, typeName, cb) {
-  if (typeName === undefined) {
-    typeName = inferRAMLTypeName(fileName)
-  }
+function js2dt (jsonData, typeName, cb) {
   try {
-    var emitter = new RAMLEmitter(loadJSONFile(fileName), typeName)
+    var emitter = new RAMLEmitter(JSON.parse(jsonData), typeName)
     var ramledData = emitter.emit()
   } catch (error) {
     cb(error, null)
@@ -198,29 +194,6 @@ function RAMLEmitter (data, typeName) {
     data.type = getCombinationType(superTypes, combsKey)
     return data
   }
-}
-
-/**
- * Load JSON file into Object.
- *
- * @param  {string} fileName - File from which to load.
- * @returns  {Object} - JSON data from file.
- */
-function loadJSONFile (fileName) {
-  var content = fs.readFileSync(fileName).toString()
-  return JSON.parse(content)
-}
-
-/**
- * Infer RAML type name from file name
- *
- * @param  {string} fileName - File in which type is located.
- * @returns  {string}
- */
-function inferRAMLTypeName (fileName) {
-  var cleanName = fileName.replace(/^.*[\\\/]/, '')
-  var filename = cleanName.split('.')[0]
-  return utils.title(filename)
 }
 
 /**

@@ -6,14 +6,16 @@ var join = require('path').join
 var rewire = require('rewire')
 var js2dt = rewire('../src/js2dt')
 var constants = require('../src/constants')
+var fs = require('fs')
 
 var JSON_FILE_NAME = join(__dirname, 'examples/schema_example.json')
 var RAMLEmitter = js2dt.__get__('RAMLEmitter')
 
 describe('js2dt.js2dt()', function () {
+  var jsonData = fs.readFileSync(JSON_FILE_NAME).toString()
   context('when applied to valid schema', function () {
     it('should produce valid RAML type library', function () {
-      js2dt.js2dt(JSON_FILE_NAME, 'Product', function (err, raml) {
+      js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
         expect(raml).to.be.a('string')
         var data = yaml.safeLoad(raml)
@@ -22,7 +24,7 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should handle JSON definitions and refs', function () {
-      js2dt.js2dt(JSON_FILE_NAME, 'Product', function (err, raml) {
+      js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property(
@@ -33,7 +35,7 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should handle anyOf in files properly', function () {
-      js2dt.js2dt(JSON_FILE_NAME, 'Product', function (err, raml) {
+      js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property(
@@ -44,17 +46,6 @@ describe('js2dt.js2dt()', function () {
           .to.have.deep.property(
             'types.Product.properties.photo.fileTypes').and
           .be.equal(['image/jpeg', 'image/png'])
-      })
-    })
-  })
-  context('when type name is not provided', function () {
-    it('should infer type name', function () {
-      js2dt.js2dt(JSON_FILE_NAME, undefined, function (err, raml) {
-        expect(raml).to.be.a('string')
-        expect(err).to.be.nil
-        var data = yaml.safeLoad(raml)
-        expect(data).to.have.deep.property('types.Schema_example')
-        expect(data).to.not.have.property('$schema')
       })
     })
   })
@@ -155,22 +146,6 @@ describe('js2dt.changeFileType()', function () {
         expect(res).to.be.deep.equal({'type': 'file'})
       })
     })
-  })
-})
-
-describe('js2dt.loadJSONFile()', function () {
-  var loadJSONFile = js2dt.__get__('loadJSONFile')
-  it('should load and parse JSON file', function () {
-    var data = loadJSONFile(JSON_FILE_NAME)
-    expect(data).to.be.an('object').and.contain.keys('$schema')
-  })
-})
-
-describe('js2dt.inferRAMLTypeName()', function () {
-  var inferRAMLTypeName = js2dt.__get__('inferRAMLTypeName')
-  it('should infer type name from file name', function () {
-    var name = inferRAMLTypeName('docs/json/cat.json')
-    expect(name).to.be.equal('Cat')
   })
 })
 

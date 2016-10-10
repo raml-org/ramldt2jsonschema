@@ -18,6 +18,7 @@ var js2dt = require('../../src/js2dt')
 var helpers = require('./helpers')
 var path = require('path')
 var parser = require('raml-1-parser')
+var fs = require('fs')
 
 var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'json')
 
@@ -27,8 +28,9 @@ var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'json')
  */
 function testFile (filepath) {
   console.log('\nTesting', filepath)
+  var jsonData = fs.readFileSync(filepath).toString()
   var typeName = 'TestType'
-  js2dt.js2dt(filepath, typeName, function (err, raml) {
+  js2dt.js2dt(jsonData, typeName, function (err, raml) {
     if (err) {
       console.log('FAIL (script):')
       console.log('-', err)

@@ -2,7 +2,9 @@
 'use strict'
 
 var js2dt = require('./js2dt')
+var utils = require('./utils')
 var program = require('commander')
+var fs = require('fs')
 
 /**
  * Callback to write RAML data to console.
@@ -20,13 +22,29 @@ function writeToConsole (err, raml) {
 }
 
 /**
+ * Infer RAML type name from file name
+ *
+ * @param  {string} fileName - File in which type is located.
+ * @returns  {string}
+ */
+function inferRAMLTypeName (fileName) {
+  var cleanName = fileName.replace(/^.*[\\\/]/, '')
+  var filename = cleanName.split('.')[0]
+  return utils.title(filename)
+}
+
+/**
  * Just call js2dt.
  *
  * @param  {string} jsonFile
  * @param  {string} ramlTypeName
  */
 function js2dtCLI (jsonFile, ramlTypeName) {
-  js2dt.js2dt(jsonFile, ramlTypeName, writeToConsole)
+  var jsonData = fs.readFileSync(jsonFile).toString()
+  if (ramlTypeName === undefined) {
+    ramlTypeName = inferRAMLTypeName(jsonFile)
+  }
+  js2dt.js2dt(jsonData, ramlTypeName, writeToConsole)
 }
 
 program
