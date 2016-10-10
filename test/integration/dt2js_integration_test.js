@@ -18,6 +18,7 @@ var helpers = require('./helpers')
 var path = require('path')
 var rewire = require('rewire')
 var Ajv = require('ajv')
+var fs = require('fs')
 
 var dt2js = rewire('../../src/dt2js')
 var getRAMLContext = dt2js.__get__('getRAMLContext')
@@ -36,7 +37,8 @@ var validate = ajv.compile(draft4schema)
  */
 function testFile (filepath) {
   try {
-    var ctx = getRAMLContext(filepath)
+    var ramlData = fs.readFileSync(filepath).toString()
+    var ctx = getRAMLContext(ramlData)
   } catch (error) {
     console.log('\nLoading', filepath)
     console.log('FAIL (RAML parsing):', '\n-', error.message)
@@ -44,7 +46,7 @@ function testFile (filepath) {
   }
   for (var typeName in ctx) {
     try {
-      testType(filepath, typeName)
+      testType(filepath, ramlData, typeName)
     } catch (err) {
       console.log('\nTesting', filepath)
       console.log('FAIL (script):', '\n-', err.message)
@@ -55,8 +57,8 @@ function testFile (filepath) {
 /**
  * Test single RAML type from file.
  */
-function testType (filepath, typeName) {
-  dt2js.dt2js(filepath, typeName, function (err, schema) {
+function testType (filepath, ramlData, typeName) {
+  dt2js.dt2js(ramlData, typeName, function (err, schema) {
     console.log('\nTesting', filepath, 'Type:', typeName)
     if (err) {
       console.log('FAIL (script):', '\n-', err.message)
