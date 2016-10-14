@@ -36,9 +36,9 @@ function js2dtCLI (jsonFile, ramlTypeName) {
 }
 
 program
-  .arguments('<jsonFile> [ramlTypeName]')
+  .arguments('<jsonFile> <ramlTypeName]>')
   .description('Convert JSON schema to RAML Data Type. ' +
-               'Writes to output.')
+               'Writes to standard output.')
   .action(js2dtCLI)
 
 program.parse(process.argv)
