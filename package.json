@@ -6,6 +6,9 @@
   "author": "MuleSoft, Inc.",
   "license": "Apache-2.0",
   "homepage": "https://github.com/raml-org/ramldt2jsonschema",
+  "files": [
+    "src/**"
+  ],
   "keywords": [
     "raml",
     "json",
