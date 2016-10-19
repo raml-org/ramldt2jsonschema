@@ -1,0 +1,48 @@
+{
+  "name": "ramldt2jsonschema",
+  "version": "0.0.1",
+  "description": "Converts a RAML data type into JSON schema, and back",
+  "main": "src/index.js",
+  "author": "MuleSoft, Inc.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/raml-org/ramldt2jsonschema",
+  "files": [
+    "src/**"
+  ],
+  "keywords": [
+    "raml",
+    "json",
+    "types"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/raml-org/ramldt2jsonschema.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raml-org/ramldt2jsonschema/issues"
+  },
+  "bin": {
+    "dt2js": "src/dt2js_cli.js",
+    "js2dt": "src/js2dt_cli.js"
+  },
+  "scripts": {
+    "lint": "standard",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
+    "test-spec": "mocha -R spec --bail",
+    "test": "npm run lint && npm run test-cov"
+  },
+  "dependencies": {
+    "commander": "^2.9.0",
+    "datatype-expansion": "^0.0.12",
+    "js-yaml": "^3.6.1"
+  },
+  "devDependencies": {
+    "ajv": "^4.7.6",
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.0",
+    "rewire": "^2.5.2",
+    "standard": "^8.3.0",
+    "raml-1-parser": "^1.1.4"
+  }
+}

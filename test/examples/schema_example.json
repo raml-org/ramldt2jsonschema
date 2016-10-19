@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Product",
+  "description": "A product from Acme's catalog",
+  "type": "object",
+  "definitions": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "city":           {"type": "string"},
+        "state":          {"type": "string"},
+        "planet":         {"type": "null"}
+      },
+      "required": ["street_address", "city", "state"]
+    }
+  },
+  "properties": {
+    "id": {
+      "description": "The unique identifier for a product",
+      "type": "integer"
+    },
+    "name": {
+      "description": "Name of the product",
+      "type": "string"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": true
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "madeIn": {"$ref": "#/definitions/address"},
+    "photo": {
+      "type": "string",
+      "media": {
+        "binaryEncoding": "binary",
+        "anyOf": [{"mediaType": "image/jpeg"}, {"mediaType": "image/png"}]
+      }
+    }
+  },
+  "required": ["id", "name", "price"]
+}
