@@ -1,0 +1,17 @@
+language: node_js
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+install:
+  - npm install
+
+node_js:
+  - "0.10"
+  - "0.12"
+  - "4"
+  - "node"
+
+after_script: "npm install coveralls@2 && cat ./coverage/lcov.info | coveralls"
