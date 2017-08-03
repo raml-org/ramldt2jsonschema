@@ -48,6 +48,117 @@ describe('js2dt.js2dt()', function () {
           .be.equal(['image/jpeg', 'image/png'])
       })
     })
+    it('should drop json schema keyword additionalItems', function () {
+      let jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'number'
+              },
+              {
+                'type': 'string'
+              },
+              {
+                'type': 'string',
+                'enum': ['Street', 'Avenue', 'Boulevard']
+              },
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ],
+            'additionalItems': false
+          }
+        },
+        'required': [
+          'start',
+          'end'
+        ],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Something', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property(
+          'types.SomethingWithAList.properties.list.additionalItems')
+      })
+    })
+    it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function () {
+      let jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'RandomNumber',
+        'type': 'object',
+        'properties': {
+          'count': {
+            'type': 'number',
+            'minimum': 3,
+            'maximum': 100,
+            'exclusiveMinimum': true,
+            'exclusiveMaximum': true
+          }
+        },
+        'required': [
+          'start',
+          'end'
+        ],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property(
+          'types.RandomNumber.properties.count.exclusiveMinimum')
+        expect(data).to.not.have.deep.property(
+          'types.RandomNumber.properties.count.exclusiveMaximum')
+      })
+    })
+    it('should drop json schema keyword "required"', function () {
+      let jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'type': 'object',
+        'title': 'Location',
+        'required': [
+          'id',
+          'label'
+        ],
+        'additionalProperties': false,
+        'properties': {
+          'id': {
+            'type': 'string'
+          },
+          'label': {
+            'type': 'string'
+          },
+          'latitude': {
+            'type': 'number',
+            'minimum': -90,
+            'maximum': 90
+          },
+          'longitude': {
+            'type': 'number',
+            'minimum': -180,
+            'maximum': 180
+          }
+        },
+        'dependencies': {
+          'latitude': [ 'longitude' ],
+          'longitude': [ 'latitude' ]
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Location', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property(
+          'types.Location.required')
+        expect(data).to.not.have.deep.property(
+          'types.RandomNumber.properties.count.exclusiveMaximum')
+      })
+    })
     it('should change js schema title to raml displayName', function () {
       let jsondata = `{
         "$schema": "http://json-schema.org/draft-04/schema#",

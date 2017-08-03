@@ -78,6 +78,15 @@ function RAMLEmitter (data, typeName) {
    */
   this.ramlForm = function (data, reqStack, prop) {
     if (prop !== 'properties') {
+      // Drop the following json schema keywords:
+      let dropKeywords = [
+        'dependencies',
+        'exclusiveMaximum',
+        'exclusiveMinimum',
+        'additionalItems'
+      ]
+      dropKeywords.map(word => delete data[word])
+
       // convert json schema title to raml displayName
       if (data.title) {
         data.displayName = data.title
