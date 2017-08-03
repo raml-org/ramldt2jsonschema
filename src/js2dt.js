@@ -77,6 +77,14 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.ramlForm = function (data, reqStack, prop) {
+    if (prop !== 'properties') {
+      // convert json schema title to raml displayName
+      if (data.title) {
+        data.displayName = data.title
+        delete data.title
+      }
+    }
+
     if (!(data instanceof Object)) {
       return data
     }

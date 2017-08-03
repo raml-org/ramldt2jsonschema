@@ -48,6 +48,58 @@ describe('js2dt.js2dt()', function () {
           .be.equal(['image/jpeg', 'image/png'])
       })
     })
+    it('should change js schema title to raml displayName', function () {
+      let jsondata = `{
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Basis period",
+        "type": "object",
+        "properties": {
+          "title": {
+            "title": "Title",
+            "description": "Title of your basis period",
+            "type": "string",
+            "format": "date"
+          },
+          "start": {
+            "title": "Start date",
+            "description": "Date your basis period began",
+            "type": "string",
+            "format": "date"
+          },
+          "end": {
+            "title": "End date",
+            "description": "Date your basis period ended",
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "additionalProperties": false
+      }`
+      js2dt.js2dt(jsondata, 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.title')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.title.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.title.title')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.start.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.start.title')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.end.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.end.title')
+      })
+    })
   })
   context('when error occurs while schema processing', function () {
     it('should not produce valid RAML type library', function () {
