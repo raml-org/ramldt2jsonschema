@@ -133,6 +133,8 @@ function RAMLEmitter (data, typeName) {
     } else if (data.type) {
       data = convertType(data)
       data = convertDateType(data)
+      // convert formats
+      data = convertDefinedFormat(data)
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
@@ -295,6 +297,30 @@ function convertDateType (data) {
       break
     default:
       data['pattern'] = pattern
+  }
+  return data
+}
+
+/**
+ * Change JSON defined formats to RAML regex.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function convertDefinedFormat (data) {
+  if (!(data.type === 'string' && data.format)) {
+    return data
+  }
+  var format = data.format
+  switch (format) {
+    case 'email':
+      data['format'] = constants.RFC5332Email
+      break
+    case 'date-time':
+      data['format'] = constants.RFC3339DatetimePattern
+      break
+    default:
+      data['format'] = format
   }
   return data
 }

@@ -378,6 +378,34 @@ describe('js2dt.convertDateType()', function () {
   })
 })
 
+describe.only('js2dt.convertDefinedFormat()', function () {
+  var convertDefinedFormat = js2dt.__get__('convertDefinedFormat')
+  context('when format is string "date-time"', function () {
+    it('should replace value of format with regexp RFC3339DatetimePattern', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'date-time'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'format': constants.RFC3339DatetimePattern
+      })
+    })
+  })
+  context('when format is string "email"', function () {
+    it('should replace value of format with regexp RFC5332Email', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'email'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'format': constants.RFC5332Email
+      })
+    })
+  })
+})
+
 describe('js2dt.convertRef()', function () {
   var convertRef = js2dt.__get__('convertRef')
   it('should replace $ref with type name', function () {

@@ -19,3 +19,4 @@ module.exports.RFC2616DatetimePattern = '(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), ' +
                                  'GMT|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) ' +
                                  '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ' +
                                  '(?:[ 1-2][0-9]|3[01]) (?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] \\d{4})'
+module.exports.RFC5332Email = `([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])`
