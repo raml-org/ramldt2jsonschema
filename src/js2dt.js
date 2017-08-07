@@ -133,7 +133,7 @@ function RAMLEmitter (data, typeName) {
     } else if (data.type) {
       data = convertType(data)
       data = convertDateType(data)
-      // convert formats
+      // convert defined formats to regex patterns
       data = convertDefinedFormat(data)
     }
     if (combsKey) {
@@ -312,15 +312,28 @@ function convertDefinedFormat (data) {
     return data
   }
   var format = data.format
+  delete data.format
   switch (format) {
-    case 'email':
-      data['format'] = constants.RFC5332Email
-      break
     case 'date-time':
-      data['format'] = constants.RFC3339DatetimePattern
+      data['pattern'] = constants.FORMAT_REGEXPS['date-time']
+      break
+    case 'email':
+      data['pattern'] = constants.FORMAT_REGEXPS['email']
+      break
+    case 'hostname':
+      data['pattern'] = constants.FORMAT_REGEXPS['hostname']
+      break
+    case 'ipv4':
+      data['pattern'] = constants.FORMAT_REGEXPS['ipv4']
+      break
+    case 'ipv6':
+      data['pattern'] = constants.FORMAT_REGEXPS['ipv6']
+      break
+    case 'uri':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri']
       break
     default:
-      data['format'] = format
+      data['pattern'] = format
   }
   return data
 }

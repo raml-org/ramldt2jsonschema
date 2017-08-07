@@ -378,7 +378,7 @@ describe('js2dt.convertDateType()', function () {
   })
 })
 
-describe.only('js2dt.convertDefinedFormat()', function () {
+describe('js2dt.convertDefinedFormat()', function () {
   var convertDefinedFormat = js2dt.__get__('convertDefinedFormat')
   context('when format is string "date-time"', function () {
     it('should replace value of format with regexp RFC3339DatetimePattern', function () {
@@ -388,7 +388,7 @@ describe.only('js2dt.convertDefinedFormat()', function () {
       })
       expect(obj).to.deep.equal({
         'type': 'string',
-        'format': constants.RFC3339DatetimePattern
+        'pattern': constants.FORMAT_REGEXPS['date-time']
       })
     })
   })
@@ -400,7 +400,55 @@ describe.only('js2dt.convertDefinedFormat()', function () {
       })
       expect(obj).to.deep.equal({
         'type': 'string',
-        'format': constants.RFC5332Email
+        'pattern': constants.FORMAT_REGEXPS['email']
+      })
+    })
+  })
+  context('when format is string "hostname"', function () {
+    it('should replace value of format with regexp for hostname', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'hostname'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['hostname']
+      })
+    })
+  })
+  context('when format is string "ipv4"', function () {
+    it('should replace value of format with regexp for ipv4', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'ipv4'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['ipv4']
+      })
+    })
+  })
+  context('when format is string "ipv6"', function () {
+    it('should replace value of format with regexp for ipv6', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'ipv6'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['ipv6']
+      })
+    })
+  })
+  context('when format is string "uri"', function () {
+    it('should replace value of format with regexp for uri', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'uri'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['uri']
       })
     })
   })
