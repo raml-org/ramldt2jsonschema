@@ -453,6 +453,27 @@ describe('js2dt.convertDefinedFormat()', function () {
     })
   })
 })
+describe('js2dt.convertPatternProperties()', function () {
+  var convertPatternProperties = js2dt.__get__('convertPatternProperties')
+  context('when a jsonSchema patternProperties keyword is found', function () {
+    it('should convert it to a RAML pattern property', function () {
+      var raml = convertPatternProperties({
+        'properties': {
+          '/': {}
+        },
+        'patternProperties': {
+          '^(/[^/]+)+$': {type: 'string'}
+        }
+      })
+      expect(raml).to.deep.equal({
+        'properties': {
+          '/': {},
+          '/^(/[^/]+)+$/': {type: 'string'}
+        }
+      })
+    })
+  })
+})
 
 describe('js2dt.convertRef()', function () {
   var convertRef = js2dt.__get__('convertRef')

@@ -135,6 +135,8 @@ function RAMLEmitter (data, typeName) {
       data = convertDateType(data)
       // convert defined formats to regex patterns
       data = convertDefinedFormat(data)
+      data = convertPatternProperties(data)
+
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
@@ -335,6 +337,25 @@ function convertDefinedFormat (data) {
     default:
       data['pattern'] = format
   }
+  return data
+}
+
+/**
+ * Change JSON patternProperties to RAML pattern properties.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function convertPatternProperties (data) {
+  if (!data.patternProperties) {
+    return data
+  }
+  data.properties = data.properties || {}
+  let patternProperties = data.patternProperties
+  delete data.patternProperties
+  Object.keys(patternProperties).map(function (pattern) {
+    data.properties[`/${pattern}/`] = patternProperties[pattern]
+  })
   return data
 }
 
