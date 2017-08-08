@@ -163,6 +163,18 @@ function convertDateType (data) {
 }
 
 /**
+ * Change RAML displayName to JSON schema title.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function convertDisplayName (data) {
+  data.title = data.displayName
+  delete data.displayName
+  return data
+}
+
+/**
  * Call `schemaForm` for all nested objects.
  *
  * @param  {Object} data
@@ -223,6 +235,9 @@ function schemaForm (data, reqStack, prop) {
   if (data.type) {
     data = convertType(data)
     data = convertDateType(data)
+  }
+  if (data.displayName) {
+    data = convertDisplayName(data)
   }
   return data
 }
