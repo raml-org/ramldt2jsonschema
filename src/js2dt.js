@@ -136,7 +136,6 @@ function RAMLEmitter (data, typeName) {
       // convert defined formats to regex patterns
       data = convertDefinedFormat(data)
       data = convertPatternProperties(data)
-
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)

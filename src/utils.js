@@ -31,7 +31,7 @@ function capitalize (str) {
  * @returns  {string}
  */
 function typeNameFromRef (ref) {
-  var name = ref.replace(/^.*[\\\/]/, '')
+  var name = ref.replace(/^.*[\\/]/, '')
   return capitalize(name)
 }
 
@@ -42,7 +42,7 @@ function typeNameFromRef (ref) {
  * @returns  {string}
  */
 function inferRAMLTypeName (fileName) {
-  var cleanName = fileName.replace(/^.*[\\\/]/, '')
+  var cleanName = fileName.replace(/^.*[\\/]/, '')
   var filename = cleanName.split('.')[0]
   return capitalize(filename)
 }
