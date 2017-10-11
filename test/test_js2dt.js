@@ -160,37 +160,37 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should change js schema title to raml displayName', function () {
-      var jsondata = ['{',
-        '"$schema": "http://json-schema.org/draft-04/schema#", ',
-        '"title": "Basis period",',
-        '"type": "object",',
-        '"properties": {',
-        '  "title": {',
-        '    "title": "Title",',
-        '    "description": "Title of your basis period",',
-        '    "type": "string",',
-        '    "format": "date"',
-        '  },',
-        '  "start": {',
-        '    "title": "Start date",',
-        '    "description": "Date your basis period began",',
-        '    "type": "string",',
-        '    "format": "date"',
-        '  },',
-        '  "end": {',
-        '    "title": "End date",',
-        '    "description": "Date your basis period ended",',
-        '    "type": "string",',
-        '    "format": "date"',
-        '  }',
-        '},',
-        '"required": [',
-        '  "start",',
-        '  "end"',
-        '],',
-        '"additionalProperties": false',
-        '}'].join('')
-      js2dt.js2dt(jsondata, 'Product', function (err, raml) {
+      var jsondata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Basis period',
+        'type': 'object',
+        'properties': {
+          'title': {
+            'title': 'Title',
+            'description': 'Title of your basis period',
+            'type': 'string',
+            'format': 'date'
+          },
+          'start': {
+            'title': 'Start date',
+            'description': 'Date your basis period began',
+            'type': 'string',
+            'format': 'date'
+          },
+          'end': {
+            'title': 'End date',
+            'description': 'Date your basis period ended',
+            'type': 'string',
+            'format': 'date'
+          }
+        },
+        'required': [
+          'start',
+          'end'
+        ],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsondata), 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property(
