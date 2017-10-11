@@ -79,13 +79,13 @@ function RAMLEmitter (data, typeName) {
   this.ramlForm = function (data, reqStack, prop) {
     if (prop !== 'properties') {
       // Drop the following json schema keywords:
-      let dropKeywords = [
+      var dropKeywords = [
         'dependencies',
         'exclusiveMaximum',
         'exclusiveMinimum',
         'additionalItems'
       ]
-      dropKeywords.map(word => delete data[word])
+      dropKeywords.map(function (word) { delete data[word] })
 
       // convert json schema title to raml displayName
       if (data.title) {
@@ -350,10 +350,10 @@ function convertPatternProperties (data) {
     return data
   }
   data.properties = data.properties || {}
-  let patternProperties = data.patternProperties
+  var patternProperties = data.patternProperties
   delete data.patternProperties
   Object.keys(patternProperties).map(function (pattern) {
-    data.properties[`/${pattern}/`] = patternProperties[pattern]
+    data.properties['/' + pattern + '/'] = patternProperties[pattern]
   })
   return data
 }

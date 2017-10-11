@@ -49,7 +49,7 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should drop json schema keyword additionalItems', function () {
-      let jsdata = {
+      var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
@@ -89,7 +89,7 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function () {
-      let jsdata = {
+      var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'RandomNumber',
         'type': 'object',
@@ -118,7 +118,7 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should drop json schema keyword "required"', function () {
-      let jsdata = {
+      var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'type': 'object',
         'title': 'Location',
@@ -160,36 +160,36 @@ describe('js2dt.js2dt()', function () {
       })
     })
     it('should change js schema title to raml displayName', function () {
-      let jsondata = `{
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "title": "Basis period",
-        "type": "object",
-        "properties": {
-          "title": {
-            "title": "Title",
-            "description": "Title of your basis period",
-            "type": "string",
-            "format": "date"
-          },
-          "start": {
-            "title": "Start date",
-            "description": "Date your basis period began",
-            "type": "string",
-            "format": "date"
-          },
-          "end": {
-            "title": "End date",
-            "description": "Date your basis period ended",
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "start",
-          "end"
-        ],
-        "additionalProperties": false
-      }`
+      var jsondata = ['{',
+        '"$schema": "http://json-schema.org/draft-04/schema#", ',
+        '"title": "Basis period",',
+        '"type": "object",',
+        '"properties": {',
+        '  "title": {',
+        '    "title": "Title",',
+        '    "description": "Title of your basis period",',
+        '    "type": "string",',
+        '    "format": "date"',
+        '  },',
+        '  "start": {',
+        '    "title": "Start date",',
+        '    "description": "Date your basis period began",',
+        '    "type": "string",',
+        '    "format": "date"',
+        '  },',
+        '  "end": {',
+        '    "title": "End date",',
+        '    "description": "Date your basis period ended",',
+        '    "type": "string",',
+        '    "format": "date"',
+        '  }',
+        '},',
+        '"required": [',
+        '  "start",',
+        '  "end"',
+        '],',
+        '"additionalProperties": false',
+        '}'].join('')
       js2dt.js2dt(jsondata, 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
