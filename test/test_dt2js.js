@@ -173,6 +173,16 @@ describe('dt2js.convertDateType()', function () {
     })
   })
 })
+describe('dt2js.convertDisplayName()', function () {
+  var convertDisplayName = dt2js.__get__('convertDisplayName')
+  context('When a RAML displayName is given', function () {
+    it('should replace it with a JSON Schema title', function () {
+      var obj = convertDisplayName({type: 'beep boop', displayName: 'Beep Boop'})
+      expect(obj).to.have.property('title', 'Beep Boop')
+      expect(obj).to.not.have.property('displayName')
+    })
+  })
+})
 
 describe('dt2js.processNested()', function () {
   var processNested = dt2js.__get__('processNested')

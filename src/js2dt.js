@@ -77,6 +77,23 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.ramlForm = function (data, reqStack, prop) {
+    if (prop !== 'properties') {
+      // Drop the following json schema keywords:
+      var dropKeywords = [
+        'dependencies',
+        'exclusiveMaximum',
+        'exclusiveMinimum',
+        'additionalItems'
+      ]
+      dropKeywords.map(function (word) { delete data[word] })
+
+      // convert json schema title to raml displayName
+      if (data.title) {
+        data.displayName = data.title
+        delete data.title
+      }
+    }
+
     if (!(data instanceof Object)) {
       return data
     }
@@ -116,6 +133,9 @@ function RAMLEmitter (data, typeName) {
     } else if (data.type) {
       data = convertType(data)
       data = convertDateType(data)
+      // convert defined formats to regex patterns
+      data = convertDefinedFormat(data)
+      data = convertPatternProperties(data)
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
@@ -279,6 +299,62 @@ function convertDateType (data) {
     default:
       data['pattern'] = pattern
   }
+  return data
+}
+
+/**
+ * Change JSON defined formats to RAML regex.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function convertDefinedFormat (data) {
+  if (!(data.type === 'string' && data.format)) {
+    return data
+  }
+  var format = data.format
+  delete data.format
+  switch (format) {
+    case 'date-time':
+      data['pattern'] = constants.FORMAT_REGEXPS['date-time']
+      break
+    case 'email':
+      data['pattern'] = constants.FORMAT_REGEXPS['email']
+      break
+    case 'hostname':
+      data['pattern'] = constants.FORMAT_REGEXPS['hostname']
+      break
+    case 'ipv4':
+      data['pattern'] = constants.FORMAT_REGEXPS['ipv4']
+      break
+    case 'ipv6':
+      data['pattern'] = constants.FORMAT_REGEXPS['ipv6']
+      break
+    case 'uri':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri']
+      break
+    default:
+      data['pattern'] = format
+  }
+  return data
+}
+
+/**
+ * Change JSON patternProperties to RAML pattern properties.
+ *
+ * @param  {Object} data
+ * @returns  {Object}
+ */
+function convertPatternProperties (data) {
+  if (!data.patternProperties) {
+    return data
+  }
+  data.properties = data.properties || {}
+  var patternProperties = data.patternProperties
+  delete data.patternProperties
+  Object.keys(patternProperties).map(function (pattern) {
+    data.properties['/' + pattern + '/'] = patternProperties[pattern]
+  })
   return data
 }
 

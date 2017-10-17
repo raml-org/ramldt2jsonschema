@@ -48,6 +48,169 @@ describe('js2dt.js2dt()', function () {
           .be.equal(['image/jpeg', 'image/png'])
       })
     })
+    it('should drop json schema keyword additionalItems', function () {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'number'
+              },
+              {
+                'type': 'string'
+              },
+              {
+                'type': 'string',
+                'enum': ['Street', 'Avenue', 'Boulevard']
+              },
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ],
+            'additionalItems': false
+          }
+        },
+        'required': [
+          'start',
+          'end'
+        ],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Something', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property(
+          'types.SomethingWithAList.properties.list.additionalItems')
+      })
+    })
+    it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function () {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'RandomNumber',
+        'type': 'object',
+        'properties': {
+          'count': {
+            'type': 'number',
+            'minimum': 3,
+            'maximum': 100,
+            'exclusiveMinimum': true,
+            'exclusiveMaximum': true
+          }
+        },
+        'required': [
+          'start',
+          'end'
+        ],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property(
+          'types.RandomNumber.properties.count.exclusiveMinimum')
+        expect(data).to.not.have.deep.property(
+          'types.RandomNumber.properties.count.exclusiveMaximum')
+      })
+    })
+    it('should drop json schema keyword "required"', function () {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'type': 'object',
+        'title': 'Location',
+        'required': [
+          'id',
+          'label'
+        ],
+        'additionalProperties': false,
+        'properties': {
+          'id': {
+            'type': 'string'
+          },
+          'label': {
+            'type': 'string'
+          },
+          'latitude': {
+            'type': 'number',
+            'minimum': -90,
+            'maximum': 90
+          },
+          'longitude': {
+            'type': 'number',
+            'minimum': -180,
+            'maximum': 180
+          }
+        },
+        'dependencies': {
+          'latitude': [ 'longitude' ],
+          'longitude': [ 'latitude' ]
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Location', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property(
+          'types.Location.required')
+        expect(data).to.not.have.deep.property(
+          'types.RandomNumber.properties.count.exclusiveMaximum')
+      })
+    })
+    it('should change js schema title to raml displayName', function () {
+      var jsondata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Basis period',
+        'type': 'object',
+        'properties': {
+          'title': {
+            'title': 'Title',
+            'description': 'Title of your basis period',
+            'type': 'string',
+            'format': 'date'
+          },
+          'start': {
+            'title': 'Start date',
+            'description': 'Date your basis period began',
+            'type': 'string',
+            'format': 'date'
+          },
+          'end': {
+            'title': 'End date',
+            'description': 'Date your basis period ended',
+            'type': 'string',
+            'format': 'date'
+          }
+        },
+        'required': [
+          'start',
+          'end'
+        ],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsondata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.title')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.title.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.title.title')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.start.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.start.title')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.end.displayName')
+        expect(data).to.not.have.deep.property(
+          'types.Product.properties.end.title')
+      })
+    })
   })
   context('when error occurs while schema processing', function () {
     it('should not produce valid RAML type library', function () {
@@ -211,6 +374,103 @@ describe('js2dt.convertDateType()', function () {
     it('should return object not changed', function () {
       var obj = convertDateType({'type': 'string', 'pattern': 'asd'})
       expect(obj).to.deep.equal({'type': 'string', 'pattern': 'asd'})
+    })
+  })
+})
+
+describe('js2dt.convertDefinedFormat()', function () {
+  var convertDefinedFormat = js2dt.__get__('convertDefinedFormat')
+  context('when format is string "date-time"', function () {
+    it('should replace value of format with regexp RFC3339DatetimePattern', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'date-time'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['date-time']
+      })
+    })
+  })
+  context('when format is string "email"', function () {
+    it('should replace value of format with regexp RFC5332Email', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'email'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['email']
+      })
+    })
+  })
+  context('when format is string "hostname"', function () {
+    it('should replace value of format with regexp for hostname', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'hostname'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['hostname']
+      })
+    })
+  })
+  context('when format is string "ipv4"', function () {
+    it('should replace value of format with regexp for ipv4', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'ipv4'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['ipv4']
+      })
+    })
+  })
+  context('when format is string "ipv6"', function () {
+    it('should replace value of format with regexp for ipv6', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'ipv6'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['ipv6']
+      })
+    })
+  })
+  context('when format is string "uri"', function () {
+    it('should replace value of format with regexp for uri', function () {
+      var obj = convertDefinedFormat({
+        'type': 'string',
+        'format': 'uri'
+      })
+      expect(obj).to.deep.equal({
+        'type': 'string',
+        'pattern': constants.FORMAT_REGEXPS['uri']
+      })
+    })
+  })
+})
+describe('js2dt.convertPatternProperties()', function () {
+  var convertPatternProperties = js2dt.__get__('convertPatternProperties')
+  context('when a jsonSchema patternProperties keyword is found', function () {
+    it('should convert it to a RAML pattern property', function () {
+      var raml = convertPatternProperties({
+        'properties': {
+          '/': {}
+        },
+        'patternProperties': {
+          '^(/[^/]+)+$': {type: 'string'}
+        }
+      })
+      expect(raml).to.deep.equal({
+        'properties': {
+          '/': {},
+          '/^(/[^/]+)+$/': {type: 'string'}
+        }
+      })
     })
   })
 })
