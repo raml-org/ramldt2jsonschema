@@ -90,9 +90,9 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
 
 - in js2dt,
   - the following JSON schema properties are not supported and as a result, will not be converted:
-    - `format`, `title`, `not`
+    - `not`
     - number and integer's `exclusiveMaximum` and `exclusiveMinimum`
-    - object's `patternProperties` and `dependencies`
+    - object's `dependencies`
     - array's `additionalItems`
   - the JSON schema `oneOf` property is processed the same way as the JSON schema `anyOf` property, it is converted to the RAML `union` type
   - the JSON schema `type: 'string'` with `media` and `binaryEncoding: 'binary'` is converted to the RAML `file` type
@@ -101,8 +101,7 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
 
 - in dt2js,
   - the following RAML properties are not supported/converted:
-    - pattern properties, annotations
-    - `displayName`
+    - annotations
   - references to external includes using `!include` or `uses` is not supported
 
 ## License
