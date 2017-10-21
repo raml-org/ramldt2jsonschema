@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "commander": "^2.9.0",
-    "datatype-expansion": "^0.2.2",
+    "datatype-expansion": "^0.2.3",
     "js-yaml": "^3.6.1"
   },
   "devDependencies": {
