@@ -1,5 +1,6 @@
 'use strict'
 
+var yap = require('yaml-ast-parser')
 var yaml = require('js-yaml')
 var dtexp = require('datatype-expansion')
 var constants = require('./constants')
@@ -13,9 +14,50 @@ var utils = require('./utils')
  */
 function getRAMLContext (ramlData) {
   var yamlContent = yaml.safeLoad(ramlData)
+  var ast = yap.safeLoad(ramlData)
+  traverse(ast, () => {})
   return yamlContent.types
 }
+// function convertAstToJs (ast) {
+//   console.log('count', count++)
+//   console.log('key', ast)
+//   if (ast.key) {
+//     console.log('key', ast.key)
+//   }
+//   if (ast.mappings) {
+//     ast.mappings.map(convertAstToJs)
+//   }
+// }
 
+function traverse (ast, callback) {
+  // var keys = []
+  // var obj = {}
+  function recurse (keys, currentNode) {
+    // console.log('kind', currentNode.kind)
+    if (currentNode.key) {
+      // console.log('key:', currentNode.key.value)
+      keys = keys.concat([currentNode.key.value])
+    }
+    if (currentNode.value && currentNode.value.value) {
+      console.log('value: ', keys, currentNode.value.value)
+    }
+    if (currentNode.mappings) {
+      for (var i = 0; i < currentNode.mappings.length; i++) {
+        recurse(keys, currentNode.mappings[i])
+      }
+    }
+    if (currentNode.value && currentNode.value.mappings) {
+      for (var o = 0; o < currentNode.value.mappings.length; o++) {
+        recurse(keys, currentNode.value.mappings[o])
+      }
+    } else if (currentNode.items) {
+      // console.log(currentNode)
+      recurse(keys, currentNode.value)
+    }
+    // callback(currentNode)
+  }
+  recurse([], ast)
+}
 /**
  * This callback accepts results converting RAML data type to JSON schema.
  *
