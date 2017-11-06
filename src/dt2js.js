@@ -16,15 +16,27 @@ function getRAMLContext (ramlData) {
   var ast = yap.load(ramlData)
   var jsContent = {}
   traverse(jsContent, ast)
+  console.log(JSON.stringify(jsContent, null, 2))
   return jsContent.types
 }
 
+// var fs = require('fs')
+var path = require('path')
 function traverse (obj, ast, callback) {
   function recurse (keys, currentNode) {
     if (currentNode.key) {
       keys = keys.concat([currentNode.key.value])
     }
-    if (currentNode.value && currentNode.value.value) {
+    if (currentNode.value && currentNode.value.kind === 5) {
+      var filename = currentNode.value.value
+      if (path.extname(filename) === '.json') {
+        var include = require(path.join(__dirname, filename))
+        deep(obj, keys.join('.'), include)
+      }
+
+      // console.log(currentNode)
+      console.log(include)
+    } else if (currentNode.value && currentNode.value.value) {
       deep(obj, keys.join('.'), currentNode.value.value)
     } else if (currentNode.value && currentNode.value.items) {
       var values = currentNode.value.items.map(function (el) { return el.value })
