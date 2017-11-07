@@ -4,6 +4,8 @@ var yap = require('yaml-ast-parser')
 var dtexp = require('datatype-expansion')
 var constants = require('./constants')
 var utils = require('./utils')
+var fs = require('fs')
+var path = require('path')
 var deep = require('deep-get-set')
 deep.p = true
 /**
@@ -12,30 +14,33 @@ deep.p = true
  * @param  {string} ramlData - RAML file content.
  * @returns  {Object} - RAML data types context.
  */
-function getRAMLContext (ramlData) {
+function getRAMLContext (ramlData, rootFileDir) {
+  rootFileDir = rootFileDir || '.'
   var ast = yap.load(ramlData)
   var jsContent = {}
-  traverse(jsContent, ast)
-  console.log(JSON.stringify(jsContent, null, 2))
+  traverse(jsContent, ast, rootFileDir)
   return jsContent.types
 }
 
-// var fs = require('fs')
-var path = require('path')
-function traverse (obj, ast, callback) {
+function traverse (obj, ast, rootFileDir) {
   function recurse (keys, currentNode) {
     if (currentNode.key) {
       keys = keys.concat([currentNode.key.value])
     }
     if (currentNode.value && currentNode.value.kind === 5) {
       var filename = currentNode.value.value
+      var include
       if (path.extname(filename) === '.json') {
-        var include = require(path.join(__dirname, filename))
-        deep(obj, keys.join('.'), include)
-      }
+        include = fs.readFileSync(path.join(rootFileDir, filename))
+        // include = require(path.join(rootFileDir, filename))
 
-      // console.log(currentNode)
-      console.log(include)
+        deep(obj, keys.join('.'), JSON.parse(include))
+      } else if (path.extname(filename) === '.raml') {
+        include = fs.readFileSync(path.join(rootFileDir, filename))
+        // include = fs.readFileSync(path.join(__dirname, filename))
+        currentNode.value = yap.load(include)
+        recurse(keys, currentNode.value)
+      }
     } else if (currentNode.value && currentNode.value.value) {
       deep(obj, keys.join('.'), currentNode.value.value)
     } else if (currentNode.value && currentNode.value.items) {
@@ -68,9 +73,9 @@ function traverse (obj, ast, callback) {
  * @param  {string} typeName - Name of the type to be converted.
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function dt2js (ramlData, typeName, cb) {
+function dt2js (rootFileDir, ramlData, typeName, cb) {
   try {
-    var ctx = getRAMLContext(ramlData)
+    var ctx = getRAMLContext(ramlData, rootFileDir)
   } catch (error) {
     cb(error, null)
     return
