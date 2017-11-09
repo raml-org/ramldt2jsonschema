@@ -35,6 +35,7 @@
     "commander": "^2.9.0",
     "datatype-expansion": "^0.2.3",
     "deep-get-set": "^1.1.0",
+    "js-yaml": "^3.10.0",
     "yaml-ast-parser": "0.0.38"
   },
   "devDependencies": {
