@@ -1,0 +1,13 @@
+#%RAML 1.0 Library
+
+types:
+
+  Cat:
+    discriminator: breed
+    discriminatorValue: CatOne
+    properties:
+      age: CatAge
+      rating:
+        type: integer
+        multipleOf: 5
+        example: !include included.json

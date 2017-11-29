@@ -9,6 +9,15 @@ var fs = require('fs')
 
 var RAML_FILE_NAME = join(__dirname, 'examples/types_example.raml')
 
+describe.only('dt2js.getRAMLContext()', function () {
+  var getRAMLContext = dt2js.__get__('getRAMLContext')
+  it('should load included json file', function () {
+    var ramlData = fs.readFileSync(join(__dirname, 'examples/type_include.raml')).toString()
+    var ctx = getRAMLContext(ramlData, 'test/examples')
+    expect(ctx.Cat.properties.rating.example.value).to.equal(50)
+  })
+})
+
 describe('dt2js.getRAMLContext()', function () {
   var getRAMLContext = dt2js.__get__('getRAMLContext')
   it('should get raml data types context from RAML content', function () {
