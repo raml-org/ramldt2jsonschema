@@ -32,12 +32,9 @@ function traverse (obj, ast, rootFileDir) {
       var include
       if (path.extname(filename) === '.json') {
         include = fs.readFileSync(path.join(rootFileDir, filename))
-        // include = require(path.join(rootFileDir, filename))
-
         deep(obj, keys.join('.'), JSON.parse(include))
       } else if (path.extname(filename) === '.raml') {
         include = fs.readFileSync(path.join(rootFileDir, filename))
-        // include = fs.readFileSync(path.join(__dirname, filename))
         currentNode.value = yap.load(include)
         recurse(keys, currentNode.value)
       }
