@@ -42,13 +42,19 @@ function traverse (obj, ast, rootFileDir) {
     if (currentNode.value && currentNode.value.kind === 5) {
       var filename = currentNode.value.value
       var include
+      // If it's json, parse it
       if (path.extname(filename) === '.json') {
         include = fs.readFileSync(path.join(rootFileDir, filename))
         deep(obj, keys.join('.'), JSON.parse(include))
-      } else if (path.extname(filename) === '.raml') {
+        // If it's raml or yaml, parse it as raml
+      } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(filename)) > -1) {
         include = fs.readFileSync(path.join(rootFileDir, filename))
         currentNode.value = yap.load(include)
         recurse(keys, currentNode.value)
+        // If it's anything else, just add it as a string.
+      } else {
+        include = fs.readFileSync(path.join(rootFileDir, filename))
+        currentNode.value = include
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
