@@ -12,6 +12,7 @@ deep.p = true
  * Get RAML Data Types context.
  *
  * @param  {string} ramlData - RAML file content.
+ * @param  {string} rootFileDir - RAML file directory.
  * @returns  {Object} - RAML data types context.
  */
 function getRAMLContext (ramlData, rootFileDir) {
@@ -27,6 +28,7 @@ function traverse (obj, ast, rootFileDir) {
     if (currentNode.key) {
       keys = keys.concat([currentNode.key.value])
     }
+    // kind 5 is an include
     if (currentNode.value && currentNode.value.kind === 5) {
       var filename = currentNode.value.value
       var include
@@ -38,15 +40,19 @@ function traverse (obj, ast, rootFileDir) {
         currentNode.value = yap.load(include)
         recurse(keys, currentNode.value)
       }
+    // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
       deep(obj, keys.join('.'), currentNode.value.value)
+    // a leaf that is an array
     } else if (currentNode.value && currentNode.value.items) {
       var values = currentNode.value.items.map(function (el) { return el.value })
       deep(obj, keys.join('.'), values)
+    // an object that needs further traversal
     } else if (currentNode.mappings) {
       for (var i = 0; i < currentNode.mappings.length; i++) {
         recurse(keys, currentNode.mappings[i])
       }
+    // an object that needs further traversal
     } else if (currentNode.value && currentNode.value.mappings) {
       for (var o = 0; o < currentNode.value.mappings.length; o++) {
         recurse(keys, currentNode.value.mappings[o])
