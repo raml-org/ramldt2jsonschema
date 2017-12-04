@@ -16,10 +16,6 @@ describe('dt2js.getRAMLContext()', function () {
     var ctx = getRAMLContext(ramlData, 'test/examples')
     expect(ctx.Cat.properties.rating.example.value).to.equal(50)
   })
-})
-
-describe('dt2js.getRAMLContext()', function () {
-  var getRAMLContext = dt2js.__get__('getRAMLContext')
   it('should get raml data types context from RAML content', function () {
     var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
     var ctx = getRAMLContext(ramlData, 'test/examples')
