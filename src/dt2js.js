@@ -60,7 +60,7 @@ function traverse (obj, ast, rootFileDir) {
         'application/yaml',
         'application/x-yaml'
       ]
-      if (path.extname(location) === '.json') {
+      if (path.extname(location) === '.json' || contentType === 'application/json') {
         deep(obj, keys.join('.'), JSON.parse(include))
         // If it's raml or yaml, parse it as raml
       } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(location)) > -1 || ramlContentTypes.indexOf(contentType) > -1) {
