@@ -6,6 +6,7 @@ var constants = require('./constants')
 var utils = require('./utils')
 var fs = require('fs')
 var path = require('path')
+var request = require('sync-request')
 var deep = require('deep-get-set')
 deep.p = true
 /**
@@ -40,20 +41,33 @@ function traverse (obj, ast, rootFileDir) {
     }
     // kind 5 is an include
     if (currentNode.value && currentNode.value.kind === 5) {
-      var filename = currentNode.value.value
+      var location = currentNode.value.value
       var include
+      // if it's an url, download it.
+      if (location.slice(0, 4) === 'http') {
+        var res = request('GET', location)
+        var contentType = res.headers['content-type'].split(';')[0]
+        include = res.getBody('utf8')
+      // else it's a file, so read it
+      } else {
+        include = fs.readFileSync(path.join(rootFileDir, location))
+      }
       // If it's json, parse it
-      if (path.extname(filename) === '.json') {
-        include = fs.readFileSync(path.join(rootFileDir, filename))
+      var ramlContentTypes = [
+        'application/raml+yaml',
+        'text/yaml',
+        'text/x-yaml',
+        'application/yaml',
+        'application/x-yaml'
+      ]
+      if (path.extname(location) === '.json') {
         deep(obj, keys.join('.'), JSON.parse(include))
         // If it's raml or yaml, parse it as raml
-      } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(filename)) > -1) {
-        include = fs.readFileSync(path.join(rootFileDir, filename))
+      } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(location)) > -1 || ramlContentTypes.indexOf(contentType) > -1) {
         currentNode.value = yap.load(include)
         recurse(keys, currentNode.value)
         // If it's anything else, just add it as a string.
       } else {
-        include = fs.readFileSync(path.join(rootFileDir, filename))
         currentNode.value = include
       }
     // a leaf node to be added
