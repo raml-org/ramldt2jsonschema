@@ -27,7 +27,8 @@ describe('dt2js.dt2js()', function () {
   var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
   context('when applied to valid type', function () {
     it('should produce valid JSON schema', function () {
-      dt2js.dt2js('test/examples', ramlData, 'Cat', function (err, schema) {
+      dt2js.setBasePath('test/examples')
+      dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
         expect(schema).to.have.property('type', 'object')
@@ -37,7 +38,7 @@ describe('dt2js.dt2js()', function () {
   })
   context('when applied to invalid type', function () {
     it('should not produce valid JSON schema', function () {
-      dt2js.dt2js(null, ramlData, 'InvalidCat', function (err, schema) {
+      dt2js.dt2js(ramlData, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
       })
@@ -45,7 +46,7 @@ describe('dt2js.dt2js()', function () {
   })
   context('when applied to invalid RAML data', function () {
     it('should return error and null', function () {
-      dt2js.dt2js(null, 'asdasdasdasd', 'Cat', function (err, schema) {
+      dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'Invalid RAML data')

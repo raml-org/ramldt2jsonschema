@@ -9,6 +9,8 @@ var path = require('path')
 var request = require('sync-request')
 var deep = require('deep-get-set')
 deep.p = true
+
+var basePath = process.cwd()
 /**
  * Get RAML Data Types context.
  *
@@ -100,15 +102,25 @@ function traverse (obj, ast, rootFileDir) {
  */
 
 /**
+ * Set basePath to something other than cwd
+ *
+ * @param  {string} path - The path to be used as root for includes
+ *
+ */
+function setBasePath (path) {
+  basePath = path
+}
+
+/**
  * Convert RAML data type to JSON schema.
  *
  * @param  {string} ramlData - RAML file content.
  * @param  {string} typeName - Name of the type to be converted.
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function dt2js (rootFileDir, ramlData, typeName, cb) {
+function dt2js (ramlData, typeName, cb) {
   try {
-    var ctx = getRAMLContext(ramlData, rootFileDir)
+    var ctx = getRAMLContext(ramlData, basePath)
   } catch (error) {
     cb(error, null)
     return
@@ -318,3 +330,4 @@ function schemaForm (data, reqStack, prop) {
 }
 
 module.exports.dt2js = dt2js
+module.exports.setBasePath = setBasePath
