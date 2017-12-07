@@ -29,7 +29,8 @@ function writeToConsole (err, schema) {
 function dt2jsCLI (ramlFile, ramlTypeName) {
   var rootFileDir = ramlFile.split('/').slice(0, -1).join('/')
   var ramlData = fs.readFileSync(ramlFile).toString()
-  dt2js.dt2js(rootFileDir, ramlData, ramlTypeName, writeToConsole)
+  dt2js.setBasePath(rootFileDir)
+  dt2js.dt2js(ramlData, ramlTypeName, writeToConsole)
 }
 
 program
