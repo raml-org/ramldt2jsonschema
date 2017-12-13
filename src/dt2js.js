@@ -129,6 +129,9 @@ function dt2js (ramlData, typeName, cb) {
     cb(new Error('Invalid RAML data'), null)
     return
   }
+
+  if (ctx[typeName] === undefined) return cb(new Error('type ' + typeName + ' does not exist'))
+
   dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
     if (err) {
       cb(err, null)

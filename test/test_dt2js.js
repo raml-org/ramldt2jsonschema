@@ -53,6 +53,15 @@ describe('dt2js.dt2js()', function () {
       })
     })
   })
+  context('when given an invalid type name', function () {
+    it('should return error and null', function () {
+      dt2js.dt2js(ramlData, 'Ant', function (err, schema) {
+        expect(schema).to.be.nil
+        expect(err).to.not.be.nil
+        expect(err).to.have.property('message', 'type Ant does not exist')
+      })
+    })
+  })
 })
 
 describe('dt2js.addRootKeywords()', function () {
