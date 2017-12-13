@@ -20,7 +20,7 @@ var path = require('path')
 var parser = require('raml-1-parser')
 var fs = require('fs')
 
-var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'json')
+var EXAMPLES_FOLDER = path.join(__dirname, 'json')
 
 /**
  * Test file by running js2dt script on it and then validating

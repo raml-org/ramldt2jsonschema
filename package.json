@@ -33,11 +33,11 @@
   },
   "dependencies": {
     "commander": "^2.9.0",
+    "datatype-expansion": "^0.2.5",
     "deep-get-set": "^1.1.0",
     "js-yaml": "^3.10.0",
     "sync-request": "^4.1.0",
-    "yaml-ast-parser": "0.0.38",
-    "datatype-expansion": "^0.2.5"
+    "yaml-ast-parser": "0.0.38"
   },
   "devDependencies": {
     "ajv": "^4.7.6",
