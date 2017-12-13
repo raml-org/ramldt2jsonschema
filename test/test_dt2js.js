@@ -11,9 +11,14 @@ var RAML_FILE_NAME = join(__dirname, 'examples/types_example.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var getRAMLContext = dt2js.__get__('getRAMLContext')
+  it('should load included json file', function () {
+    var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
+    var ctx = getRAMLContext(ramlData, 'test/examples')
+    expect(ctx.Cat.properties.rating.example.value).to.equal(50)
+  })
   it('should get raml data types context from RAML content', function () {
     var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
-    var ctx = getRAMLContext(ramlData)
+    var ctx = getRAMLContext(ramlData, 'test/examples')
     expect(ctx).to.be.an('object').and.contain.keys('Cat')
   })
 })
@@ -22,6 +27,7 @@ describe('dt2js.dt2js()', function () {
   var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
   context('when applied to valid type', function () {
     it('should produce valid JSON schema', function () {
+      dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
