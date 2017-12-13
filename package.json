@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "commander": "^2.9.0",
-    "datatype-expansion": "^0.2.3",
+    "datatype-expansion": "^0.2.6",
     "deep-get-set": "^1.1.0",
     "js-yaml": "^3.10.0",
     "sync-request": "^4.1.0",
