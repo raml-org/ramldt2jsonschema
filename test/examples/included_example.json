@@ -1,0 +1,6 @@
+{
+  "displayName": "Cat's rating",
+  "description": "Rating of cat's awesomeness",
+  "strict": false,
+  "value": 50
+}

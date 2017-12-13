@@ -23,7 +23,7 @@ var fs = require('fs')
 var dt2js = rewire('../../src/dt2js')
 var getRAMLContext = dt2js.__get__('getRAMLContext')
 
-var EXAMPLES_FOLDER = path.join(__dirname, '..', 'examples', 'raml')
+var EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
 var ajv = new Ajv({'allErrors': true})
 var draft4schema = JSON.parse(
