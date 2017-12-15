@@ -74,7 +74,8 @@ function traverse (obj, ast, rootFileDir) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      deep(obj, keys.join('.'), currentNode.value.value)
+      var val = parseInt(currentNode.value.value) || currentNode.value.value
+      deep(obj, keys.join('.'), val)
     // a leaf that is an array
     } else if (currentNode.value && currentNode.value.items) {
       var values = currentNode.value.items.map(function (el) { return el.value })
