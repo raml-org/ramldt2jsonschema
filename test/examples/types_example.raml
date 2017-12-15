@@ -1,5 +1,8 @@
 #%RAML 1.0 Library
 
+uses:
+  cat-lib: type_library.raml
+
 types:
   NameXML:
     type: string
@@ -47,13 +50,8 @@ types:
     maximum: 50
     format: int32
 
-  CatWithAddress:
-    additionalProperties: false
-    properties:
-      address: string
-
   Cat:
-    type: CatWithAddress
+    type: cat-lib.CatWithAddress
     minProperties: 1
     maxProperties: 50
     additionalProperties: false
