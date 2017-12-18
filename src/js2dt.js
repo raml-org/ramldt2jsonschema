@@ -93,6 +93,17 @@ function RAMLEmitter (data, typeName) {
         delete data.title
       }
     }
+    if (data.hasOwnProperty('additionalProperties')) {
+      var val = data
+      if (typeof data.additionalProperties === 'boolean') val = data.additionalProperties
+      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length === 0) val = true
+      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length > 0) {
+        var type = data.additionalProperties.type
+        data.properties['//'] = {type: type}
+        val = false
+      }
+      data.additionalProperties = val
+    }
 
     if (!(data instanceof Object)) {
       return data
