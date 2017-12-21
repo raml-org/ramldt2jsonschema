@@ -93,17 +93,7 @@ function RAMLEmitter (data, typeName) {
         delete data.title
       }
     }
-    if (data.hasOwnProperty('additionalProperties')) {
-      var val = data
-      if (typeof data.additionalProperties === 'boolean') val = data.additionalProperties
-      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length === 0) val = true
-      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length > 0) {
-        var type = data.additionalProperties.type
-        data.properties['//'] = {type: type}
-        val = false
-      }
-      data.additionalProperties = val
-    }
+    data = convertAdditionalProperties(data)
 
     if (!(data instanceof Object)) {
       return data
@@ -150,6 +140,27 @@ function RAMLEmitter (data, typeName) {
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
+    }
+    return data
+  }
+
+  /**
+   * convert additionalProperties from jsonSchema to raml form
+   *
+   * @param  {Object} data - current data
+   * @returns  {Object} raml form
+   */
+  function convertAdditionalProperties (data) {
+    if (data.hasOwnProperty('additionalProperties')) {
+      var val = data
+      if (typeof data.additionalProperties === 'boolean') val = data.additionalProperties
+      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length === 0) val = true
+      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length > 0) {
+        var type = data.additionalProperties.type
+        data.properties['//'] = {type: type}
+        val = false
+      }
+      data.additionalProperties = val
     }
     return data
   }

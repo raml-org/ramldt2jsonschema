@@ -539,13 +539,15 @@ describe('js2dt.convertPatternProperties()', function () {
           '/': {}
         },
         'patternProperties': {
-          '^(/[^/]+)+$': {type: 'string'}
+          '^(/[^/]+)+$': {type: 'string'},
+          'p': {}
         }
       })
       expect(raml).to.deep.equal({
         'properties': {
           '/': {},
-          '/^(/[^/]+)+$/': {type: 'string'}
+          '/^(/[^/]+)+$/': {type: 'string'},
+          '/p/': {}
         }
       })
     })
