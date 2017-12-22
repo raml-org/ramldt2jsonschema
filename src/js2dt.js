@@ -377,6 +377,7 @@ function convertPatternProperties (data) {
   Object.keys(patternProperties).map(function (pattern) {
     data.properties['/' + pattern + '/'] = patternProperties[pattern]
   })
+  if (data.additionalProperties) delete data.additionalProperties
   return data
 }
 
