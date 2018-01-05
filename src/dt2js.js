@@ -188,7 +188,15 @@ function processArray (arr, reqStack) {
 function convertType (data) {
   switch (data.type) {
     case 'union':
-      data['type'] = 'object'
+      if (Array.isArray(data.anyOf)) {
+        var items = data.anyOf.map(function (e) { return e.items })
+        data.items = {anyOf: []}
+        data.items.anyOf = items
+        data['type'] = 'array'
+        delete data.anyOf
+      } else {
+        data['type'] = 'object'
+      }
       break
     case 'nil':
       data['type'] = 'null'
