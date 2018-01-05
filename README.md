@@ -66,6 +66,27 @@ raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
 })
 ```
 
+NOTE: when the inputed RAML contains `!include`s and those includes are not in the same directory as the script it is being ran from, you can use `dt2js.setBasePath()` to specify a different base path.
+
+```js
+var raml2json = require('ramldt2jsonschema')
+var join = require('path').join
+var fs = require('fs')
+
+var filePath = join(__dirname, 'api.raml')
+var includesPath = '/different/path/to/includes/'
+var ramlData = fs.readFileSync(filePath).toString()
+
+raml2json.setBasePath(includesPath)
+raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
+  if (err) {
+    console.log(err)
+    return
+  }
+  console.log(JSON.stringify(schema, null, 2))
+})
+```
+
 #### js2dt
 
 ```js

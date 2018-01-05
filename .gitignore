@@ -37,3 +37,7 @@ jspm_packages
 .node_repl_history
 
 .idea
+
+# Examples
+examples/node_modules
+examples/package-lock.json
