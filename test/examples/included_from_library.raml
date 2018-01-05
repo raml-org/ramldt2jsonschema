@@ -1,0 +1,11 @@
+#%RAML 1.0 Library
+
+types:
+  Something:
+    type: Something
+    minProperties: 1
+    maxProperties: 50
+    properties:
+      rating:
+        type: integer
+        multipleOf: 5
