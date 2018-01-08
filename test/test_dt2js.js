@@ -70,6 +70,26 @@ describe('dt2js.dt2js()', function () {
   })
 })
 
+describe('dt2js.destringify()', function () {
+  var destringify = dt2js.__get__('destringify')
+  it('should change a string to an int where possible', function () {
+    var val = destringify('100')
+    expect(val).to.equal(100)
+  })
+  it('should leave non int/ non boolean as a string', function () {
+    var val = destringify('foo')
+    expect(val).to.equal('foo')
+  })
+  it('should convert the string "true" to boolean true', function () {
+    var val = destringify('true')
+    expect(val).to.equal(true)
+  })
+  it('should convert the string "false" to boolean false', function () {
+    var val = destringify('false')
+    expect(val).to.equal(false)
+  })
+})
+
 describe('dt2js.addRootKeywords()', function () {
   var addRootKeywords = dt2js.__get__('addRootKeywords')
   it('should add missing root keywords', function () {

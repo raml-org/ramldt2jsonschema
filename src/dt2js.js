@@ -28,7 +28,19 @@ function getRAMLContext (ramlData, rootFileDir) {
 }
 
 /**
- * Extract libraries used in an AST
+ * restore ints and booleans stored as strings
+ *
+ * @param  {String} val - the value to be tested and possibly converted
+ * @returns  {Mixed} - either a string, int or boolean.
+ */
+function destringify (val) {
+  if (parseInt(val)) return parseInt(val)
+  if (val === 'true') return true
+  if (val === 'false') return false
+  return val
+}
+
+/* Extract libraries used in an AST
  *
  * @param  {Object} ast - The ast to look in.
  * @param  {string} rootFileDir - RAML file directory.
@@ -131,7 +143,9 @@ function traverse (obj, ast, rootFileDir, libraries) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      var val = libraryOrValue(libraries, currentNode.value.value)
+      // if it looks like an int, it's an int
+      var val = destringify(currentNode.value.value)
+      val = libraryOrValue(libraries, currentNode.value.value)
       deep(obj, keys.join('.'), val)
     // a leaf that is an array
     } else if (currentNode.value && currentNode.value.items) {
