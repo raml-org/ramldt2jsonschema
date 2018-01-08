@@ -7,24 +7,29 @@ var dt2js = rewire('../src/dt2js')
 var constants = require('../src/constants')
 var fs = require('fs')
 
-var RAML_FILE_NAME = join(__dirname, 'examples/types_example.raml')
+var RAML_FILE = join(__dirname, 'examples/types_example.raml')
+var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
 
 describe('dt2js.getRAMLContext()', function () {
+  var ramlData = fs.readFileSync(RAML_FILE).toString()
   var getRAMLContext = dt2js.__get__('getRAMLContext')
-  it('should load included json file', function () {
-    var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
+  it('should load included json example file', function () {
     var ctx = getRAMLContext(ramlData, 'test/examples')
-    expect(ctx.Cat.properties.rating.example.value).to.equal(50)
+    expect(ctx.CatWithRating.example.rating).to.equal(50)
+  })
+  it('should load libraries defined under `use:`', function () {
+    var ctx = getRAMLContext(ramlData, 'test/examples')
+    expect(ctx.Cat.type.properties).to.have.property('address', 'string')
+    expect(ctx.CatWithRating.type.properties.rating).to.have.property('type', 'integer')
   })
   it('should get raml data types context from RAML content', function () {
-    var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
     var ctx = getRAMLContext(ramlData, 'test/examples')
     expect(ctx).to.be.an('object').and.contain.keys('Cat')
   })
 })
 
 describe('dt2js.dt2js()', function () {
-  var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
+  var ramlData = fs.readFileSync(RAML_FILE).toString()
   context('when applied to valid type', function () {
     it('should produce valid JSON schema', function () {
       dt2js.setBasePath('test/examples')
@@ -37,6 +42,7 @@ describe('dt2js.dt2js()', function () {
     })
   })
   context('when applied to invalid type', function () {
+    var ramlData = fs.readFileSync(INVALID_RAML_FILE).toString()
     it('should not produce valid JSON schema', function () {
       dt2js.dt2js(ramlData, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil

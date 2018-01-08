@@ -23,6 +23,83 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.not.have.property('$schema')
       })
     })
+    it('should retain boolean additionalProperties as boolean', function () {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ]
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.additionalProperties.', false)
+      })
+    })
+    it('should change additionalProperties: {} to true', function () {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ]
+          }
+        },
+        'additionalProperties': {}
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.additionalProperties.', true)
+      })
+    })
+    it('should correctly handle additionalProperties: json SCHEMA', function () {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ]
+          }
+        },
+        'additionalProperties': { type: 'string' }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.//.type', 'string')
+        expect(data).to.have.deep.property(
+          'types.Product.additionalProperties', false)
+      })
+    })
     it('should handle JSON definitions and refs', function () {
       js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
@@ -462,13 +539,15 @@ describe('js2dt.convertPatternProperties()', function () {
           '/': {}
         },
         'patternProperties': {
-          '^(/[^/]+)+$': {type: 'string'}
+          '^(/[^/]+)+$': {type: 'string'},
+          'p': {}
         }
       })
       expect(raml).to.deep.equal({
         'properties': {
           '/': {},
-          '/^(/[^/]+)+$/': {type: 'string'}
+          '/^(/[^/]+)+$/': {type: 'string'},
+          '/p/': {}
         }
       })
     })
