@@ -47,7 +47,7 @@ describe('dt2js.dt2js()', function () {
     it('should not produce valid JSON schema', function (done) {
       dt2js.dt2js(ramlData, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.not.be.nil
+        expect(err).to.have.property('message', 'Consistency check failure for property length and values [123 1]')
         done()
       })
     })
@@ -56,7 +56,6 @@ describe('dt2js.dt2js()', function () {
     it('should return error and null', function (done) {
       dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'Invalid RAML data')
         done()
       })
@@ -66,7 +65,6 @@ describe('dt2js.dt2js()', function () {
     it('should return error and null', function (done) {
       dt2js.dt2js(ramlData, 'Ant', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'type Ant does not exist')
         done()
       })

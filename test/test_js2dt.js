@@ -303,7 +303,7 @@ describe('js2dt.js2dt()', function () {
     it('should not produce valid RAML type library', function (done) {
       js2dt.js2dt('foobar.json', 'Product', function (err, raml) {
         expect(raml).to.be.nil
-        expect(err).to.not.be.nil
+        expect(err).to.have.property('message', 'Unexpected token o in JSON at position 1')
         done()
       })
     })
