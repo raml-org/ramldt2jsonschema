@@ -1,5 +1,8 @@
 #%RAML 1.0 Library
 
+uses:
+  cat-lib: type_library.raml
+
 types:
   NameXML:
     type: string
@@ -47,13 +50,12 @@ types:
     maximum: 50
     format: int32
 
-  CatWithAddress:
-    additionalProperties: false
-    properties:
-      address: string
+  CatWithRating:
+    type: cat-lib.CatWithRating
+    example: !include included_example.json
 
   Cat:
-    type: CatWithAddress
+    type: cat-lib.CatWithAddress
     minProperties: 1
     maxProperties: 50
     additionalProperties: false
@@ -72,7 +74,7 @@ types:
       rating:
         type: integer
         multipleOf: 5
-        example: !include included_example.json
+        example: 10
       year_of_birth: date-only
       time_of_birth: time-only
       dt_of_birth:
@@ -97,8 +99,3 @@ types:
           type: object
           properties:
             weight: number
-
-  InvalidCat:
-    type: string
-    minLength: 123
-    maxLength: 1
