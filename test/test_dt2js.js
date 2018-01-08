@@ -31,40 +31,44 @@ describe('dt2js.getRAMLContext()', function () {
 describe('dt2js.dt2js()', function () {
   var ramlData = fs.readFileSync(RAML_FILE).toString()
   context('when applied to valid type', function () {
-    it('should produce valid JSON schema', function () {
+    it('should produce valid JSON schema', function (done) {
       dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
         expect(schema).to.have.property('type', 'object')
         expect(err).to.be.nil
+        done()
       })
     })
   })
   context('when applied to invalid type', function () {
     var ramlData = fs.readFileSync(INVALID_RAML_FILE).toString()
-    it('should not produce valid JSON schema', function () {
+    it('should not produce valid JSON schema', function (done) {
       dt2js.dt2js(ramlData, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
+        done()
       })
     })
   })
   context('when applied to invalid RAML data', function () {
-    it('should return error and null', function () {
+    it('should return error and null', function (done) {
       dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'Invalid RAML data')
+        done()
       })
     })
   })
   context('when given an invalid type name', function () {
-    it('should return error and null', function () {
+    it('should return error and null', function (done) {
       dt2js.dt2js(ramlData, 'Ant', function (err, schema) {
         expect(schema).to.be.nil
         expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'type Ant does not exist')
+        done()
       })
     })
   })
