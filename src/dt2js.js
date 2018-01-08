@@ -51,6 +51,7 @@ function extractLibraries (ast, rootFileDir) {
   var useStatement = ast.mappings.filter(function (e) {
     return e.key.value === 'uses'
   })
+  if (useStatement[0] === undefined) return {}
   var libraries = useStatement[0].value.mappings.reduce(function (libs, e) {
     var libraryString = fs.readFileSync(path.join(rootFileDir, e.value.value))
     var libraryAst = yap.load(libraryString)
