@@ -21,9 +21,78 @@ var basePath = process.cwd()
 function getRAMLContext (ramlData, rootFileDir) {
   rootFileDir = rootFileDir || '.'
   var ast = yap.load(ramlData)
+  var libraries = extractLibraries(ast, rootFileDir)
   var jsContent = {}
-  traverse(jsContent, ast, rootFileDir)
+  traverse(jsContent, ast, rootFileDir, libraries)
   return jsContent.types
+}
+
+/**
+ * restore ints and booleans stored as strings
+ *
+ * @param  {String} val - the value to be tested and possibly converted
+ * @returns  {Mixed} - either a string, int or boolean.
+ */
+function destringify (val) {
+  if (parseInt(val)) return parseInt(val)
+  if (val === 'true') return true
+  if (val === 'false') return false
+  return val
+}
+
+/* Extract libraries used in an AST
+ *
+ * @param  {Object} ast - The ast to look in.
+ * @param  {string} rootFileDir - RAML file directory.
+ * @returns  {Object} - the libraries found as a js object.
+ */
+function extractLibraries (ast, rootFileDir) {
+  if (ast.mappings === undefined) return {}
+  var useStatement = ast.mappings.filter(function (e) {
+    return e.key.value === 'uses'
+  })
+  if (useStatement[0] === undefined) return {}
+  var libraries = useStatement[0].value.mappings.reduce(function (libs, e) {
+    var libraryString = fs.readFileSync(path.join(rootFileDir, e.value.value))
+    var libraryAst = yap.load(libraryString)
+    var libraryJs = {}
+    traverse(libraryJs, libraryAst, rootFileDir)
+    libs[e.key.value] = libraryJs
+    return libs
+  }, {})
+  var libs = Object.keys(libraries).reduce(function (lib, name) {
+    lib[name] = {}
+    Object.keys(libraries[name]).map(function (skip) {
+      Object.keys(libraries[name][skip]).map(function (key) {
+        lib[name][key] = libraries[name][skip][key]
+      })
+    })
+    return lib
+  }, {})
+  return libs
+}
+
+/**
+ * Matches a given string to a library namespace and
+ * returns either the library (for a match) or the original
+ * string (if no match)
+ *
+ * @param  {Object} libraries - The known libraries
+ * @param  {String} value - The String to try as a namespace
+ * @returns  {Mixed} - returns either a library, or the original value
+ */
+function libraryOrValue (libraries, value) {
+  libraries = libraries || {}
+  var namespace = value.split('.')
+  var libNames = Object.keys(libraries)
+  if (namespace.length !== 2) return value
+  if (libNames.indexOf(namespace[0]) === -1) {
+    return value
+  } else if (Object.keys(libraries[namespace[0]]).indexOf(namespace[1]) === -1) {
+    return value
+  } else {
+    return libraries[namespace[0]][namespace[1]]
+  }
 }
 
 /**
@@ -34,9 +103,10 @@ function getRAMLContext (ramlData, rootFileDir) {
  * @param  {Object} ast - The ast from yaml-ast-parser
  * @param  {String} rootFileDir - a directory to be used
  *                  as cwd while resolving includes
+ * @param  {Object} libraries - an object holding libraries to be used
  * @returns  {Object} - js object representing raml
  */
-function traverse (obj, ast, rootFileDir) {
+function traverse (obj, ast, rootFileDir, libraries) {
   function recurse (keys, currentNode) {
     if (currentNode.key) {
       keys = keys.concat([currentNode.key.value])
@@ -74,7 +144,10 @@ function traverse (obj, ast, rootFileDir) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      deep(obj, keys.join('.'), currentNode.value.value)
+      // if it looks like an int, it's an int
+      var val = destringify(currentNode.value.value)
+      val = libraryOrValue(libraries, currentNode.value.value)
+      deep(obj, keys.join('.'), val)
     // a leaf that is an array
     } else if (currentNode.value && currentNode.value.items) {
       var values = currentNode.value.items.map(function (el) { return el.value })
