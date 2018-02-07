@@ -172,7 +172,7 @@ describe('js2dt.js2dt()', function () {
         done()
       })
     })
-    it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function (done) {
+    it('should convert exclusiveMinimum & exclusiveMaximum keywords to minimum and maximum', function (done) {
       var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'RandomNumber',
@@ -180,10 +180,8 @@ describe('js2dt.js2dt()', function () {
         'properties': {
           'count': {
             'type': 'number',
-            'minimum': 3,
-            'maximum': 100,
-            'exclusiveMinimum': true,
-            'exclusiveMaximum': true
+            'exclusiveMinimum': 3,
+            'exclusiveMaximum': 100
           }
         },
         'required': [
@@ -195,10 +193,12 @@ describe('js2dt.js2dt()', function () {
       js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
-        expect(data).to.not.have.deep.property(
-          'types.RandomNumber.properties.count.exclusiveMinimum')
-        expect(data).to.not.have.deep.property(
-          'types.RandomNumber.properties.count.exclusiveMaximum')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.count.minimum').and
+          .to.equal(4)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.count.maximum').and
+          .to.equal(99)
         done()
       })
     })
@@ -241,7 +241,7 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.not.have.deep.property(
           'types.Location.required')
         expect(data).to.not.have.deep.property(
-          'types.RandomNumber.properties.count.exclusiveMaximum')
+          'types.Location.properties.count.exclusiveMaximum')
         done()
       })
     })

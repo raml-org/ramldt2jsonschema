@@ -81,12 +81,11 @@ function RAMLEmitter (data, typeName) {
       // Drop the following json schema keywords:
       var dropKeywords = [
         'dependencies',
-        'exclusiveMaximum',
-        'exclusiveMinimum',
         'additionalItems'
       ]
       dropKeywords.map(function (word) { delete data[word] })
 
+      data = convertExclusives(data)
       // convert json schema title to raml displayName
       if (data.title) {
         data.displayName = data.title
@@ -140,6 +139,25 @@ function RAMLEmitter (data, typeName) {
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
+    }
+    return data
+  }
+
+  /**
+   * convert exclusiveMinimum and exclusiveMaximum
+   * to minimum and maximum
+   *
+   * @param  {Object} data - current data
+   * @returns  {Object} converted data
+   */
+  function convertExclusives (data) {
+    if (data.exclusiveMaximum) {
+      data.maximum = data.exclusiveMaximum - 1
+      delete data.exclusiveMaximum
+    }
+    if (data.exclusiveMinimum) {
+      data.minimum = data.exclusiveMinimum + 1
+      delete data.exclusiveMinimum
     }
     return data
   }
