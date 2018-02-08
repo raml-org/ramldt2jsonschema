@@ -81,6 +81,7 @@ function extractLibraries (ast, rootFileDir) {
  * @returns  {Mixed} - returns either a library, or the original value
  */
 function libraryOrValue (libraries, value) {
+  if (!value.split) return value
   libraries = libraries || {}
   var namespace = value.split('.')
   var libNames = Object.keys(libraries)
@@ -145,7 +146,7 @@ function traverse (obj, ast, rootFileDir, libraries) {
     } else if (currentNode.value && currentNode.value.value) {
       // if it looks like an int, it's an int
       var val = destringify(currentNode.value.value)
-      val = libraryOrValue(libraries, currentNode.value.value)
+      val = libraryOrValue(libraries, val)
       deep(obj, keys.join('.'), val)
     // a leaf that is an array
     } else if (currentNode.value && currentNode.value.items) {
