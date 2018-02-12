@@ -123,9 +123,9 @@ function RAMLEmitter (data, typeName) {
       reqStack.pop()
     }
     var lastEl = reqStack[reqStack.length - 1]
-    if (lastEl && prop) {
-      if (lastEl.props.indexOf(prop) > -1) {
-        data['required'] = lastEl.reqs.indexOf(prop) > -1
+    if (lastEl && prop && prop !== 'properties') {
+      if (lastEl.reqs.indexOf(prop) === -1) {
+        data['required'] = false
       }
     }
 
@@ -216,7 +216,14 @@ function RAMLEmitter (data, typeName) {
       }
 
       if (val instanceof Object) {
-        updateWith[key] = this.ramlForm(val, reqStack, key)
+        var raml = this.ramlForm(val, reqStack, key)
+        if (raml.required === false) {
+          delete raml.required
+          updateWith[key + '?'] = raml
+          delete data[key]
+        } else {
+          updateWith[key] = raml
+        }
         continue
       }
     }

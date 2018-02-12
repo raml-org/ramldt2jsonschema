@@ -97,6 +97,7 @@ describe('js2dt.js2dt()', function () {
       js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
+        console.log(data)
         expect(data).to.have.deep.property(
           'types.Product.properties.//.type', 'string')
         expect(data).to.have.deep.property(
@@ -593,17 +594,18 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
         },
         'address': {
           'type': 'string'
+        },
+        contact: {
+          type: 'string'
         }
       },
       'required': ['name', 'address']
     }
     var raml = emitter.ramlForm(data, [])
     expect(raml)
-      .to.have.deep.property('properties.name.required').and
-      .to.be.true
+      .to.not.have.deep.property('properties.name.required')
     expect(raml)
-      .to.have.deep.property('properties.address.required').and
-      .to.be.true
+      .to.not.have.deep.property('properties.address.required')
   })
   it('should make properties not present in `required` required=false', function () {
     var emitter = new RAMLEmitter()
