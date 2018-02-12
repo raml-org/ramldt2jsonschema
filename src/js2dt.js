@@ -217,11 +217,12 @@ function RAMLEmitter (data, typeName) {
 
       if (val instanceof Object) {
         var raml = this.ramlForm(val, reqStack, key)
-        if (raml.required === false) {
+        if (raml.required === false && key !== '//') {
           delete raml.required
           updateWith[key + '?'] = raml
           delete data[key]
         } else {
+          delete raml.required
           updateWith[key] = raml
         }
         continue

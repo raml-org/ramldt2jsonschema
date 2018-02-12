@@ -97,7 +97,6 @@ describe('js2dt.js2dt()', function () {
       js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
-        console.log(data)
         expect(data).to.have.deep.property(
           'types.Product.properties.//.type', 'string')
         expect(data).to.have.deep.property(
@@ -110,9 +109,9 @@ describe('js2dt.js2dt()', function () {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property(
-          'types.Address.properties.planet.type', 'nil')
+          'types.Address.properties.planet?.type', 'nil')
         expect(data).to.have.deep.property(
-          'types.Product.properties.madeIn.type', 'Address')
+          'types.Product.properties.madeIn?.type', 'Address')
         expect(data).to.not.have.property('definitions')
         done()
       })
@@ -122,12 +121,12 @@ describe('js2dt.js2dt()', function () {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property(
-          'types.Product.properties.photo.type', 'file')
+          'types.Product.properties.photo?.type', 'file')
         expect(data).to.not.have.deep.property(
-          'types.Product.properties.photo.media')
+          'types.Product.properties.photo?.media')
         expect(data)
           .to.have.deep.property(
-            'types.Product.properties.photo.fileTypes').and
+            'types.Product.properties.photo?.fileTypes').and
           .be.equal(['image/jpeg', 'image/png'])
         done()
       })
@@ -285,9 +284,9 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.not.have.deep.property(
           'types.Product.title')
         expect(data).to.have.deep.property(
-          'types.Product.properties.title.displayName')
+          'types.Product.properties.title?.displayName')
         expect(data).to.not.have.deep.property(
-          'types.Product.properties.title.title')
+          'types.Product.properties.title?.title')
         expect(data).to.have.deep.property(
           'types.Product.properties.start.displayName')
         expect(data).to.not.have.deep.property(
@@ -594,9 +593,6 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
         },
         'address': {
           'type': 'string'
-        },
-        contact: {
-          type: 'string'
         }
       },
       'required': ['name', 'address']
@@ -607,7 +603,7 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
     expect(raml)
       .to.not.have.deep.property('properties.address.required')
   })
-  it('should make properties not present in `required` required=false', function () {
+  it('should make properties not present in `required` <prop>?', function () {
     var emitter = new RAMLEmitter()
     var data = {
       'type': 'object',
@@ -620,8 +616,7 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
     }
     var raml = emitter.ramlForm(data, [])
     expect(raml)
-      .to.have.deep.property('properties.address.required').and
-      .to.be.false
+      .to.have.deep.property('properties.address?')
   })
   it('should remove root `required` keyword while hoisting', function () {
     var emitter = new RAMLEmitter()
@@ -675,11 +670,11 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
     }
     var raml = emitter.ramlForm(data, [])
     expect(raml).to.have.deep.property(
-      'properties.bio.properties.event.type', 'file')
+      'properties.bio?.properties.event?.type', 'file')
     expect(raml).to.not.have.deep.property(
-      'properties.bio.properties.event.media')
+      'properties.bio?.properties.event?.media')
     expect(raml).to.have.deep.property(
-      'properties.siblings.foo[0].type', 'nil')
+      'properties.siblings?.foo[0].type', 'nil')
   })
   context('when $ref IS present in input data', function () {
     var emitter = new RAMLEmitter()
@@ -761,10 +756,9 @@ describe('js2dt.RAMLEmitter.translateDefinitions()', function () {
       }
       var res = emitter.translateDefinitions(defs)
       expect(res)
-        .to.have.deep.property('Address.properties.street.required').and
-        .to.be.true
+        .to.have.deep.property('Address.properties.street')
       expect(res).to.have.deep.property(
-        'Address.properties.city.type', 'nil')
+        'Address.properties.city?.type', 'nil')
       expect(res).to.not.have.deep.property('Address.required')
     })
   })
@@ -840,7 +834,7 @@ describe('js2dt.RAMLEmitter.processDefinitions()', function () {
     expect(emitter).to.have.deep.property('data.definitions')
     emitter.processDefinitions()
     expect(emitter).to.have.deep.property(
-      'types.Address.properties.city.type', 'nil')
+      'types.Address.properties.city?.type', 'nil')
     expect(emitter).to.not.have.deep.property('data.definitions')
   })
 })
@@ -857,7 +851,7 @@ describe('js2dt.RAMLEmitter.processMainData()', function () {
     var emitter = new RAMLEmitter(data, 'Address')
     emitter.processMainData()
     expect(emitter).to.have.deep.property(
-      'types.Address.properties.city.type', 'nil')
+      'types.Address.properties.city?.type', 'nil')
     expect(emitter).to.not.have.deep.property(
       'types.Address.$schema')
   })
@@ -874,7 +868,7 @@ describe('js2dt.RAMLEmitter.emit()', function () {
     var emitter = new RAMLEmitter(data, 'Address')
     var types = emitter.emit()
     expect(types).to.have.deep.property(
-      'types.Address.properties.city.type', 'nil')
+      'types.Address.properties.city?.type', 'nil')
   })
 })
 
