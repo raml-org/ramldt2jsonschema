@@ -157,6 +157,11 @@ function traverse (obj, ast, rootFileDir, libraries) {
       for (var i = 0; i < currentNode.mappings.length; i++) {
         recurse(keys, currentNode.mappings[i])
       }
+    } else if (currentNode.key.value === 'examples') {
+      var vals = currentNode.value.mappings.map(function (el) {
+        return el.value.value
+      })
+      deep(obj, keys.join('.'), vals)
     // an object that needs further traversal
     } else if (currentNode.value && currentNode.value.mappings) {
       for (var o = 0; o < currentNode.value.mappings.length; o++) {
@@ -233,7 +238,7 @@ function dt2js (ramlData, typeName, cb) {
  * @returns  {Object}
  */
 function addRootKeywords (schema) {
-  schema['$schema'] = 'http://json-schema.org/draft-04/schema#'
+  schema['$schema'] = 'http://json-schema.org/draft-06/schema#'
   return schema
 }
 
