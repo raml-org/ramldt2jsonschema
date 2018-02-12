@@ -216,6 +216,28 @@ describe('dt2js.convertDateType()', function () {
     })
   })
 })
+
+describe('dt2js.convertPatternProperties()', function () {
+  var convertPatternProperties = dt2js.__get__('convertPatternProperties')
+  context('When pattern properties are found', function () {
+    it('should replace it with a JSON Schema patternProperties', function () {
+      var obj = convertPatternProperties({
+        properties: {
+          beep: 'boop',
+          '/^note\\d+$/': {type: 'string'}
+        }
+      })
+      expect(obj).to.not.have.deep.property('properties./^note\\d+$/')
+      expect(obj).to.deep.equal({
+        properties: {beep: 'boop'},
+        patternProperties: {
+          '^note\\d+$': { type: 'string' }
+        }
+      })
+    })
+  })
+})
+
 describe('dt2js.convertDisplayName()', function () {
   var convertDisplayName = dt2js.__get__('convertDisplayName')
   context('When a RAML displayName is given', function () {

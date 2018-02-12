@@ -326,6 +326,24 @@ function convertDateType (data) {
 }
 
 /**
+ * Change RAML pattern properties to JSON patternProperties.
+ *
+ * @param  {Object} data - the library fragment to convert
+ * @returns  {Object}
+ */
+function convertPatternProperties (data) {
+  Object.keys(data.properties).map(function (key) {
+    if (/^\/.*\/$/.test(key)) {
+      data.patternProperties = data.patternProperties || {}
+      var stringRegex = key.slice(1, -1)
+      data.patternProperties[stringRegex] = data.properties[key]
+      delete data.properties[key]
+    }
+  })
+  return data
+}
+
+/**
  * Change RAML displayName to JSON schema title.
  *
  * @param  {Object} data
@@ -401,6 +419,9 @@ function schemaForm (data, reqStack, prop) {
   }
   if (data.displayName) {
     data = convertDisplayName(data)
+  }
+  if (data.properties) {
+    convertPatternProperties(data)
   }
   return data
 }
