@@ -157,7 +157,7 @@ function traverse (obj, ast, rootFileDir, libraries) {
       for (var i = 0; i < currentNode.mappings.length; i++) {
         recurse(keys, currentNode.mappings[i])
       }
-    } else if (currentNode.key.value === 'examples') {
+    } else if (currentNode.key && currentNode.key.value === 'examples') {
       var vals = currentNode.value.mappings.map(function (el) {
         return el.value.value
       })

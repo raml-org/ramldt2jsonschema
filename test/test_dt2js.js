@@ -35,7 +35,7 @@ describe('dt2js.dt2js()', function () {
       dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
-            '$schema', 'http://json-schema.org/draft-04/schema#').and
+            '$schema', 'http://json-schema.org/draft-06/schema#').and
         expect(schema).to.have.property('type', 'object')
         expect(err).to.be.nil
         done()
@@ -55,6 +55,7 @@ describe('dt2js.dt2js()', function () {
   context('when applied to invalid RAML data', function () {
     it('should return error and null', function (done) {
       dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
+        console.log(err)
         expect(schema).to.be.nil
         expect(err).to.have.property('message', 'Invalid RAML data')
         done()
@@ -99,7 +100,7 @@ describe('dt2js.addRootKeywords()', function () {
     expect(schema)
       .to.be.an('object').and
       .to.have.property(
-        '$schema', 'http://json-schema.org/draft-04/schema#')
+        '$schema', 'http://json-schema.org/draft-06/schema#')
   })
 })
 
