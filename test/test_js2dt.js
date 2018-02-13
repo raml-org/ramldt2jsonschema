@@ -245,6 +245,57 @@ describe('js2dt.js2dt()', function () {
         done()
       })
     })
+    it('should shorten properties with only type defined', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'type': 'object',
+        'title': 'Location',
+        'required': [
+          'id',
+          'label',
+          'latitude',
+          'longitude'
+        ],
+        'additionalProperties': false,
+        'properties': {
+          'id': {
+            'type': 'string'
+          },
+          'label': {
+            'type': 'string'
+          },
+          'latitude': {
+            'type': 'number',
+            'minimum': -90,
+            'maximum': 90
+          },
+          'longitude': {
+            'type': 'number',
+            'minimum': -180,
+            'maximum': 180
+          }
+        },
+        'dependencies': {
+          'latitude': [ 'longitude' ],
+          'longitude': [ 'latitude' ]
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Location', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        console.log(JSON.stringify(data, null, 4))
+        expect(data).to.have.deep.property(
+          'types.Location.properties.id').and
+          .to.equal('string')
+        expect(data).to.have.deep.property(
+          'types.Location.properties.label').and
+          .to.equal('string')
+        expect(data).to.have.deep.property(
+          'types.Location.properties.latitude.type').and
+          .to.equal('number')
+        done()
+      })
+    })
     it('should change js schema title to raml displayName', function (done) {
       var jsondata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
@@ -674,14 +725,15 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
     expect(raml).to.not.have.deep.property(
       'properties.bio?.properties.event?.media')
     expect(raml).to.have.deep.property(
-      'properties.siblings?.foo[0].type', 'nil')
+      'properties.siblings?.foo[0]', 'nil')
   })
   context('when $ref IS present in input data', function () {
     var emitter = new RAMLEmitter()
     it('should replace $ref with defined type name', function () {
       var data = {'$ref': '#/definitions/username'}
       var raml = emitter.ramlForm(data, [])
-      expect(raml).to.be.deep.equal({'type': 'Username'})
+      console.log(raml)
+      expect(raml).to.be.deep.equal('Username')
     })
   })
   context('when $ref IS NOT present in input data', function () {
@@ -698,16 +750,16 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
         }
       }
       var raml = emitter.ramlForm(data, [])
-      expect(raml).to.have.deep.property('properties.name.type', 'nil')
-      expect(raml).to.have.deep.property('properties.photo.type', 'file')
+      expect(raml).to.have.deep.property('properties.name', 'nil')
+      expect(raml).to.have.deep.property('properties.photo', 'file')
       expect(raml).to.not.have.deep.property('properties.photo.media')
-      expect(raml).to.have.deep.property('properties.dob.type', 'date-only')
+      expect(raml).to.have.deep.property('properties.dob', 'date-only')
       expect(raml).to.not.have.deep.property('properties.dob.pattern')
     })
   })
   context('when combinations (allOf/anyOf/oneOf) are used', function () {
     var emitter = new RAMLEmitter()
-    it('should convert then properly', function () {
+    it('should convert them properly', function () {
       var data = {
         'type': 'string',
         'anyOf': [
@@ -719,7 +771,8 @@ describe('js2dt.RAMLEmitter.ramlForm()', function () {
         .to.have.property('types').and
         .to.be.deep.equal({})
       var raml = emitter.ramlForm(data, [], 'foo')
-      expect(raml).to.have.property('type', 'FooParentType0 | FooParentType1')
+      console.log(emitter)
+      expect(raml).to.equal('FooParentType0 | FooParentType1')
       expect(raml).to.not.have.property('anyOf')
       expect(emitter).to.have.deep.property(
         'types.FooParentType0.type', 'string')
@@ -770,9 +823,10 @@ describe('js2dt.RAMLEmitter.processArray()', function () {
     var result = emitter.processArray(
       [{'type': 'null'},
        {'type': 'string', 'media': {'binaryEncoding': 'binary'}}], [])
+    console.log(result)
     expect(result).to.have.lengthOf(2)
-    expect(result).to.have.deep.property('[0].type', 'nil')
-    expect(result).to.have.deep.property('[1].type', 'file')
+    expect(result).to.have.deep.property('[0]', 'nil')
+    expect(result).to.have.deep.property('[1]', 'file')
   })
 })
 
@@ -784,7 +838,7 @@ describe('js2dt.RAMLEmitter.processNested()', function () {
     expect(result)
       .to.have.property('foo').and
       .to.have.lengthOf(1)
-    expect(result).to.have.deep.property('foo[0].type', 'nil')
+    expect(result).to.have.deep.property('foo[0]', 'nil')
   })
   it('should process nested objects', function () {
     var emitter = new RAMLEmitter()
@@ -792,8 +846,8 @@ describe('js2dt.RAMLEmitter.processNested()', function () {
     var result = emitter.processNested(data, [])
     expect(result)
       .to.have.property('foo').and
-      .to.have.all.keys('type')
-    expect(result).to.have.deep.property('foo.type', 'nil')
+      .to.equal('nil')
+    expect(result).to.have.deep.property('foo', 'nil')
   })
   it('should return empty object if no nesting is present', function () {
     var emitter = new RAMLEmitter()

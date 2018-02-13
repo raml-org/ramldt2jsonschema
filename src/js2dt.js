@@ -141,6 +141,11 @@ function RAMLEmitter (data, typeName) {
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
     }
+    // if property is only a type definition, use <property>: <type> shorthand
+    var keys = Object.keys(data)
+    if (keys.length === 1 && keys[0] === 'type') {
+      data = data[keys[0]]
+    }
     return data
   }
 
