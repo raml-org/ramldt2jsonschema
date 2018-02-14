@@ -55,7 +55,6 @@ describe('dt2js.dt2js()', function () {
   context('when applied to invalid RAML data', function () {
     it('should return error and null', function (done) {
       dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
-        console.log(err)
         expect(schema).to.be.nil
         expect(err).to.have.property('message', 'Invalid RAML data')
         done()
