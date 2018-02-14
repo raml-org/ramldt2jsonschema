@@ -283,7 +283,6 @@ describe('js2dt.js2dt()', function () {
       js2dt.js2dt(JSON.stringify(jsdata), 'Location', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
-        console.log(JSON.stringify(data, null, 4))
         expect(data).to.have.deep.property(
           'types.Location.properties.id').and
           .to.equal('string')
@@ -834,7 +833,7 @@ describe('js2dt.RAMLEmitter.processNested()', function () {
   it('should process nested arrays', function () {
     var emitter = new RAMLEmitter()
     var data = {'foo': [{'type': 'null'}]}
-    var result = emitter.processNested(data, [])
+    var result = emitter.processNested(null, data, [])
     expect(result)
       .to.have.property('foo').and
       .to.have.lengthOf(1)
@@ -843,7 +842,7 @@ describe('js2dt.RAMLEmitter.processNested()', function () {
   it('should process nested objects', function () {
     var emitter = new RAMLEmitter()
     var data = {'foo': {'type': 'null'}}
-    var result = emitter.processNested(data, [])
+    var result = emitter.processNested(null, data, [])
     expect(result)
       .to.have.property('foo').and
       .to.equal('nil')
