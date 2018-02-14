@@ -37,7 +37,7 @@ describe('dt2js.dt2js()', function () {
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
-        expect(schema).to.have.property('type', 'object')
+        expect(schema).to.have.property('type', 'array')
         expect(err).to.be.nil
         done()
       })
