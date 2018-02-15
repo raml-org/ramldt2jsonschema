@@ -26,7 +26,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should retain boolean additionalProperties as boolean', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -52,7 +52,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should change additionalProperties: {} to true', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -78,7 +78,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should correctly handle additionalProperties: json SCHEMA', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -133,7 +133,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should drop json schema keyword additionalItems', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -174,7 +174,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should convert exclusiveMinimum & exclusiveMaximum keywords to minimum and maximum', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'RandomNumber',
         'type': 'object',
         'properties': {
@@ -204,7 +204,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should drop json schema keyword "required"', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'type': 'object',
         'title': 'Location',
         'required': [
@@ -247,7 +247,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should change js schema title to raml displayName', function (done) {
       var jsondata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'Basis period',
         'type': 'object',
         'properties': {
