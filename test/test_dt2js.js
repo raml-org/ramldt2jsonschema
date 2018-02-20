@@ -357,7 +357,7 @@ describe('dt2js.schemaForm()', function () {
 
 describe('dt2js.schemaForm()', function () {
   var schemaForm = dt2js.__get__('schemaForm')
-  it('should hoist `required` properties param to object root', function () {
+  it('should interpret absence of `required` as required: true', function () {
     var data = {
       'type': 'object',
       'properties': {
