@@ -270,7 +270,8 @@ describe('dt2js.schemaForm()', function () {
           'required': true
         },
         'address': {
-          'type': 'string'
+          'type': 'string',
+          'required': false
         }
       }
     }
@@ -295,7 +296,7 @@ describe('dt2js.schemaForm()', function () {
       .to.be.deep.equal(['name'])
     expect(schema).to.not.have.deep.property('properties.name.required')
   })
-  context('when `required` param is not used properly', function () {
+  context.skip('when `required` param is not used properly', function () {
     it('should not hoist `required` properties param', function () {
       var data = {
         'type': 'object',
@@ -351,5 +352,39 @@ describe('dt2js.schemaForm()', function () {
     expect(schema).to.have.deep.property('properties.photo.type', 'string')
     expect(schema).to.have.deep.property('properties.photo.media')
     expect(schema).to.have.deep.property('properties.dob.type', 'string')
+  })
+})
+
+describe('dt2js.schemaForm()', function () {
+  var schemaForm = dt2js.__get__('schemaForm')
+  it('should hoist `required` properties param to object root', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'key1': {
+          'type': 'integer',
+          'default': 1,
+          'required': true
+        },
+        'key2': {
+          'type': 'string',
+          'required': false
+        },
+        'key3': {
+          'type': 'boolean',
+          'default': true
+        }
+      }
+    }
+    var schema = schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['key1', 'key3'])
+    expect(schema)
+      .to.have.deep.property('properties.key1.default').and
+      .to.equal(1)
+    expect(schema)
+      .to.have.deep.property('properties.key3.default').and
+      .to.equal(true)
   })
 })
