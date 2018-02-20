@@ -151,14 +151,14 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object} converted data
    */
   function convertExclusives (data) {
-    if (data.exclusiveMaximum) {
-      data.maximum = data.exclusiveMaximum - 1
-      delete data.exclusiveMaximum
+    if (data.exclusiveMaximum !== undefined && typeof data.exclusiveMaximum !== 'boolean') {
+      data.maximum = data.exclusiveMaximum
     }
-    if (data.exclusiveMinimum) {
-      data.minimum = data.exclusiveMinimum + 1
-      delete data.exclusiveMinimum
+    if (data.exclusiveMinimum !== undefined && typeof data.exclusiveMinimum !== 'boolean') {
+      data.minimum = data.exclusiveMinimum
     }
+    delete data.exclusiveMinimum
+    delete data.exclusiveMaximum
     return data
   }
 

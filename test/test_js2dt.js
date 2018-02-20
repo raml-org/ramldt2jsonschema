@@ -195,10 +195,10 @@ describe('js2dt.js2dt()', function () {
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property(
           'types.Product.properties.count.minimum').and
-          .to.equal(4)
+          .to.equal(3)
         expect(data).to.have.deep.property(
           'types.Product.properties.count.maximum').and
-          .to.equal(99)
+          .to.equal(100)
         done()
       })
     })
@@ -1008,6 +1008,66 @@ describe('js2dt.getCombinationTypes()', function () {
     it('should return types joined by pipe (|)', function () {
       var res = getCombinationTypes(['x', 'y'], 'anyOf')
       expect(res).to.be.equal('x | y')
+    })
+  })
+})
+
+describe('exclusiveMinimum/exclusiveMaximum', function () {
+  context('JSON Schema draft04', function () {
+    it('should be stripped', function (done) {
+      var jsdata = {
+        '$id': 'some id',
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          },
+          'price': {
+            'type': 'number',
+            'minimum': 0,
+            'exclusiveMinimum': true
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price.minimum', 0)
+        expect(data).not.to.have.deep.property(
+          'types.Product.properties.price.exclusiveMinimum')
+        done()
+      })
+    })
+  })
+  context('JSON Schema draft06', function () {
+    it('should be replaced with minimum or maximum', function (done) {
+      var jsdata = {
+        '$id': 'some id',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          },
+          'price': {
+            'type': 'number',
+            'exclusiveMinimum': 0
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price.minimum', 0)
+        done()
+      })
     })
   })
 })
