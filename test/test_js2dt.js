@@ -1154,4 +1154,32 @@ describe('draft06 changes', function () {
       })
     })
   })
+  context('propertyNames', function () {
+    it('should be dropped', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'foo_list': {
+            'type': 'array'
+          },
+          'foo_description': {
+            'type': 'string'
+          }
+        },
+        'required': ['list', 'description'],
+        'propertyNames': {
+          'pattern': 'foo[A-Z][a-z0-9]*'
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.propertyNames')
+        done()
+      })
+    })
+  })
 })

@@ -94,7 +94,8 @@ function RAMLEmitter (data, typeName) {
       // Drop the following json schema keywords:
       var dropKeywords = [
         'dependencies',
-        'additionalItems'
+        'additionalItems',
+        'propertyNames'
       ]
       dropKeywords.map(function (word) { delete data[word] })
 
