@@ -1071,3 +1071,81 @@ describe('exclusiveMinimum/exclusiveMaximum', function () {
     })
   })
 })
+describe('draft06 changes', function () {
+  context('$id keyword', function () {
+    it('should get dropped', function (done) {
+      var jsdata = {
+        '$id': 'some id',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.$id')
+        done()
+      })
+    })
+  })
+  context('$ref keyword', function () {
+    it('should be ignored as a property name', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          },
+          'price': {
+            '$ref': '#/definitions/price'
+          },
+          '$ref': {
+            'type': 'string'
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price.type', 'Price')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.$ref.type', 'string')
+        done()
+      })
+    })
+  })
+  context('booleans as schemas', function () {
+    it.only('should convert to type `any`', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': true,
+          'description': {}
+        },
+        'required': ['list', 'description'],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        console.log(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price.type', 'Price')
+        done()
+      })
+    })
+  })
+})

@@ -56,6 +56,7 @@ function RAMLEmitter (data, typeName) {
    */
   this.processMainData = function () {
     delete this.data['$schema']
+    delete this.data['$id']
     this.types[this.mainTypeName] = this.ramlForm(this.data, [])
   }
 
@@ -128,7 +129,7 @@ function RAMLEmitter (data, typeName) {
       }
     }
 
-    if (data['$ref']) {
+    if (data['$ref'] && prop !== 'properties') {
       data = convertRef(data)
     } else if (data.type) {
       data = convertType(data)
