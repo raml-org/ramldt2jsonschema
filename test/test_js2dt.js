@@ -1182,4 +1182,32 @@ describe('draft06 changes', function () {
       })
     })
   })
+  context('contains', function () {
+    it('should be dropped', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'foo_list': {
+            'type': 'array',
+            'contains': {
+              'type': 'string'
+            }
+          },
+          'foo_description': {
+            'type': 'string'
+          }
+        },
+        'required': ['list', 'description']
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.properties.foo_list.contains')
+        done()
+      })
+    })
+  })
 })

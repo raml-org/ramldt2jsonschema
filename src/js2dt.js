@@ -105,6 +105,10 @@ function RAMLEmitter (data, typeName) {
         data.displayName = data.title
         delete data.title
       }
+      // strip json schema contains keyword
+      if (data.contains) {
+        delete data.contains
+      }
     }
     data = convertAdditionalProperties(data)
 
