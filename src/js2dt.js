@@ -78,6 +78,18 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.ramlForm = function (data, reqStack, prop) {
+    if (prop === 'properties') {
+      // handle schema boolean true and empty schemas
+      var properties = {}
+      Object.keys(data).map(function (key) {
+        if (data[key] === true || (typeof data[key] === 'object' && Object.keys(data[key]).length === 0)) {
+          properties[key] = {type: 'any'}
+        } else {
+          properties[key] = data[key]
+        }
+      })
+      data = properties
+    }
     if (prop !== 'properties') {
       // Drop the following json schema keywords:
       var dropKeywords = [

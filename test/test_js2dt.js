@@ -1126,14 +1126,19 @@ describe('draft06 changes', function () {
     })
   })
   context('booleans as schemas', function () {
-    it.only('should convert to type `any`', function (done) {
+    it('should convert to type `any`', function (done) {
       var jsdata = {
         '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'Product',
         'type': 'object',
         'properties': {
           'list': true,
-          'description': {}
+          'forbiden': false,
+          'description': {},
+          'forSale': {
+            'type': 'boolean',
+            'default': true
+          }
         },
         'required': ['list', 'description'],
         'additionalProperties': false
@@ -1141,9 +1146,10 @@ describe('draft06 changes', function () {
       js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
-        console.log(raml)
         expect(data).to.have.deep.property(
-          'types.Product.properties.price.type', 'Price')
+          'types.Product.properties.list.type', 'any')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.description.type', 'any')
         done()
       })
     })
