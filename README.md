@@ -112,9 +112,9 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
 - in js2dt,
   - the following JSON schema properties are not supported and as a result, will not be converted:
     - `not`
-    - number and integer's `exclusiveMaximum` and `exclusiveMinimum`
     - object's `dependencies`
     - array's `additionalItems`
+  - JSON schema number and integer's `exclusiveMaximum` and `exclusiveMinimum` properties are converted to raml 'maximum' and 'minimum'
   - the JSON schema `oneOf` property is processed the same way as the JSON schema `anyOf` property, it is converted to the RAML `union` type
   - the JSON schema `type: 'string'` with `media` and `binaryEncoding: 'binary'` is converted to the RAML `file` type
   - the JSON schema `type: string` with a `pattern` that matches exactly one of the RAML date types will be converted in the matching RAML date type
