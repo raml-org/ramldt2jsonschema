@@ -1238,7 +1238,7 @@ describe('draft06 changes', function () {
     })
   })
   context('empty required array', function () {
-    it.only('should mark all properties optional', function (done) {
+    it('should mark all properties optional', function (done) {
       var jsdata = {
         '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'Product',
