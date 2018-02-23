@@ -109,6 +109,10 @@ function RAMLEmitter (data, typeName) {
       if (data.contains) {
         delete data.contains
       }
+      if (data.const) {
+        data.enum = [data.const]
+        delete data.const
+      }
     }
     data = convertAdditionalProperties(data)
 

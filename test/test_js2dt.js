@@ -1182,6 +1182,33 @@ describe('draft06 changes', function () {
       })
     })
   })
+  context('const', function () {
+    it('should be converted to an enum with one element', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Task',
+        'type': 'object',
+        'properties': {
+          'difficulty': {
+            'type': 'string',
+            'enum': ['easy', 'hard']
+          },
+          'type': {
+            'type': 'string',
+            'const': 'list'
+          }
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Task', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.properties.type.enum').and
+          .to.deep.equal(['list'])
+        done()
+      })
+    })
+  })
   context('contains', function () {
     it('should be dropped', function (done) {
       var jsdata = {
