@@ -1237,4 +1237,26 @@ describe('draft06 changes', function () {
       })
     })
   })
+  context('empty required array', function () {
+    it.only('should mark all properties optional', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          }
+        },
+        'required': []
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.list.required', false)
+        done()
+      })
+    })
+  })
 })
