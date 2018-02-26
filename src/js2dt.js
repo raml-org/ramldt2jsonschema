@@ -398,6 +398,9 @@ function convertDefinedFormat (data) {
     case 'uri-reference':
       data['pattern'] = constants.FORMAT_REGEXPS['uri-reference']
       break
+    case 'json-pointer':
+      data['pattern'] = constants.FORMAT_REGEXPS['json-pointer']
+      break
     default:
       data['pattern'] = format
   }
