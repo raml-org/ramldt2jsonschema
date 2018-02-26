@@ -1259,4 +1259,46 @@ describe('draft06 changes', function () {
       })
     })
   })
+  context('format reference-uri', function () {
+    it('should be converted to a pattern', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'webURI': {
+            'type': 'string',
+            'format': 'uri-reference'
+          }
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.webURI.pattern')
+        done()
+      })
+    })
+    it('should validate a global uri', function (done) {
+      var pattern = new RegExp(constants.FORMAT_REGEXPS['uri-reference'])
+      var uris = [
+        'http://user:password@example.com:8080/some/path/to/somewhere?search=regex&order=desc#fragment',
+        '/some/path/to/somewhere',
+        '/?foo=bar',
+        '#hash',
+        '66.7 is a number'
+      ]
+      var matches = uris.map(function (uri) {
+        return uri.match(pattern)
+      })
+      expect(matches[0][1]).to.equal('http')
+      expect(matches[1][7]).to.equal('some/path/to/somewhere')
+      expect(matches[2][9]).to.equal('foo=bar')
+      expect(matches[3][10]).to.equal('hash')
+      expect(matches[4][8]).to.equal('66.7')
+      done()
+    })
+  })
 })
+

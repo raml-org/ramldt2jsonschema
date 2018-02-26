@@ -395,6 +395,9 @@ function convertDefinedFormat (data) {
     case 'uri':
       data['pattern'] = constants.FORMAT_REGEXPS['uri']
       break
+    case 'uri-reference':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri-reference']
+      break
     default:
       data['pattern'] = format
   }
