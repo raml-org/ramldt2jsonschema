@@ -111,10 +111,10 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
 
 - in js2dt,
   - the following JSON schema properties are not supported and as a result, will not be converted:
-    - `not`
+    - `not` (or `false` when used as a schema boolean)
     - object's `dependencies`
     - array's `additionalItems`
-    - the `propertyName` keyword
+    - the `propertyNames` keyword
     - the `contains` keyword
   - JSON schema number and integer's `exclusiveMaximum` and `exclusiveMinimum` properties are converted to raml 'maximum' and 'minimum'
   - the JSON schema `oneOf` property is processed the same way as the JSON schema `anyOf` property, it is converted to the RAML `union` type
