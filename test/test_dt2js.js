@@ -71,6 +71,30 @@ describe('dt2js.dt2js()', function () {
       })
     })
   })
+  context.only('when given a pattern property', function () {
+    var raml = [
+      '#%RAML 1.0',
+      '    title: My API With Types',
+      '    types:',
+      '      Person:',
+      '        properties:',
+      '          name:',
+      '            type: string',
+      '          age:',
+      '            required: false',
+      '            type: number',
+      '          /^note\\d+$/:',
+      '            type: string'
+    ].join('\n')
+    it('should omit it from required array', function (done) {
+      dt2js.dt2js(raml, 'Person', function (err, schema) {
+        expect(schema).to.have.property('required').and
+          .to.deep.equal(['name'])
+        expect(err).to.be.null
+        done()
+      })
+    })
+  })
 })
 
 describe('dt2js.destringify()', function () {

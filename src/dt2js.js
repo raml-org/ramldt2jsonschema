@@ -403,7 +403,7 @@ function schemaForm (data, reqStack, prop) {
   }
   var lastEl = reqStack[reqStack.length - 1]
   if (data.required && lastEl && prop) {
-    if (lastEl.props.indexOf(prop) > -1) {
+    if (lastEl.props.indexOf(prop) > -1 && (prop[0] + prop[prop.length - 1]) !== '//') {
       lastEl.reqs.push(prop)
     }
   }
