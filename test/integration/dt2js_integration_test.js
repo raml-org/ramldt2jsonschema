@@ -39,7 +39,8 @@ var validate = ajv.compile(draft4schema)
 function testFile (filepath) {
   try {
     var ramlData = fs.readFileSync(filepath).toString()
-    var ctx = getRAMLContext(ramlData)
+    dt2js.setBasePath(__dirname)
+    var ctx = getRAMLContext(ramlData, __dirname)
   } catch (error) {
     console.log('\nLoading', filepath)
     console.log('FAIL (RAML parsing):', '\n-', error.message)
