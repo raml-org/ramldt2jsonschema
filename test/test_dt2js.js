@@ -9,6 +9,7 @@ var fs = require('fs')
 
 var RAML_FILE = join(__dirname, 'examples/types_example.raml')
 var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
+var ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var ramlData = fs.readFileSync(RAML_FILE).toString()
@@ -36,7 +37,7 @@ describe('dt2js.dt2js()', function () {
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
-        expect(schema).to.have.property('type', 'object')
+        expect(schema).to.have.property('type', 'array')
         expect(err).to.be.nil
         done()
       })
@@ -351,5 +352,18 @@ describe('dt2js.schemaForm()', function () {
     expect(schema).to.have.deep.property('properties.photo.type', 'string')
     expect(schema).to.have.deep.property('properties.photo.media')
     expect(schema).to.have.deep.property('properties.dob.type', 'string')
+  })
+})
+
+describe('Converting an array of union type', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should result in an array type, with anyOf on the items level', function (cb) {
+    var ramlData = fs.readFileSync(ARRAY_OF_UNION_TEST).toString()
+    convert(ramlData, 'Devices', function (e, r) {
+      var expected = require(join(__dirname, 'examples/union_test_result.json'))
+      expect(r).to.deep.equal(expected)
+      expect(r.items.anyOf[0].properties.manufacturer.type).to.equal('string')
+      return cb()
+    })
   })
 })
