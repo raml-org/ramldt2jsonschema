@@ -71,7 +71,7 @@ describe('dt2js.dt2js()', function () {
       })
     })
   })
-  context.only('when given a pattern property', function () {
+  context('when given a pattern property', function () {
     var raml = [
       '#%RAML 1.0',
       '    title: My API With Types',
