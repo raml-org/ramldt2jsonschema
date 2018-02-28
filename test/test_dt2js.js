@@ -7,61 +7,89 @@ var dt2js = rewire('../src/dt2js')
 var constants = require('../src/constants')
 var fs = require('fs')
 
-var RAML_FILE_NAME = join(__dirname, 'examples/types_example.raml')
+var RAML_FILE = join(__dirname, 'examples/types_example.raml')
+var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
 var ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
 
 describe('dt2js.getRAMLContext()', function () {
+  var ramlData = fs.readFileSync(RAML_FILE).toString()
   var getRAMLContext = dt2js.__get__('getRAMLContext')
-  it('should load included json file', function () {
-    var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
+  it('should load included json example file', function () {
     var ctx = getRAMLContext(ramlData, 'test/examples')
-    expect(ctx.Cat.properties.rating.example.value).to.equal(50)
+    expect(ctx.CatWithRating.example.rating).to.equal(50)
+  })
+  it('should load libraries defined under `use:`', function () {
+    var ctx = getRAMLContext(ramlData, 'test/examples')
+    expect(ctx.Cat.type.properties).to.have.property('address', 'string')
+    expect(ctx.CatWithRating.type.properties.rating).to.have.property('type', 'integer')
   })
   it('should get raml data types context from RAML content', function () {
-    var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
     var ctx = getRAMLContext(ramlData, 'test/examples')
     expect(ctx).to.be.an('object').and.contain.keys('Cat')
   })
 })
 
 describe('dt2js.dt2js()', function () {
-  var ramlData = fs.readFileSync(RAML_FILE_NAME).toString()
+  var ramlData = fs.readFileSync(RAML_FILE).toString()
   context('when applied to valid type', function () {
-    it('should produce valid JSON schema', function () {
+    it('should produce valid JSON schema', function (done) {
       dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
-        expect(schema).to.have.property('type', 'object')
+        expect(schema).to.have.property('type', 'array')
         expect(err).to.be.nil
+        done()
       })
     })
   })
   context('when applied to invalid type', function () {
-    it('should not produce valid JSON schema', function () {
+    var ramlData = fs.readFileSync(INVALID_RAML_FILE).toString()
+    it('should not produce valid JSON schema', function (done) {
       dt2js.dt2js(ramlData, 'InvalidCat', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.not.be.nil
+        expect(err).to.have.property('message', 'Consistency check failure for property length and values [123 1]')
+        done()
       })
     })
   })
   context('when applied to invalid RAML data', function () {
-    it('should return error and null', function () {
+    it('should return error and null', function (done) {
       dt2js.dt2js('asdasdasdasd', 'Cat', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'Invalid RAML data')
+        done()
       })
     })
   })
   context('when given an invalid type name', function () {
-    it('should return error and null', function () {
+    it('should return error and null', function (done) {
       dt2js.dt2js(ramlData, 'Ant', function (err, schema) {
         expect(schema).to.be.nil
-        expect(err).to.not.be.nil
         expect(err).to.have.property('message', 'type Ant does not exist')
+        done()
       })
     })
+  })
+})
+
+describe('dt2js.destringify()', function () {
+  var destringify = dt2js.__get__('destringify')
+  it('should change a string to an int where possible', function () {
+    var val = destringify('100')
+    expect(val).to.equal(100)
+  })
+  it('should leave non int/ non boolean as a string', function () {
+    var val = destringify('foo')
+    expect(val).to.equal('foo')
+  })
+  it('should convert the string "true" to boolean true', function () {
+    var val = destringify('true')
+    expect(val).to.equal(true)
+  })
+  it('should convert the string "false" to boolean false', function () {
+    var val = destringify('false')
+    expect(val).to.equal(false)
   })
 })
 

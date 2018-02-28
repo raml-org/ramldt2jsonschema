@@ -123,7 +123,6 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
 - in dt2js,
   - the following RAML properties are not supported/converted:
     - annotations
-  - references to external libraries using `uses` is not yet supported
 
 ## License
 

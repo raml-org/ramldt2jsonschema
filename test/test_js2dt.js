@@ -14,16 +14,97 @@ var RAMLEmitter = js2dt.__get__('RAMLEmitter')
 describe('js2dt.js2dt()', function () {
   var jsonData = fs.readFileSync(JSON_FILE_NAME).toString()
   context('when applied to valid schema', function () {
-    it('should produce valid RAML type library', function () {
+    it('should produce valid RAML type library', function (done) {
       js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
         expect(raml).to.be.a('string')
         var data = yaml.safeLoad(raml)
         expect(data).to.have.deep.property('types.Product')
         expect(data).to.not.have.property('$schema')
+        done()
       })
     })
-    it('should handle JSON definitions and refs', function () {
+    it('should retain boolean additionalProperties as boolean', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ]
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.additionalProperties.', false)
+        done()
+      })
+    })
+    it('should change additionalProperties: {} to true', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ]
+          }
+        },
+        'additionalProperties': {}
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.additionalProperties.', true)
+        done()
+      })
+    })
+    it('should correctly handle additionalProperties: json SCHEMA', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'SomethingWithAList',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array',
+            'items': [
+              {
+                'type': 'string',
+                'enum': ['NW', 'NE', 'SW', 'SE']
+              }
+            ]
+          }
+        },
+        'additionalProperties': { type: 'string' }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.//.type', 'string')
+        expect(data).to.have.deep.property(
+          'types.Product.additionalProperties', false)
+        done()
+      })
+    })
+    it('should handle JSON definitions and refs', function (done) {
       js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
@@ -32,9 +113,10 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.have.deep.property(
           'types.Product.properties.madeIn.type', 'Address')
         expect(data).to.not.have.property('definitions')
+        done()
       })
     })
-    it('should handle anyOf in files properly', function () {
+    it('should handle anyOf in files properly', function (done) {
       js2dt.js2dt(jsonData, 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
@@ -46,9 +128,10 @@ describe('js2dt.js2dt()', function () {
           .to.have.deep.property(
             'types.Product.properties.photo.fileTypes').and
           .be.equal(['image/jpeg', 'image/png'])
+        done()
       })
     })
-    it('should drop json schema keyword additionalItems', function () {
+    it('should drop json schema keyword additionalItems', function (done) {
       var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'SomethingWithAList',
@@ -86,9 +169,10 @@ describe('js2dt.js2dt()', function () {
         var data = yaml.safeLoad(raml)
         expect(data).to.not.have.deep.property(
           'types.SomethingWithAList.properties.list.additionalItems')
+        done()
       })
     })
-    it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function () {
+    it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function (done) {
       var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'RandomNumber',
@@ -115,9 +199,10 @@ describe('js2dt.js2dt()', function () {
           'types.RandomNumber.properties.count.exclusiveMinimum')
         expect(data).to.not.have.deep.property(
           'types.RandomNumber.properties.count.exclusiveMaximum')
+        done()
       })
     })
-    it('should drop json schema keyword "required"', function () {
+    it('should drop json schema keyword "required"', function (done) {
       var jsdata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'type': 'object',
@@ -157,9 +242,10 @@ describe('js2dt.js2dt()', function () {
           'types.Location.required')
         expect(data).to.not.have.deep.property(
           'types.RandomNumber.properties.count.exclusiveMaximum')
+        done()
       })
     })
-    it('should change js schema title to raml displayName', function () {
+    it('should change js schema title to raml displayName', function (done) {
       var jsondata = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'Basis period',
@@ -209,14 +295,17 @@ describe('js2dt.js2dt()', function () {
           'types.Product.properties.end.displayName')
         expect(data).to.not.have.deep.property(
           'types.Product.properties.end.title')
+        done()
       })
     })
   })
   context('when error occurs while schema processing', function () {
-    it('should not produce valid RAML type library', function () {
+    it('should not produce valid RAML type library', function (done) {
       js2dt.js2dt('foobar.json', 'Product', function (err, raml) {
         expect(raml).to.be.nil
-        expect(err).to.not.be.nil
+        expect(err).to.have.property('message')
+        expect(err.message).to.have.string('Unexpected token o')
+        done()
       })
     })
   })
@@ -462,13 +551,15 @@ describe('js2dt.convertPatternProperties()', function () {
           '/': {}
         },
         'patternProperties': {
-          '^(/[^/]+)+$': {type: 'string'}
+          '^(/[^/]+)+$': {type: 'string'},
+          'p': {}
         }
       })
       expect(raml).to.deep.equal({
         'properties': {
           '/': {},
-          '/^(/[^/]+)+$/': {type: 'string'}
+          '/^(/[^/]+)+$/': {type: 'string'},
+          '/p/': {}
         }
       })
     })
