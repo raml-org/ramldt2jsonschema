@@ -35,9 +35,10 @@ describe('dt2js.dt2js()', function () {
     it('should produce valid JSON schema', function (done) {
       dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
+        console.log(schema)
         expect(schema).to.have.property(
             '$schema', 'http://json-schema.org/draft-04/schema#').and
-        expect(schema).to.have.property('type', 'array')
+        expect(schema).to.have.property('type', 'object')
         expect(err).to.be.nil
         done()
       })
