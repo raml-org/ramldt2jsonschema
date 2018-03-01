@@ -10,6 +10,7 @@ var fs = require('fs')
 var RAML_FILE = join(__dirname, 'examples/types_example.raml')
 var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
 var ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
+var UNION_TEST = join(__dirname, 'examples/union_test2.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var ramlData = fs.readFileSync(RAML_FILE).toString()
@@ -363,6 +364,18 @@ describe('Converting an array of union type', function () {
       var expected = require(join(__dirname, 'examples/union_test_result.json'))
       expect(r).to.deep.equal(expected)
       expect(r.items.anyOf[0].properties.manufacturer.type).to.equal('string')
+      return cb()
+    })
+  })
+})
+describe('Converting a plain union type', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should result in an array of schemas', function (cb) {
+    var ramlData = fs.readFileSync(UNION_TEST).toString()
+    convert(ramlData, 'Animal', function (e, r) {
+      var expected = require(join(__dirname, 'examples/union_test_result2.json'))
+      expect(r).to.deep.equal(expected)
+      console.log(r)
       return cb()
     })
   })
