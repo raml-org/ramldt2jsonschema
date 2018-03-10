@@ -33,19 +33,19 @@
   },
   "dependencies": {
     "commander": "^2.9.0",
-    "datatype-expansion": "^0.2.6",
+    "datatype-expansion": "^0.3.1",
     "deep-get-set": "^1.1.0",
     "js-yaml": "^3.10.0",
-    "sync-request": "^4.1.0",
+    "sync-request": "^6.0.0",
     "yaml-ast-parser": "0.0.40"
   },
   "devDependencies": {
-    "ajv": "^4.7.6",
-    "chai": "^3.5.0",
+    "ajv": "^6.2.1",
+    "chai": "^4.1.2",
     "istanbul": "^0.4.5",
-    "mocha": "^3.1.0",
-    "rewire": "^2.5.2",
-    "standard": "^8.3.0",
+    "mocha": "^5.0.4",
+    "rewire": "^3.0.2",
+    "standard": "^11.0.0",
     "raml-1-parser": "^1.1.4"
   }
 }
