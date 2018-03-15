@@ -402,7 +402,7 @@ function schemaForm (data, reqStack, prop) {
     return data
   }
   var lastEl = reqStack[reqStack.length - 1]
-  if (data.required && lastEl && prop) {
+  if (data.required !== false && lastEl && prop) {
     if (lastEl.props.indexOf(prop) > -1 && (prop[0] + prop[prop.length - 1]) !== '//') {
       lastEl.reqs.push(prop)
     }
@@ -417,6 +417,7 @@ function schemaForm (data, reqStack, prop) {
   }
 
   var updateWith = processNested(data, reqStack)
+
   data = utils.updateObjWith(data, updateWith)
   if (isObj) {
     data.required = reqStack.pop().reqs

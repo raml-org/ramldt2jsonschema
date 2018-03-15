@@ -317,7 +317,8 @@ describe('dt2js.schemaForm()', function () {
           'required': true
         },
         'address': {
-          'type': 'string'
+          'type': 'string',
+          'required': false
         }
       }
     }
@@ -342,7 +343,7 @@ describe('dt2js.schemaForm()', function () {
       .to.be.deep.equal(['name'])
     expect(schema).to.not.have.deep.property('properties.name.required')
   })
-  context('when `required` param is not used properly', function () {
+  context.skip('when `required` param is not used properly', function () {
     it('should not hoist `required` properties param', function () {
       var data = {
         'type': 'object',
@@ -401,6 +402,39 @@ describe('dt2js.schemaForm()', function () {
   })
 })
 
+describe('dt2js.schemaForm()', function () {
+  var schemaForm = dt2js.__get__('schemaForm')
+  it('should interpret absence of `required` as required: true', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'key1': {
+          'type': 'integer',
+          'default': 1,
+          'required': true
+        },
+        'key2': {
+          'type': 'string',
+          'required': false
+        },
+        'key3': {
+          'type': 'boolean',
+          'default': true
+        }
+      }
+    }
+    var schema = schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['key1', 'key3'])
+    expect(schema)
+      .to.have.deep.property('properties.key1.default').and
+      .to.equal(1)
+    expect(schema)
+      .to.have.deep.property('properties.key3.default').and
+      .to.equal(true)
+  })
+})
 describe('Converting an array of union type', function () {
   var convert = dt2js.__get__('dt2js')
   it('should result in an array type, with anyOf on the items level', function (cb) {
