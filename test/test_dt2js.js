@@ -71,6 +71,30 @@ describe('dt2js.dt2js()', function () {
       })
     })
   })
+  context('when given a pattern property', function () {
+    var raml = [
+      '#%RAML 1.0',
+      '    title: My API With Types',
+      '    types:',
+      '      Person:',
+      '        properties:',
+      '          name:',
+      '            type: string',
+      '          age:',
+      '            required: false',
+      '            type: number',
+      '          /^note\\d+$/:',
+      '            type: string'
+    ].join('\n')
+    it('should omit it from required array', function (done) {
+      dt2js.dt2js(raml, 'Person', function (err, schema) {
+        expect(schema).to.have.property('required').and
+          .to.deep.equal(['name'])
+        expect(err).to.be.null
+        done()
+      })
+    })
+  })
 })
 
 describe('dt2js.destringify()', function () {
@@ -217,6 +241,28 @@ describe('dt2js.convertDateType()', function () {
     })
   })
 })
+
+describe('dt2js.convertPatternProperties()', function () {
+  var convertPatternProperties = dt2js.__get__('convertPatternProperties')
+  context('When pattern properties are found', function () {
+    it('should replace it with a JSON Schema patternProperties', function () {
+      var obj = convertPatternProperties({
+        properties: {
+          beep: 'boop',
+          '/^note\\d+$/': {type: 'string'}
+        }
+      })
+      expect(obj).to.not.have.deep.property('properties./^note\\d+$/')
+      expect(obj).to.deep.equal({
+        properties: {beep: 'boop'},
+        patternProperties: {
+          '^note\\d+$': { type: 'string' }
+        }
+      })
+    })
+  })
+})
+
 describe('dt2js.convertDisplayName()', function () {
   var convertDisplayName = dt2js.__get__('convertDisplayName')
   context('When a RAML displayName is given', function () {
