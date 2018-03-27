@@ -1,0 +1,25 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "from": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 10
+        },
+        "partial": {
+            "type": "string",
+            "enum": [
+                "true",
+                "false"
+            ],
+            "default": "true"
+        }
+    },
+    "required": [
+        "from",
+        "partial"
+    ],
+    "$schema": "http://json-schema.org/draft-04/schema#"
+}
