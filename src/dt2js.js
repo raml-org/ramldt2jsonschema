@@ -34,7 +34,6 @@ function getRAMLContext (ramlData, rootFileDir) {
  * @returns  {Mixed} - either a string, int or boolean.
  */
 function destringify (val) {
-  // if (val === '0') return 0
   if (!isNaN(Number(val))) return Number(val)
   if (val === 'true') return true
   if (val === 'false') return false
