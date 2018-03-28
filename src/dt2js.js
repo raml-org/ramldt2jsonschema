@@ -421,7 +421,12 @@ function schemaForm (data, reqStack, prop) {
 
   data = utils.updateObjWith(data, updateWith)
   if (isObj) {
-    data.required = reqStack.pop().reqs
+    var reqs = reqStack.pop().reqs
+    // Strip duplicates from reqs
+    reqs = reqs.filter(function (value, index, self) {
+      return self.indexOf(value) === index
+    })
+    data.required = reqs
   }
 
   if (data.type) {

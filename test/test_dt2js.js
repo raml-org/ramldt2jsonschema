@@ -11,6 +11,7 @@ var RAML_FILE = join(__dirname, 'examples/types_example.raml')
 var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
 var ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
 var UNION_TEST = join(__dirname, 'examples/union_test2.raml')
+var DUPLICATE_REQUIRED_ENTRY = join(__dirname, 'examples/duplicate_required_entry_test.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var ramlData = fs.readFileSync(RAML_FILE).toString()
@@ -456,6 +457,16 @@ describe('Converting a plain union type', function () {
       var expected = require(join(__dirname, 'examples/union_test_result2.json'))
       expect(r).to.deep.equal(expected)
       console.log(r)
+      return cb()
+    })
+  })
+})
+describe('When property with name "items".', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should only have one entry in required array.', function (cb) {
+    var ramlData = fs.readFileSync(DUPLICATE_REQUIRED_ENTRY).toString()
+    convert(ramlData, 'Foo', function (e, r) {
+      expect(r.required).to.deep.equal(['items', 'total_count'])
       return cb()
     })
   })
