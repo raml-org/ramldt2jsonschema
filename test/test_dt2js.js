@@ -465,7 +465,6 @@ describe('Type conversion & destringify function', function () {
   it('should be skipped for values of type string', function (cb) {
     var ramlData = fs.readFileSync(TYPE_CONVERSION_TEST).toString()
     convert(ramlData, 'SearchQuery', function (e, r) {
-      // console.log(JSON.stringify(r, null, 4))
       var expected = require(join(__dirname, 'examples/type_conversion_test.json'))
       expect(r).to.deep.equal(expected)
       return cb()

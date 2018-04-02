@@ -1,14 +1,21 @@
 types:
-    SearchQuery:
-        type: object
-        additionalProperties: false
-        properties:
-          from:
-            type: integer
-            default: 0
-            minimum: 0
-            maximum: 10
-          partial:
-            type: string
-            enum: ["true", "false"]
-            default: "true"
+  TimeRange:
+    type: string
+    enum:
+      - "1"
+      - "30"
+  SearchQuery:
+    type: object
+    additionalProperties: false
+    properties:
+      time_range:
+        type: TimeRange
+        default: "1"
+      toggle:
+        type: boolean
+        default: false
+      from:
+        type: integer
+        default: 0
+        minimum: 0
+        maximum: 10

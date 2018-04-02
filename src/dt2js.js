@@ -145,17 +145,13 @@ function traverse (obj, ast, rootFileDir, libraries) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      var type = currentNode.parent.mappings.filter(function (el) {
-        return el.key.value === 'type'
-      })[0]
-      if (type && type.value && type.value.value) type = type.value.value
       var val
-      if (type !== 'string') {
+      if (currentNode.value.doubleQuoted === false) {
+        // convert back from string type
         val = destringify(currentNode.value.value)
       } else {
         val = currentNode.value.value
       }
-      // convert back from string type
       val = libraryOrValue(libraries, val)
       deep(obj, keys.join('.'), val)
     // a leaf that is an array
