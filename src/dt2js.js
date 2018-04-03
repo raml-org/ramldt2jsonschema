@@ -34,7 +34,7 @@ function getRAMLContext (ramlData, rootFileDir) {
  * @returns  {Mixed} - either a string, int or boolean.
  */
 function destringify (val) {
-  if (parseInt(val)) return parseInt(val)
+  if (!isNaN(Number(val))) return Number(val)
   if (val === 'true') return true
   if (val === 'false') return false
   return val
@@ -145,8 +145,13 @@ function traverse (obj, ast, rootFileDir, libraries) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      // if it looks like an int, it's an int
-      var val = destringify(currentNode.value.value)
+      var val
+      if (currentNode.value.doubleQuoted === false) {
+        // convert back from string type
+        val = destringify(currentNode.value.value)
+      } else {
+        val = currentNode.value.value
+      }
       val = libraryOrValue(libraries, val)
       deep(obj, keys.join('.'), val)
     // a leaf that is an array
