@@ -11,6 +11,7 @@ var RAML_FILE = join(__dirname, 'examples/types_example.raml')
 var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
 var ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
 var UNION_TEST = join(__dirname, 'examples/union_test2.raml')
+var DUPLICATE_REQUIRED_ENTRY = join(__dirname, 'examples/duplicate_required_entry_test.raml')
 var TYPE_CONVERSION_TEST = join(__dirname, 'examples/type_conversion_test.raml')
 
 describe('dt2js.getRAMLContext()', function () {
@@ -467,6 +468,16 @@ describe('Type conversion & destringify function', function () {
     convert(ramlData, 'SearchQuery', function (e, r) {
       var expected = require(join(__dirname, 'examples/type_conversion_test.json'))
       expect(r).to.deep.equal(expected)
+      return cb()
+    })
+  })
+})
+describe('When property with name "items".', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should only have one entry in required array.', function (cb) {
+    var ramlData = fs.readFileSync(DUPLICATE_REQUIRED_ENTRY).toString()
+    convert(ramlData, 'Foo', function (e, r) {
+      expect(r.required).to.deep.equal(['items', 'total_count'])
       return cb()
     })
   })
