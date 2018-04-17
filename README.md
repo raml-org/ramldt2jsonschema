@@ -5,7 +5,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-This repository contains a node implementation that converts a RAML data type into JSON schema, and back.
+CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back
 
 ## Usage
 
