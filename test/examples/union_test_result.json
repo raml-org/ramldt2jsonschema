@@ -1,9 +1,10 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "array",
   "items": {
+    "type": "object",
     "anyOf": [
       {
+        "type": "object",
         "properties": {
           "manufacturer": {
             "type": "string"
@@ -16,7 +17,6 @@
           }
         },
         "additionalProperties": true,
-        "type": "object",
         "required": [
           "manufacturer",
           "numberOfSIMCards",
@@ -24,6 +24,7 @@
         ]
       },
       {
+        "type": "object",
         "properties": {
           "manufacturer": {
             "type": "string"
@@ -36,7 +37,6 @@
           }
         },
         "additionalProperties": true,
-        "type": "object",
         "required": [
           "manufacturer",
           "numberOfUSBPorts",
@@ -44,5 +44,6 @@
         ]
       }
     ]
-  }
+  },
+  "$schema": "http://json-schema.org/draft-04/schema#"
 }
