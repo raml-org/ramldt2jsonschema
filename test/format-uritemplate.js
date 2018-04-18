@@ -1,5 +1,8 @@
 /* global describe, it */
 
+// Uses spec files from the uritemplate-test project
+// https://github.com/uri-templates/uritemplate-test
+
 var expect = require('chai').expect
 var specs = require('./uritemplate-spec-examples')
 var negativeSpecs = require('./uritemplate-spec-negative')
