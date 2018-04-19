@@ -9,6 +9,10 @@ var fs = require('fs')
 
 var RAML_FILE = join(__dirname, 'examples/types_example.raml')
 var INVALID_RAML_FILE = join(__dirname, 'examples/invalid.raml')
+var ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
+var UNION_TEST = join(__dirname, 'examples/union_test2.raml')
+var DUPLICATE_REQUIRED_ENTRY = join(__dirname, 'examples/duplicate_required_entry_test.raml')
+var TYPE_CONVERSION_TEST = join(__dirname, 'examples/type_conversion_test.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   var ramlData = fs.readFileSync(RAML_FILE).toString()
@@ -35,7 +39,7 @@ describe('dt2js.dt2js()', function () {
       dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
-            '$schema', 'http://json-schema.org/draft-04/schema#').and
+            '$schema', 'http://json-schema.org/draft-06/schema#').and
         expect(schema).to.have.property('type', 'object')
         expect(err).to.be.nil
         done()
@@ -70,6 +74,30 @@ describe('dt2js.dt2js()', function () {
       })
     })
   })
+  context('when given a pattern property', function () {
+    var raml = [
+      '#%RAML 1.0',
+      '    title: My API With Types',
+      '    types:',
+      '      Person:',
+      '        properties:',
+      '          name:',
+      '            type: string',
+      '          age:',
+      '            required: false',
+      '            type: number',
+      '          /^note\\d+$/:',
+      '            type: string'
+    ].join('\n')
+    it('should omit it from required array', function (done) {
+      dt2js.dt2js(raml, 'Person', function (err, schema) {
+        expect(schema).to.have.property('required').and
+          .to.deep.equal(['name'])
+        expect(err).to.be.null
+        done()
+      })
+    })
+  })
 })
 
 describe('dt2js.destringify()', function () {
@@ -99,7 +127,7 @@ describe('dt2js.addRootKeywords()', function () {
     expect(schema)
       .to.be.an('object').and
       .to.have.property(
-        '$schema', 'http://json-schema.org/draft-04/schema#')
+        '$schema', 'http://json-schema.org/draft-06/schema#')
   })
 })
 
@@ -216,6 +244,28 @@ describe('dt2js.convertDateType()', function () {
     })
   })
 })
+
+describe('dt2js.convertPatternProperties()', function () {
+  var convertPatternProperties = dt2js.__get__('convertPatternProperties')
+  context('When pattern properties are found', function () {
+    it('should replace it with a JSON Schema patternProperties', function () {
+      var obj = convertPatternProperties({
+        properties: {
+          beep: 'boop',
+          '/^note\\d+$/': {type: 'string'}
+        }
+      })
+      expect(obj).to.not.have.deep.property('properties./^note\\d+$/')
+      expect(obj).to.deep.equal({
+        properties: {beep: 'boop'},
+        patternProperties: {
+          '^note\\d+$': { type: 'string' }
+        }
+      })
+    })
+  })
+})
+
 describe('dt2js.convertDisplayName()', function () {
   var convertDisplayName = dt2js.__get__('convertDisplayName')
   context('When a RAML displayName is given', function () {
@@ -270,7 +320,8 @@ describe('dt2js.schemaForm()', function () {
           'required': true
         },
         'address': {
-          'type': 'string'
+          'type': 'string',
+          'required': false
         }
       }
     }
@@ -295,7 +346,7 @@ describe('dt2js.schemaForm()', function () {
       .to.be.deep.equal(['name'])
     expect(schema).to.not.have.deep.property('properties.name.required')
   })
-  context('when `required` param is not used properly', function () {
+  context.skip('when `required` param is not used properly', function () {
     it('should not hoist `required` properties param', function () {
       var data = {
         'type': 'object',
@@ -351,5 +402,83 @@ describe('dt2js.schemaForm()', function () {
     expect(schema).to.have.deep.property('properties.photo.type', 'string')
     expect(schema).to.have.deep.property('properties.photo.media')
     expect(schema).to.have.deep.property('properties.dob.type', 'string')
+  })
+})
+
+describe('dt2js.schemaForm()', function () {
+  var schemaForm = dt2js.__get__('schemaForm')
+  it('should interpret absence of `required` as required: true', function () {
+    var data = {
+      'type': 'object',
+      'properties': {
+        'key1': {
+          'type': 'integer',
+          'default': 1,
+          'required': true
+        },
+        'key2': {
+          'type': 'string',
+          'required': false
+        },
+        'key3': {
+          'type': 'boolean',
+          'default': true
+        }
+      }
+    }
+    var schema = schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['key1', 'key3'])
+    expect(schema)
+      .to.have.deep.property('properties.key1.default').and
+      .to.equal(1)
+    expect(schema)
+      .to.have.deep.property('properties.key3.default').and
+      .to.equal(true)
+  })
+})
+describe('Converting an array of union type', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should result in an array type, with anyOf on the items level', function (cb) {
+    var ramlData = fs.readFileSync(ARRAY_OF_UNION_TEST).toString()
+    convert(ramlData, 'Devices', function (e, r) {
+      var expected = require(join(__dirname, 'examples/union_test_result.json'))
+      expect(r).to.deep.equal(expected)
+      expect(r.items.anyOf[0].properties.manufacturer.type).to.equal('string')
+      return cb()
+    })
+  })
+})
+describe('Converting a plain union type', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should result in an array of schemas', function (cb) {
+    var ramlData = fs.readFileSync(UNION_TEST).toString()
+    convert(ramlData, 'Animal', function (e, r) {
+      var expected = require(join(__dirname, 'examples/union_test_result2.json'))
+      expect(r).to.deep.equal(expected)
+      return cb()
+    })
+  })
+})
+describe('Type conversion & destringify function', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should be skipped for values of type string', function (cb) {
+    var ramlData = fs.readFileSync(TYPE_CONVERSION_TEST).toString()
+    convert(ramlData, 'SearchQuery', function (e, r) {
+      var expected = require(join(__dirname, 'examples/type_conversion_test.json'))
+      expect(r).to.deep.equal(expected)
+      return cb()
+    })
+  })
+})
+describe('When property with name "items".', function () {
+  var convert = dt2js.__get__('dt2js')
+  it('should only have one entry in required array.', function (cb) {
+    var ramlData = fs.readFileSync(DUPLICATE_REQUIRED_ENTRY).toString()
+    convert(ramlData, 'Foo', function (e, r) {
+      expect(r.required).to.deep.equal(['items', 'total_count'])
+      return cb()
+    })
   })
 })

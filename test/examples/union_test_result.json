@@ -1,0 +1,48 @@
+{
+  "type": "array",
+  "items": {
+    "anyOf": [
+      {
+        "type": "object",
+        "properties": {
+          "manufacturer": {
+            "type": "string"
+          },
+          "numberOfSIMCards": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "manufacturer",
+          "numberOfSIMCards",
+          "kind"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "manufacturer": {
+            "type": "string"
+          },
+          "numberOfUSBPorts": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "manufacturer",
+          "numberOfUSBPorts",
+          "kind"
+        ]
+      }
+    ]
+  },
+  "$schema": "http://json-schema.org/draft-06/schema#"
+}

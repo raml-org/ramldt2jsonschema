@@ -56,6 +56,7 @@ function RAMLEmitter (data, typeName) {
    */
   this.processMainData = function () {
     delete this.data['$schema']
+    delete this.data['$id']
     this.types[this.mainTypeName] = this.ramlForm(this.data, [])
   }
 
@@ -77,20 +78,40 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.ramlForm = function (data, reqStack, prop) {
+    if (prop === 'properties') {
+      // handle schema boolean true and empty schemas
+      var properties = {}
+      Object.keys(data).map(function (key) {
+        if (data[key] === true || (typeof data[key] === 'object' && Object.keys(data[key]).length === 0)) {
+          properties[key] = {type: 'any'}
+        } else {
+          properties[key] = data[key]
+        }
+      })
+      data = properties
+    }
     if (prop !== 'properties') {
       // Drop the following json schema keywords:
       var dropKeywords = [
         'dependencies',
-        'exclusiveMaximum',
-        'exclusiveMinimum',
-        'additionalItems'
+        'additionalItems',
+        'propertyNames'
       ]
       dropKeywords.map(function (word) { delete data[word] })
 
+      data = convertExclusives(data)
       // convert json schema title to raml displayName
       if (data.title) {
         data.displayName = data.title
         delete data.title
+      }
+      // strip json schema contains keyword
+      if (data.contains) {
+        delete data.contains
+      }
+      if (data.const) {
+        data.enum = [data.const]
+        delete data.const
       }
     }
     data = convertAdditionalProperties(data)
@@ -116,20 +137,20 @@ function RAMLEmitter (data, typeName) {
       data = convertFileType(data)
     }
 
-    var updateWith = this.processNested(data, reqStack)
+    var updateWith = this.processNested(prop, data, reqStack)
     data = utils.updateObjWith(data, updateWith)
 
     if (isObj) {
       reqStack.pop()
     }
     var lastEl = reqStack[reqStack.length - 1]
-    if (lastEl && prop) {
-      if (lastEl.props.indexOf(prop) > -1) {
-        data['required'] = lastEl.reqs.indexOf(prop) > -1
+    if (lastEl && prop && prop !== 'properties') {
+      if (lastEl.reqs.indexOf(prop) === -1) {
+        data['required'] = false
       }
     }
 
-    if (data['$ref']) {
+    if (data['$ref'] && prop !== 'properties') {
       data = convertRef(data)
     } else if (data.type) {
       data = convertType(data)
@@ -141,6 +162,30 @@ function RAMLEmitter (data, typeName) {
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
     }
+    // if property is only a type definition, use <property>: <type> shorthand
+    var keys = Object.keys(data)
+    if (keys.length === 1 && keys[0] === 'type') {
+      data = data[keys[0]]
+    }
+    return data
+  }
+
+  /**
+   * convert exclusiveMinimum and exclusiveMaximum
+   * to minimum and maximum
+   *
+   * @param  {Object} data - current data
+   * @returns  {Object} converted data
+   */
+  function convertExclusives (data) {
+    if (data.exclusiveMaximum !== undefined && typeof data.exclusiveMaximum !== 'boolean') {
+      data.maximum = data.exclusiveMaximum
+    }
+    if (data.exclusiveMinimum !== undefined && typeof data.exclusiveMinimum !== 'boolean') {
+      data.minimum = data.exclusiveMinimum
+    }
+    delete data.exclusiveMinimum
+    delete data.exclusiveMaximum
     return data
   }
 
@@ -205,7 +250,7 @@ function RAMLEmitter (data, typeName) {
    * @param  {Array} reqStack - Stack of required properties.
    * @returns  {Object}
    */
-  this.processNested = function (data, reqStack) {
+  this.processNested = function (prop, data, reqStack) {
     var updateWith = {}
     for (var key in data) {
       var val = data[key]
@@ -216,7 +261,15 @@ function RAMLEmitter (data, typeName) {
       }
 
       if (val instanceof Object) {
-        updateWith[key] = this.ramlForm(val, reqStack, key)
+        var raml = this.ramlForm(val, reqStack, key)
+        if (raml.required === false && key !== '//' && prop === 'properties') {
+          delete raml.required
+          updateWith[key + '?'] = raml
+          delete data[key]
+        } else {
+          delete raml.required
+          updateWith[key] = raml
+        }
         continue
       }
     }
@@ -354,6 +407,15 @@ function convertDefinedFormat (data) {
       break
     case 'uri':
       data['pattern'] = constants.FORMAT_REGEXPS['uri']
+      break
+    case 'uri-reference':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri-reference']
+      break
+    case 'json-pointer':
+      data['pattern'] = constants.FORMAT_REGEXPS['json-pointer']
+      break
+    case 'uri-template':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri-template']
       break
     default:
       data['pattern'] = format

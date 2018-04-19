@@ -25,11 +25,11 @@ var getRAMLContext = dt2js.__get__('getRAMLContext')
 
 var EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
-var ajv = new Ajv({'allErrors': true})
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'))
+var ajv = new Ajv({schemaId: 'id', allErrors: true})
+ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
 
 var draft4schema = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'draft6schema.json')).toString())
+  fs.readFileSync(path.join(__dirname, 'draft4schema.json')).toString())
 var validate = ajv.compile(draft4schema)
 
 /**

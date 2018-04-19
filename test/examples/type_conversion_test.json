@@ -1,0 +1,30 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "time_range": {
+            "type": "string",
+            "enum": [
+                "1",
+                "30"
+            ],
+            "default": "1"
+        },
+        "toggle": {
+            "type": "boolean",
+            "default": false
+        },
+        "from": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 10
+        }
+    },
+    "required": [
+        "time_range",
+        "toggle",
+        "from"
+    ],
+    "$schema": "http://json-schema.org/draft-06/schema#"
+}
