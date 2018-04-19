@@ -34,7 +34,7 @@ function getRAMLContext (ramlData, rootFileDir) {
  * @returns  {Mixed} - either a string, int or boolean.
  */
 function destringify (val) {
-  if (parseInt(val)) return parseInt(val)
+  if (!isNaN(Number(val))) return Number(val)
   if (val === 'true') return true
   if (val === 'false') return false
   return val
@@ -145,8 +145,13 @@ function traverse (obj, ast, rootFileDir, libraries) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      // if it looks like an int, it's an int
-      var val = destringify(currentNode.value.value)
+      var val
+      if (currentNode.value.doubleQuoted === false) {
+        // convert back from string type
+        val = destringify(currentNode.value.value)
+      } else {
+        val = currentNode.value.value
+      }
       val = libraryOrValue(libraries, val)
       deep(obj, keys.join('.'), val)
     // a leaf that is an array
@@ -267,7 +272,8 @@ function processArray (arr, reqStack) {
 function convertType (data) {
   switch (data.type) {
     case 'union':
-      if (Array.isArray(data.anyOf)) {
+      // If union of arrays
+      if (Array.isArray(data.anyOf) && data.anyOf[0].type === 'array') {
         var items = data.anyOf.map(function (e) { return e.items })
         data.items = {anyOf: []}
         data.items.anyOf = items
@@ -340,6 +346,24 @@ function convertDateType (data) {
 }
 
 /**
+ * Change RAML pattern properties to JSON patternProperties.
+ *
+ * @param  {Object} data - the library fragment to convert
+ * @returns  {Object}
+ */
+function convertPatternProperties (data) {
+  Object.keys(data.properties).map(function (key) {
+    if (/^\/.*\/$/.test(key)) {
+      data.patternProperties = data.patternProperties || {}
+      var stringRegex = key.slice(1, -1)
+      data.patternProperties[stringRegex] = data.properties[key]
+      delete data.properties[key]
+    }
+  })
+  return data
+}
+
+/**
  * Change RAML displayName to JSON schema title.
  *
  * @param  {Object} data
@@ -389,8 +413,8 @@ function schemaForm (data, reqStack, prop) {
     return data
   }
   var lastEl = reqStack[reqStack.length - 1]
-  if (data.required && lastEl && prop) {
-    if (lastEl.props.indexOf(prop) > -1) {
+  if (data.required !== false && lastEl && prop) {
+    if (lastEl.props.indexOf(prop) > -1 && (prop[0] + prop[prop.length - 1]) !== '//') {
       lastEl.reqs.push(prop)
     }
   }
@@ -404,9 +428,15 @@ function schemaForm (data, reqStack, prop) {
   }
 
   var updateWith = processNested(data, reqStack)
+
   data = utils.updateObjWith(data, updateWith)
   if (isObj) {
-    data.required = reqStack.pop().reqs
+    var reqs = reqStack.pop().reqs
+    // Strip duplicates from reqs
+    reqs = reqs.filter(function (value, index, self) {
+      return self.indexOf(value) === index
+    })
+    data.required = reqs
   }
 
   if (data.type) {
@@ -415,6 +445,9 @@ function schemaForm (data, reqStack, prop) {
   }
   if (data.displayName) {
     data = convertDisplayName(data)
+  }
+  if (data.properties) {
+    convertPatternProperties(data)
   }
   return data
 }

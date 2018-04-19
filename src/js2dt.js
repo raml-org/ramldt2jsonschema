@@ -137,16 +137,16 @@ function RAMLEmitter (data, typeName) {
       data = convertFileType(data)
     }
 
-    var updateWith = this.processNested(data, reqStack)
+    var updateWith = this.processNested(prop, data, reqStack)
     data = utils.updateObjWith(data, updateWith)
 
     if (isObj) {
       reqStack.pop()
     }
     var lastEl = reqStack[reqStack.length - 1]
-    if (lastEl && prop) {
-      if (lastEl.props.indexOf(prop) > -1) {
-        data['required'] = lastEl.reqs.indexOf(prop) > -1
+    if (lastEl && prop && prop !== 'properties') {
+      if (lastEl.reqs.indexOf(prop) === -1) {
+        data['required'] = false
       }
     }
 
@@ -161,6 +161,11 @@ function RAMLEmitter (data, typeName) {
     }
     if (combsKey) {
       data = this.processCombinations(data, combsKey, prop)
+    }
+    // if property is only a type definition, use <property>: <type> shorthand
+    var keys = Object.keys(data)
+    if (keys.length === 1 && keys[0] === 'type') {
+      data = data[keys[0]]
     }
     return data
   }
@@ -245,7 +250,7 @@ function RAMLEmitter (data, typeName) {
    * @param  {Array} reqStack - Stack of required properties.
    * @returns  {Object}
    */
-  this.processNested = function (data, reqStack) {
+  this.processNested = function (prop, data, reqStack) {
     var updateWith = {}
     for (var key in data) {
       var val = data[key]
@@ -256,7 +261,15 @@ function RAMLEmitter (data, typeName) {
       }
 
       if (val instanceof Object) {
-        updateWith[key] = this.ramlForm(val, reqStack, key)
+        var raml = this.ramlForm(val, reqStack, key)
+        if (raml.required === false && key !== '//' && prop === 'properties') {
+          delete raml.required
+          updateWith[key + '?'] = raml
+          delete data[key]
+        } else {
+          delete raml.required
+          updateWith[key] = raml
+        }
         continue
       }
     }
