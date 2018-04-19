@@ -9,7 +9,6 @@ var negativeSpecs = require('./uritemplate-spec-negative')
 var constants = require('../src/constants')
 
 describe('uri template format', function () {
-  // var regExp = /^(\w+\?)?(\w+[=])?(\?\w+[=]\w+)?X?({(?=[^}]+}))[+#./;?&]?(\w+([:]\d+(?!\*))?[*]?[,]?)+}(\/\w+)?/
   var regExp = new RegExp(constants['FORMAT_REGEXPS']['uri-template'])
   it('should work for level 1', function () {
     var level1 = specs['Level 1 Examples'].testcases.map(function (e) { return e[0] })

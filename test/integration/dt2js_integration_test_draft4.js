@@ -25,7 +25,6 @@ var getRAMLContext = dt2js.__get__('getRAMLContext')
 
 var EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
-// var ajv = new Ajv({'allErrors': true})
 var ajv = new Ajv({schemaId: 'id', allErrors: true})
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
 
