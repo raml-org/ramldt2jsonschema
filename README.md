@@ -5,7 +5,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back
+CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 6, and back. (dt2js can still be used to produce draft04 documents if used programatically)
 
 ## Usage
 
@@ -106,6 +106,30 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
   console.log(raml)
 })
 ```
+
+### Producing jsonschema Draft 04
+Use the function `raml2json.setDraft04()`
+
+```
+var raml2json = require('ramldt2jsonschema')
+var join = require('path').join
+var fs = require('fs')
+
+var filePath = join(__dirname, 'api.raml')
+var ramlData = fs.readFileSync(filePath).toString()
+
+raml2json.setDraft04()
+
+raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
+  if (err) {
+    console.log(err)
+    return
+  }
+  console.log(JSON.stringify(schema, null, 2))
+})
+```
+
+
 
 ### Limitations
 

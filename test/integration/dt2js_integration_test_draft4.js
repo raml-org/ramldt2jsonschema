@@ -21,6 +21,7 @@ var Ajv = require('ajv')
 var fs = require('fs')
 
 var dt2js = rewire('../../src/dt2js')
+dt2js.setDraft04()
 var getRAMLContext = dt2js.__get__('getRAMLContext')
 
 var EXAMPLES_FOLDER = path.join(__dirname, 'raml')
