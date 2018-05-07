@@ -1,7 +1,7 @@
 'use strict'
 
 var yap = require('yaml-ast-parser')
-var dtexp = require('datatype-expansion')
+const {canonicalForm, expandedForm} = require('datatype-expansion')
 var constants = require('./constants')
 var utils = require('./utils')
 var fs = require('fs')
@@ -212,38 +212,18 @@ function setDraft04 () {
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
 function dt2js (ramlData, typeName, cb) {
-  try {
-    var ctx = getRAMLContext(ramlData, basePath)
-  } catch (error) {
-    cb(error, null)
-    return
-  }
-  if (!(ctx instanceof Object)) {
-    cb(new Error('Invalid RAML data'), null)
-    return
-  }
+  const ctx = getRAMLContext(ramlData, basePath)
+  if (!(ctx instanceof Object)) throw new Error('Invalid RAML data')
 
-  if (ctx[typeName] === undefined) return cb(new Error('type ' + typeName + ' does not exist'))
+  if (ctx[typeName] === undefined) throw new Error('type ' + typeName + ' does not exist')
 
-  dtexp.expandedForm(ctx[typeName], ctx, function (err, expanded) {
-    if (err) {
-      cb(err, null)
-      return
-    }
-    dtexp.canonicalForm(expanded, function (err, canonical) {
-      if (err) {
-        cb(err, null)
-        return
-      }
-      try {
-        var schema = schemaForm(canonical, [])
-        schema = addRootKeywords(schema)
-      } catch (error) {
-        cb(error, null)
-      }
-      cb(err, schema)
-    })
-  })
+  const expanded = expandedForm(ctx[typeName], ctx)
+  const canonical = canonicalForm(expanded)
+
+  let schema = schemaForm(canonical)
+  schema = addRootKeywords(schema)
+
+  return schema
 }
 
 /**
@@ -417,7 +397,7 @@ function processNested (data, reqStack) {
  * @param  {string} [prop] - Property name nested objects of which are processed.
  * @returns  {Object}
  */
-function schemaForm (data, reqStack, prop) {
+function schemaForm (data, reqStack = [], prop) {
   if (!(data instanceof Object)) {
     return data
   }
@@ -445,7 +425,9 @@ function schemaForm (data, reqStack, prop) {
     reqs = reqs.filter(function (value, index, self) {
       return self.indexOf(value) === index
     })
-    data.required = reqs
+    if (reqs.length > 0) {
+      data.required = reqs
+    }
   }
 
   if (data.type) {

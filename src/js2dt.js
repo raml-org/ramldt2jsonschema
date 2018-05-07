@@ -20,14 +20,10 @@ var utils = require('./utils')
  * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
 function js2dt (jsonData, typeName, cb) {
-  try {
-    var emitter = new RAMLEmitter(JSON.parse(jsonData), typeName)
-    var ramledData = emitter.emit()
-  } catch (error) {
-    cb(error, null)
-    return
-  }
-  cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
+  const emitter = new RAMLEmitter(JSON.parse(jsonData), typeName)
+  const ramledData = emitter.emit()
+
+  return yaml.safeDump(ramledData, {'noRefs': true})
 }
 
 /**
