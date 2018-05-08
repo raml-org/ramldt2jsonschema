@@ -79,9 +79,6 @@
       "default": "regular cat",
       "type": "string",
       "amazing": true,
-      "facets": {
-        "amazing": "boolean"
-      },
       "example": "fluffy",
       "xml": {
         "attribute": false,
