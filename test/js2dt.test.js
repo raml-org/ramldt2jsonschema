@@ -107,12 +107,10 @@ describe('js2dt.js2dt()', function () {
         'types.Product.properties.photo?.type', 'file')
       expect(data).to.not.have.nested.property(
         'types.Product.properties.photo?.media')
-      expect(data)
-        .to.have.nested.property(
-          'types.Product.properties.photo?.fileTypes[0]', 'image/jpeg')
-      expect(data)
-        .to.have.nested.property(
-          'types.Product.properties.photo?.fileTypes[1]', 'image/png')
+      expect(data).to.have.nested.property(
+        'types.Product.properties.photo?.fileTypes[0]', 'image/jpeg')
+      expect(data).to.have.nested.property(
+        'types.Product.properties.photo?.fileTypes[1]', 'image/png')
     })
     it('should drop json schema keyword additionalItems', function () {
       const jsdata = {
@@ -344,7 +342,7 @@ describe('js2dt.isFileType()', function () {
       'type': 'string',
       'media': {'binaryEncoding': 'binary'}
     }
-    expect(isFileType(data)).to.be.true()
+    expect(isFileType(data)).to.equal(true)
   })
   context('when type is not string', function () {
     it('should return false', function () {
@@ -352,7 +350,7 @@ describe('js2dt.isFileType()', function () {
         'type': 'asd',
         'media': {'binaryEncoding': 'binary'}
       }
-      expect(isFileType(data)).to.be.false()
+      expect(isFileType(data)).to.equal(false)
     })
   })
   context('when no media is set', function () {
@@ -360,7 +358,7 @@ describe('js2dt.isFileType()', function () {
       const data = {
         'type': 'string'
       }
-      expect(isFileType(data)).to.be.false()
+      expect(isFileType(data)).to.equal(false)
     })
   })
   context('when binaryEncoding is not `binary`', function () {
@@ -369,7 +367,7 @@ describe('js2dt.isFileType()', function () {
         'type': 'asd',
         'media': {'binaryEncoding': 'asdasd'}
       }
-      expect(isFileType(data)).to.be.false()
+      expect(isFileType(data)).to.equal(false)
     })
   })
 })
@@ -980,7 +978,7 @@ describe('js2dt.getCombinationsKey()', function () {
   })
   context('when object does not contain any combinations prop', function () {
     it('should return undefined', function () {
-      expect(getCombinationsKey({})).to.be.undefined()
+      expect(getCombinationsKey({})).to.equal(undefined)
     })
   })
 })

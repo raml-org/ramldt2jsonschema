@@ -25,7 +25,7 @@ describe('utils.typeNameFromRef()', function () {
   it('should get type name from $ref string', function () {
     expect(utils.typeNameFromRef('foo')).to.be.equal('Foo')
     expect(utils.typeNameFromRef('#/definitions/address'))
-        .to.be.equal('Address')
+      .to.be.equal('Address')
   })
 })
 

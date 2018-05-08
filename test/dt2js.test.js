@@ -343,7 +343,7 @@ describe('dt2js.schemaForm()', function () {
       const schema = schemaForm(data, [])
       expect(schema)
         .to.have.property('required').and
-        .to.be.deep.empty
+        .to.be.deep.empty()
     })
   })
   it('should process nested', function () {
