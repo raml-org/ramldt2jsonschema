@@ -1,8 +1,8 @@
 'use strict'
 
-var yaml = require('js-yaml')
-var constants = require('./constants')
-var utils = require('./utils')
+const yaml = require('js-yaml')
+const constants = require('./constants')
+const utils = require('./utils')
 
 /**
  * This callback accepts results converting JSON schema to RAML data type.
@@ -17,9 +17,8 @@ var utils = require('./utils')
  *
  * @param  {string} jsonData - JSON file content.
  * @param  {string} typeName - Name of RAML data type to hold converted data.
- * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function js2dt (jsonData, typeName, cb) {
+function js2dt (jsonData, typeName) {
   const emitter = new RAMLEmitter(JSON.parse(jsonData), typeName)
   const ramledData = emitter.emit()
 
@@ -42,7 +41,7 @@ function RAMLEmitter (data, typeName) {
    * values to `this.types`.
    */
   this.processDefinitions = function () {
-    var defsData = this.translateDefinitions(this.data.definitions)
+    const defsData = this.translateDefinitions(this.data.definitions)
     delete this.data.definitions
     this.types = utils.updateObjWith(this.types, defsData)
   }
@@ -88,7 +87,7 @@ function RAMLEmitter (data, typeName) {
     }
     if (prop !== 'properties') {
       // Drop the following json schema keywords:
-      var dropKeywords = [
+      const dropKeywords = [
         'dependencies',
         'additionalItems',
         'propertyNames'
@@ -115,7 +114,7 @@ function RAMLEmitter (data, typeName) {
     if (!(data instanceof Object)) {
       return data
     }
-    var isObj = data.type === 'object'
+    const isObj = data.type === 'object'
     if (isObj) {
       reqStack.push({
         'reqs': data.required || [],
@@ -124,7 +123,7 @@ function RAMLEmitter (data, typeName) {
       delete data.required
     }
 
-    var combsKey = getCombinationsKey(data)
+    const combsKey = getCombinationsKey(data)
     if (combsKey && data.type) {
       data = setCombinationsTypes(data, combsKey)
     }
@@ -133,13 +132,13 @@ function RAMLEmitter (data, typeName) {
       data = convertFileType(data)
     }
 
-    var updateWith = this.processNested(prop, data, reqStack)
+    const updateWith = this.processNested(prop, data, reqStack)
     data = utils.updateObjWith(data, updateWith)
 
     if (isObj) {
       reqStack.pop()
     }
-    var lastEl = reqStack[reqStack.length - 1]
+    const lastEl = reqStack[reqStack.length - 1]
     if (lastEl && prop && prop !== 'properties') {
       if (lastEl.reqs.indexOf(prop) === -1) {
         data['required'] = false
@@ -159,7 +158,7 @@ function RAMLEmitter (data, typeName) {
       data = this.processCombinations(data, combsKey, prop)
     }
     // if property is only a type definition, use <property>: <type> shorthand
-    var keys = Object.keys(data)
+    const keys = Object.keys(data)
     if (keys.length === 1 && keys[0] === 'type') {
       data = data[keys[0]]
     }
@@ -193,11 +192,11 @@ function RAMLEmitter (data, typeName) {
    */
   function convertAdditionalProperties (data) {
     if (data.hasOwnProperty('additionalProperties')) {
-      var val = data
+      let val = data
       if (typeof data.additionalProperties === 'boolean') val = data.additionalProperties
       if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length === 0) val = true
       if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length > 0) {
-        var type = data.additionalProperties.type
+        const type = data.additionalProperties.type
         data.properties['//'] = {type: type}
         val = false
       }
@@ -214,11 +213,11 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.translateDefinitions = function (defs) {
-    var defsData = {}
+    const defsData = {}
     if (!defs) {
       return defsData
     }
-    for (var key in defs) {
+    for (const key in defs) {
       defsData[utils.capitalize(key)] = this.ramlForm(defs[key], [])
     }
     return defsData
@@ -232,7 +231,7 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Array}
    */
   this.processArray = function (arr, reqStack) {
-    var accum = []
+    const accum = []
     arr.forEach(function (el) {
       accum.push(this.ramlForm(el, reqStack))
     }.bind(this))
@@ -247,9 +246,9 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.processNested = function (prop, data, reqStack) {
-    var updateWith = {}
-    for (var key in data) {
-      var val = data[key]
+    const updateWith = {}
+    for (const key in data) {
+      const val = data[key]
 
       if (val instanceof Array) {
         updateWith[key] = this.processArray(val, reqStack)
@@ -257,7 +256,7 @@ function RAMLEmitter (data, typeName) {
       }
 
       if (val instanceof Object) {
-        var raml = this.ramlForm(val, reqStack, key)
+        const raml = this.ramlForm(val, reqStack, key)
         if (raml.required === false && key !== '//' && prop === 'properties') {
           delete raml.required
           updateWith[key + '?'] = raml
@@ -274,10 +273,10 @@ function RAMLEmitter (data, typeName) {
 
   this.processCombinations = function (data, combsKey, prop) {
     prop = prop ? utils.capitalize(prop) : this.mainTypeName
-    var combSchemas = data[combsKey]
-    var superTypes = []
+    const combSchemas = data[combsKey]
+    const superTypes = []
     combSchemas.forEach(function (el, ind) {
-      var name = prop + 'ParentType' + ind.toString()
+      const name = prop + 'ParentType' + ind.toString()
       superTypes.push(name)
       this.types[name] = el
     }.bind(this))
@@ -321,7 +320,7 @@ function isFileType (data) {
  */
 function convertFileType (data) {
   data['type'] = 'file'
-  var anyOf = data.media.anyOf
+  const anyOf = data.media.anyOf
   if (anyOf && anyOf.length > 0) {
     data['fileTypes'] = []
     anyOf.forEach(function (el) {
@@ -347,7 +346,7 @@ function convertDateType (data) {
   if (!(data.type === 'string' && data.pattern)) {
     return data
   }
-  var pattern = data.pattern
+  const pattern = data.pattern
   delete data.pattern
   switch (pattern) {
     case constants.dateOnlyPattern:
@@ -383,7 +382,7 @@ function convertDefinedFormat (data) {
   if (!(data.type === 'string' && data.format)) {
     return data
   }
-  var format = data.format
+  const format = data.format
   delete data.format
   switch (format) {
     case 'date-time':
@@ -430,7 +429,7 @@ function convertPatternProperties (data) {
     return data
   }
   data.properties = data.properties || {}
-  var patternProperties = data.patternProperties
+  const patternProperties = data.patternProperties
   delete data.patternProperties
   Object.keys(patternProperties).map(function (pattern) {
     data.properties['/' + pattern + '/'] = patternProperties[pattern]

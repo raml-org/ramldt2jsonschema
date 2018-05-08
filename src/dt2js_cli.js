@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 'use strict'
 
-var dt2js = require('./dt2js')
-var program = require('commander')
-var fs = require('fs')
+const dt2js = require('./dt2js')
+const program = require('commander')
+const fs = require('fs')
 
 /**
  * Callback to write JSON schema to console.
@@ -16,7 +16,7 @@ function writeToConsole (err, schema) {
     console.log(err)
     return
   }
-  var pretty = JSON.stringify(schema, null, 2)
+  const pretty = JSON.stringify(schema, null, 2)
   console.log(pretty)
 }
 
@@ -27,8 +27,8 @@ function writeToConsole (err, schema) {
  * @param  {string} ramlTypeName
  */
 function dt2jsCLI (ramlFile, ramlTypeName) {
-  var rootFileDir = ramlFile.split('/').slice(0, -1).join('/')
-  var ramlData = fs.readFileSync(ramlFile).toString()
+  const rootFileDir = ramlFile.split('/').slice(0, -1).join('/')
+  const ramlData = fs.readFileSync(ramlFile).toString()
   dt2js.setBasePath(rootFileDir)
   dt2js.dt2js(ramlData, ramlTypeName, writeToConsole)
 }

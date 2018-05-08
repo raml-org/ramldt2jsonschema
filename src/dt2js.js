@@ -1,17 +1,17 @@
 'use strict'
 
-var yap = require('yaml-ast-parser')
+const yap = require('yaml-ast-parser')
 const {canonicalForm, expandedForm} = require('datatype-expansion')
-var constants = require('./constants')
-var utils = require('./utils')
-var fs = require('fs')
-var path = require('path')
-var request = require('sync-request')
-var deep = require('deep-get-set')
+const constants = require('./constants')
+const utils = require('./utils')
+const fs = require('fs')
+const path = require('path')
+const request = require('sync-request')
+const deep = require('deep-get-set')
 deep.p = true
 
-var basePath = process.cwd()
-var draft = '06'
+let basePath = process.cwd()
+let draft = '06'
 /**
  * Get RAML Data Types context.
  *
@@ -21,9 +21,9 @@ var draft = '06'
  */
 function getRAMLContext (ramlData, rootFileDir) {
   rootFileDir = rootFileDir || '.'
-  var ast = yap.load(ramlData)
-  var libraries = extractLibraries(ast, rootFileDir)
-  var jsContent = {}
+  const ast = yap.load(ramlData)
+  const libraries = extractLibraries(ast, rootFileDir)
+  const jsContent = {}
   traverse(jsContent, ast, rootFileDir, libraries)
   return jsContent.types
 }
@@ -49,19 +49,19 @@ function destringify (val) {
  */
 function extractLibraries (ast, rootFileDir) {
   if (ast.mappings === undefined) return {}
-  var useStatement = ast.mappings.filter(function (e) {
+  const useStatement = ast.mappings.filter(function (e) {
     return e.key.value === 'uses'
   })
   if (useStatement[0] === undefined) return {}
-  var libraries = useStatement[0].value.mappings.reduce(function (libs, e) {
-    var libraryString = fs.readFileSync(path.join(rootFileDir, e.value.value))
-    var libraryAst = yap.load(libraryString)
-    var libraryJs = {}
+  const libraries = useStatement[0].value.mappings.reduce(function (libs, e) {
+    const libraryString = fs.readFileSync(path.join(rootFileDir, e.value.value))
+    const libraryAst = yap.load(libraryString)
+    const libraryJs = {}
     traverse(libraryJs, libraryAst, rootFileDir)
     libs[e.key.value] = libraryJs
     return libs
   }, {})
-  var libs = Object.keys(libraries).reduce(function (lib, name) {
+  const libs = Object.keys(libraries).reduce(function (lib, name) {
     lib[name] = {}
     Object.keys(libraries[name]).map(function (skip) {
       Object.keys(libraries[name][skip]).map(function (key) {
@@ -85,8 +85,8 @@ function extractLibraries (ast, rootFileDir) {
 function libraryOrValue (libraries, value) {
   if (!value.split) return value
   libraries = libraries || {}
-  var namespace = value.split('.')
-  var libNames = Object.keys(libraries)
+  const namespace = value.split('.')
+  const libNames = Object.keys(libraries)
   if (namespace.length !== 2) return value
   if (libNames.indexOf(namespace[0]) === -1) {
     return value
@@ -94,6 +94,18 @@ function libraryOrValue (libraries, value) {
     return value
   } else {
     return libraries[namespace[0]][namespace[1]]
+  }
+}
+
+function resolveInclude (rootFileDir, location) {
+  if (location.slice(0, 4) === 'http') {
+    const res = request('GET', location)
+    const include = res.getBody('utf8')
+    const contentType = res.headers['content-type'].split(';')[0]
+    return [include, contentType]
+  } else {
+    const include = fs.readFileSync(path.join(rootFileDir, location))
+    return [include, null]
   }
 }
 
@@ -115,19 +127,10 @@ function traverse (obj, ast, rootFileDir, libraries) {
     }
     // kind 5 is an include
     if (currentNode.value && currentNode.value.kind === 5) {
-      var location = currentNode.value.value
-      var include
-      // if it's an url, download it.
-      if (location.slice(0, 4) === 'http') {
-        var res = request('GET', location)
-        var contentType = res.headers['content-type'].split(';')[0]
-        include = res.getBody('utf8')
-      // else it's a file, so read it
-      } else {
-        include = fs.readFileSync(path.join(rootFileDir, location))
-      }
+      const location = currentNode.value.value
+      const [include, contentType] = resolveInclude(rootFileDir, location)
       // If it's json, parse it
-      var ramlContentTypes = [
+      const ramlContentTypes = [
         'application/raml+yaml',
         'text/yaml',
         'text/x-yaml',
@@ -146,32 +149,29 @@ function traverse (obj, ast, rootFileDir, libraries) {
       }
     // a leaf node to be added
     } else if (currentNode.value && currentNode.value.value) {
-      var val
-      if (currentNode.value.doubleQuoted === false) {
+      let val = !currentNode.value.doubleQuoted
         // convert back from string type
-        val = destringify(currentNode.value.value)
-      } else {
-        val = currentNode.value.value
-      }
+        ? destringify(currentNode.value.value)
+        : currentNode.value.value
       val = libraryOrValue(libraries, val)
       deep(obj, keys.join('.'), val)
     // a leaf that is an array
     } else if (currentNode.value && currentNode.value.items) {
-      var values = currentNode.value.items.map(function (el) { return el.value })
+      const values = currentNode.value.items.map(function (el) { return el.value })
       deep(obj, keys.join('.'), values)
     // an object that needs further traversal
     } else if (currentNode.mappings) {
-      for (var i = 0; i < currentNode.mappings.length; i++) {
+      for (let i = 0; i < currentNode.mappings.length; i++) {
         recurse(keys, currentNode.mappings[i])
       }
     } else if (currentNode.key && currentNode.key.value === 'examples') {
-      var vals = currentNode.value.mappings.map(function (el) {
+      const vals = currentNode.value.mappings.map(function (el) {
         return el.value.value
       })
       deep(obj, keys.join('.'), vals)
     // an object that needs further traversal
     } else if (currentNode.value && currentNode.value.mappings) {
-      for (var o = 0; o < currentNode.value.mappings.length; o++) {
+      for (let o = 0; o < currentNode.value.mappings.length; o++) {
         recurse(keys, currentNode.value.mappings[o])
       }
     }
@@ -209,9 +209,8 @@ function setDraft04 () {
  *
  * @param  {string} ramlData - RAML file content.
  * @param  {string} typeName - Name of the type to be converted.
- * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function dt2js (ramlData, typeName, cb) {
+function dt2js (ramlData, typeName) {
   const ctx = getRAMLContext(ramlData, basePath)
   if (!(ctx instanceof Object)) throw new Error('Invalid RAML data')
 
@@ -245,7 +244,7 @@ function addRootKeywords (schema) {
  * @returns  {Array}
  */
 function processArray (arr, reqStack) {
-  var accum = []
+  const accum = []
   arr.forEach(function (el) {
     accum.push(schemaForm(el, reqStack))
   })
@@ -263,7 +262,7 @@ function convertType (data) {
     case 'union':
       // If union of arrays
       if (Array.isArray(data.anyOf) && data.anyOf[0].type === 'array') {
-        var items = data.anyOf.map(function (e) { return e.items })
+        const items = data.anyOf.map(function (e) { return e.items })
         data.items = {anyOf: []}
         data.items.anyOf = items
         data['type'] = 'array'
@@ -344,7 +343,7 @@ function convertPatternProperties (data) {
   Object.keys(data.properties).map(function (key) {
     if (/^\/.*\/$/.test(key)) {
       data.patternProperties = data.patternProperties || {}
-      var stringRegex = key.slice(1, -1)
+      const stringRegex = key.slice(1, -1)
       data.patternProperties[stringRegex] = data.properties[key]
       delete data.properties[key]
     }
@@ -372,9 +371,9 @@ function convertDisplayName (data) {
  * @returns  {Object}
  */
 function processNested (data, reqStack) {
-  var updateWith = {}
-  for (var key in data) {
-    var val = data[key]
+  const updateWith = {}
+  for (const key in data) {
+    const val = data[key]
 
     if (val instanceof Array) {
       updateWith[key] = processArray(val, reqStack)
@@ -401,14 +400,14 @@ function schemaForm (data, reqStack = [], prop) {
   if (!(data instanceof Object)) {
     return data
   }
-  var lastEl = reqStack[reqStack.length - 1]
+  const lastEl = reqStack[reqStack.length - 1]
   if (data.required !== false && lastEl && prop) {
     if (lastEl.props.indexOf(prop) > -1 && (prop[0] + prop[prop.length - 1]) !== '//') {
       lastEl.reqs.push(prop)
     }
   }
   delete data.required
-  var isObj = data.type === 'object'
+  const isObj = data.type === 'object'
   if (isObj) {
     reqStack.push({
       'reqs': [],
@@ -416,11 +415,11 @@ function schemaForm (data, reqStack = [], prop) {
     })
   }
 
-  var updateWith = processNested(data, reqStack)
+  const updateWith = processNested(data, reqStack)
 
   data = utils.updateObjWith(data, updateWith)
   if (isObj) {
-    var reqs = reqStack.pop().reqs
+    let reqs = reqStack.pop().reqs
     // Strip duplicates from reqs
     reqs = reqs.filter(function (value, index, self) {
       return self.indexOf(value) === index

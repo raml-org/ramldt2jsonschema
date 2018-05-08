@@ -8,7 +8,7 @@
  * @returns  {Object}
  */
 function updateObjWith (obj, upd) {
-  for (var key in upd) {
+  for (const key in upd) {
     obj[key] = upd[key]
   }
   return obj
@@ -31,7 +31,7 @@ function capitalize (str) {
  * @returns  {string}
  */
 function typeNameFromRef (ref) {
-  var name = ref.replace(/^.*[\\/]/, '')
+  const name = ref.replace(/^.*[\\/]/, '')
   return capitalize(name)
 }
 
@@ -42,8 +42,8 @@ function typeNameFromRef (ref) {
  * @returns  {string}
  */
 function inferRAMLTypeName (fileName) {
-  var cleanName = fileName.replace(/^.*[\\/]/, '')
-  var filename = cleanName.split('.')[0]
+  const cleanName = fileName.replace(/^.*[\\/]/, '')
+  const filename = cleanName.split('.')[0]
   return capitalize(filename)
 }
 

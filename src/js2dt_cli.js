@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 'use strict'
 
-var js2dt = require('./js2dt')
-var utils = require('./utils')
-var program = require('commander')
-var fs = require('fs')
+const js2dt = require('./js2dt')
+const utils = require('./utils')
+const program = require('commander')
+const fs = require('fs')
 
 /**
  * Callback to write RAML data to console.
@@ -28,7 +28,7 @@ function writeToConsole (err, raml) {
  * @param  {string} ramlTypeName
  */
 function js2dtCLI (jsonFile, ramlTypeName) {
-  var jsonData = fs.readFileSync(jsonFile).toString()
+  const jsonData = fs.readFileSync(jsonFile).toString()
   if (ramlTypeName === undefined) {
     ramlTypeName = utils.inferRAMLTypeName(jsonFile)
   }
