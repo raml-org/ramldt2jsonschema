@@ -56,6 +56,7 @@ function RAMLEmitter (data, typeName) {
    */
   this.processMainData = function () {
     delete this.data['$schema']
+    delete this.data['$id']
     this.types[this.mainTypeName] = this.ramlForm(this.data, [])
   }
 
@@ -77,20 +78,40 @@ function RAMLEmitter (data, typeName) {
    * @returns  {Object}
    */
   this.ramlForm = function (data, reqStack, prop) {
+    if (prop === 'properties') {
+      // handle schema boolean true and empty schemas
+      var properties = {}
+      Object.keys(data).map(function (key) {
+        if (data[key] === true || (typeof data[key] === 'object' && Object.keys(data[key]).length === 0)) {
+          properties[key] = {type: 'any'}
+        } else {
+          properties[key] = data[key]
+        }
+      })
+      data = properties
+    }
     if (prop !== 'properties') {
       // Drop the following json schema keywords:
       var dropKeywords = [
         'dependencies',
-        'exclusiveMaximum',
-        'exclusiveMinimum',
-        'additionalItems'
+        'additionalItems',
+        'propertyNames'
       ]
       dropKeywords.map(function (word) { delete data[word] })
 
+      data = convertExclusives(data)
       // convert json schema title to raml displayName
       if (data.title) {
         data.displayName = data.title
         delete data.title
+      }
+      // strip json schema contains keyword
+      if (data.contains) {
+        delete data.contains
+      }
+      if (data.const) {
+        data.enum = [data.const]
+        delete data.const
       }
     }
     data = convertAdditionalProperties(data)
@@ -129,7 +150,7 @@ function RAMLEmitter (data, typeName) {
       }
     }
 
-    if (data['$ref']) {
+    if (data['$ref'] && prop !== 'properties') {
       data = convertRef(data)
     } else if (data.type) {
       data = convertType(data)
@@ -146,6 +167,25 @@ function RAMLEmitter (data, typeName) {
     if (keys.length === 1 && keys[0] === 'type') {
       data = data[keys[0]]
     }
+    return data
+  }
+
+  /**
+   * convert exclusiveMinimum and exclusiveMaximum
+   * to minimum and maximum
+   *
+   * @param  {Object} data - current data
+   * @returns  {Object} converted data
+   */
+  function convertExclusives (data) {
+    if (data.exclusiveMaximum !== undefined && typeof data.exclusiveMaximum !== 'boolean') {
+      data.maximum = data.exclusiveMaximum
+    }
+    if (data.exclusiveMinimum !== undefined && typeof data.exclusiveMinimum !== 'boolean') {
+      data.minimum = data.exclusiveMinimum
+    }
+    delete data.exclusiveMinimum
+    delete data.exclusiveMaximum
     return data
   }
 
@@ -367,6 +407,15 @@ function convertDefinedFormat (data) {
       break
     case 'uri':
       data['pattern'] = constants.FORMAT_REGEXPS['uri']
+      break
+    case 'uri-reference':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri-reference']
+      break
+    case 'json-pointer':
+      data['pattern'] = constants.FORMAT_REGEXPS['json-pointer']
+      break
+    case 'uri-template':
+      data['pattern'] = constants.FORMAT_REGEXPS['uri-template']
       break
     default:
       data['pattern'] = format

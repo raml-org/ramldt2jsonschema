@@ -26,7 +26,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should retain boolean additionalProperties as boolean', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -52,7 +52,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should change additionalProperties: {} to true', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -78,7 +78,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should correctly handle additionalProperties: json SCHEMA', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -133,7 +133,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should drop json schema keyword additionalItems', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'SomethingWithAList',
         'type': 'object',
         'properties': {
@@ -172,39 +172,38 @@ describe('js2dt.js2dt()', function () {
         done()
       })
     })
-    it('should drop json schema keywords exclusiveMinimum & exclusiveMaximum', function (done) {
+    it('should convert exclusiveMinimum & exclusiveMaximum keywords to minimum and maximum', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'RandomNumber',
         'type': 'object',
         'properties': {
           'count': {
             'type': 'number',
-            'minimum': 3,
-            'maximum': 100,
-            'exclusiveMinimum': true,
-            'exclusiveMaximum': true
+            'exclusiveMinimum': 3,
+            'exclusiveMaximum': 100
           }
         },
         'required': [
-          'start',
-          'end'
+          'count'
         ],
         'additionalProperties': false
       }
       js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
         expect(err).to.be.nil
         var data = yaml.safeLoad(raml)
-        expect(data).to.not.have.deep.property(
-          'types.RandomNumber.properties.count.exclusiveMinimum')
-        expect(data).to.not.have.deep.property(
-          'types.RandomNumber.properties.count.exclusiveMaximum')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.count.minimum').and
+          .to.equal(3)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.count.maximum').and
+          .to.equal(100)
         done()
       })
     })
     it('should drop json schema keyword "required"', function (done) {
       var jsdata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'type': 'object',
         'title': 'Location',
         'required': [
@@ -241,7 +240,7 @@ describe('js2dt.js2dt()', function () {
         expect(data).to.not.have.deep.property(
           'types.Location.required')
         expect(data).to.not.have.deep.property(
-          'types.RandomNumber.properties.count.exclusiveMaximum')
+          'types.Location.properties.count.exclusiveMaximum')
         done()
       })
     })
@@ -297,7 +296,7 @@ describe('js2dt.js2dt()', function () {
     })
     it('should change js schema title to raml displayName', function (done) {
       var jsondata = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
         'title': 'Basis period',
         'type': 'object',
         'properties': {
@@ -1060,3 +1059,297 @@ describe('js2dt.getCombinationTypes()', function () {
     })
   })
 })
+
+describe('exclusiveMinimum/exclusiveMaximum', function () {
+  context('JSON Schema draft04', function () {
+    it('should be stripped', function (done) {
+      var jsdata = {
+        '$id': 'some id',
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          },
+          'price': {
+            'type': 'number',
+            'minimum': 0,
+            'exclusiveMinimum': true
+          }
+        },
+        'required': ['price'],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price.minimum', 0)
+        expect(data).not.to.have.deep.property(
+          'types.Product.properties.price.exclusiveMinimum')
+        done()
+      })
+    })
+  })
+  context('JSON Schema draft06', function () {
+    it('should be replaced with minimum or maximum', function (done) {
+      var jsdata = {
+        '$id': 'some id',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          },
+          'price': {
+            'type': 'number',
+            'exclusiveMinimum': 0
+          }
+        },
+        'required': ['price'],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price.minimum', 0)
+        done()
+      })
+    })
+  })
+})
+describe('draft06 changes', function () {
+  context('$id keyword', function () {
+    it('should get dropped', function (done) {
+      var jsdata = {
+        '$id': 'some id',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          }
+        },
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.$id')
+        done()
+      })
+    })
+  })
+  context('$ref keyword', function () {
+    it('should be ignored as a property name', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          },
+          'price': {
+            '$ref': '#/definitions/price'
+          },
+          '$ref': {
+            'type': 'string'
+          }
+        },
+        'required': ['list', 'price', '$ref'],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.price', 'Price')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.$ref', 'string')
+        done()
+      })
+    })
+  })
+  context('booleans as schemas', function () {
+    it('should convert to type `any`', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': true,
+          'forbiden': false,
+          'description': {},
+          'forSale': {
+            'type': 'boolean',
+            'default': true
+          }
+        },
+        'required': ['list', 'description'],
+        'additionalProperties': false
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.list', 'any')
+        expect(data).to.have.deep.property(
+          'types.Product.properties.description', 'any')
+        done()
+      })
+    })
+  })
+  context('propertyNames', function () {
+    it('should be dropped', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'foo_list': {
+            'type': 'array'
+          },
+          'foo_description': {
+            'type': 'string'
+          }
+        },
+        'required': ['list', 'description'],
+        'propertyNames': {
+          'pattern': 'foo[A-Z][a-z0-9]*'
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.propertyNames')
+        done()
+      })
+    })
+  })
+  context('const', function () {
+    it('should be converted to an enum with one element', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Task',
+        'type': 'object',
+        'properties': {
+          'difficulty': {
+            'type': 'string',
+            'enum': ['easy', 'hard']
+          },
+          'type': {
+            'type': 'string',
+            'const': 'list'
+          }
+        }
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Task', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.properties.type.enum').and
+          .to.deep.equal(['list'])
+        done()
+      })
+    })
+  })
+  context('contains', function () {
+    it('should be dropped', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'foo_list': {
+            'type': 'array',
+            'contains': {
+              'type': 'string'
+            }
+          },
+          'foo_description': {
+            'type': 'string'
+          }
+        },
+        'required': ['list', 'description']
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).not.to.have.deep.property(
+          'types.Product.properties.foo_list.contains')
+        done()
+      })
+    })
+  })
+  context('empty required array', function () {
+    it('should mark all properties optional', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'list': {
+            'type': 'array'
+          }
+        },
+        'required': []
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.not.have.deep.property('types.Product.properties.list.required')
+        done()
+      })
+    })
+  })
+  context('format reference-uri', function () {
+    it('should be converted to a pattern', function (done) {
+      var jsdata = {
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'title': 'Product',
+        'type': 'object',
+        'properties': {
+          'webURI': {
+            'type': 'string',
+            'format': 'uri-reference'
+          }
+        },
+        'required': ['webURI']
+      }
+      js2dt.js2dt(JSON.stringify(jsdata), 'Product', function (err, raml) {
+        expect(err).to.be.nil
+        var data = yaml.safeLoad(raml)
+        expect(data).to.have.deep.property(
+          'types.Product.properties.webURI.pattern')
+        done()
+      })
+    })
+    it('should validate a global uri', function (done) {
+      var pattern = new RegExp(constants.FORMAT_REGEXPS['uri-reference'])
+      var uris = [
+        'http://user:password@example.com:8080/some/path/to/somewhere?search=regex&order=desc#fragment',
+        '/some/path/to/somewhere',
+        '/?foo=bar',
+        '#hash',
+        '66.7 is a number'
+      ]
+      var matches = uris.map(function (uri) {
+        return uri.match(pattern)
+      })
+      expect(matches[0][1]).to.equal('http')
+      expect(matches[1][7]).to.equal('some/path/to/somewhere')
+      expect(matches[2][9]).to.equal('foo=bar')
+      expect(matches[3][10]).to.equal('hash')
+      expect(matches[4][8]).to.equal('66.7')
+      done()
+    })
+  })
+})
+

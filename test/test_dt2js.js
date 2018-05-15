@@ -1,4 +1,4 @@
-/* global describe, it, context */
+/* global describe, it, context, before, after */
 
 var expect = require('chai').expect
 var join = require('path').join
@@ -39,7 +39,7 @@ describe('dt2js.dt2js()', function () {
       dt2js.setBasePath('test/examples')
       dt2js.dt2js(ramlData, 'Cat', function (err, schema) {
         expect(schema).to.have.property(
-            '$schema', 'http://json-schema.org/draft-04/schema#').and
+            '$schema', 'http://json-schema.org/draft-06/schema#').and
         expect(schema).to.have.property('type', 'object')
         expect(err).to.be.nil
         done()
@@ -127,7 +127,7 @@ describe('dt2js.addRootKeywords()', function () {
     expect(schema)
       .to.be.an('object').and
       .to.have.property(
-        '$schema', 'http://json-schema.org/draft-04/schema#')
+        '$schema', 'http://json-schema.org/draft-06/schema#')
   })
 })
 
@@ -478,6 +478,23 @@ describe('When property with name "items".', function () {
     var ramlData = fs.readFileSync(DUPLICATE_REQUIRED_ENTRY).toString()
     convert(ramlData, 'Foo', function (e, r) {
       expect(r.required).to.deep.equal(['items', 'total_count'])
+      return cb()
+    })
+  })
+})
+describe('When setDraft04() is used.', function (cb) {
+  var convert
+  before(function () {
+    dt2js.setDraft04()
+    convert = dt2js.__get__('dt2js')
+  })
+  after(function () {
+    dt2js.__set__({draft: '06'})
+  })
+  it('should have a draft04 schema declaration.', function (cb) {
+    var ramlData = fs.readFileSync(DUPLICATE_REQUIRED_ENTRY).toString()
+    convert(ramlData, 'Foo', function (e, r) {
+      expect(r['$schema']).to.equal('http://json-schema.org/draft-04/schema#')
       return cb()
     })
   })

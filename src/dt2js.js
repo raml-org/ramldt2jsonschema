@@ -11,6 +11,7 @@ var deep = require('deep-get-set')
 deep.p = true
 
 var basePath = process.cwd()
+var draft = '06'
 /**
  * Get RAML Data Types context.
  *
@@ -163,6 +164,11 @@ function traverse (obj, ast, rootFileDir, libraries) {
       for (var i = 0; i < currentNode.mappings.length; i++) {
         recurse(keys, currentNode.mappings[i])
       }
+    } else if (currentNode.key && currentNode.key.value === 'examples') {
+      var vals = currentNode.value.mappings.map(function (el) {
+        return el.value.value
+      })
+      deep(obj, keys.join('.'), vals)
     // an object that needs further traversal
     } else if (currentNode.value && currentNode.value.mappings) {
       for (var o = 0; o < currentNode.value.mappings.length; o++) {
@@ -188,6 +194,14 @@ function traverse (obj, ast, rootFileDir, libraries) {
  */
 function setBasePath (path) {
   basePath = path
+}
+
+/**
+ * output draft04 compliant jsonschema
+ *
+ */
+function setDraft04 () {
+  draft = '04'
 }
 
 /**
@@ -239,7 +253,7 @@ function dt2js (ramlData, typeName, cb) {
  * @returns  {Object}
  */
 function addRootKeywords (schema) {
-  schema['$schema'] = 'http://json-schema.org/draft-04/schema#'
+  schema['$schema'] = 'http://json-schema.org/draft-' + draft + '/schema#'
   return schema
 }
 
@@ -449,3 +463,4 @@ function schemaForm (data, reqStack, prop) {
 
 module.exports.dt2js = dt2js
 module.exports.setBasePath = setBasePath
+module.exports.setDraft04 = setDraft04

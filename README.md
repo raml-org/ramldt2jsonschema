@@ -1,11 +1,13 @@
 # ramldt2jsonschema
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/raml-org/ramldt2jsonschema.svg)](https://greenkeeper.io/)
+
 [![NPM version][npm-image]][npm-url]
 [![NPM downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back
+CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 6, and back. (dt2js can still be used to produce draft04 documents if used programatically)
 
 ## Usage
 
@@ -107,14 +109,40 @@ raml2json.js2dt(jsonData, 'Person', function (err, raml) {
 })
 ```
 
+### Producing jsonschema Draft 04
+Use the function `raml2json.setDraft04()`
+
+```
+var raml2json = require('ramldt2jsonschema')
+var join = require('path').join
+var fs = require('fs')
+
+var filePath = join(__dirname, 'api.raml')
+var ramlData = fs.readFileSync(filePath).toString()
+
+raml2json.setDraft04()
+
+raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
+  if (err) {
+    console.log(err)
+    return
+  }
+  console.log(JSON.stringify(schema, null, 2))
+})
+```
+
+
+
 ### Limitations
 
 - in js2dt,
   - the following JSON schema properties are not supported and as a result, will not be converted:
-    - `not`
-    - number and integer's `exclusiveMaximum` and `exclusiveMinimum`
+    - `not` (or `false` when used as a schema boolean)
     - object's `dependencies`
     - array's `additionalItems`
+    - the `propertyNames` keyword
+    - the `contains` keyword
+  - JSON schema number and integer's `exclusiveMaximum` and `exclusiveMinimum` properties are converted to raml 'maximum' and 'minimum'
   - the JSON schema `oneOf` property is processed the same way as the JSON schema `anyOf` property, it is converted to the RAML `union` type
   - the JSON schema `type: 'string'` with `media` and `binaryEncoding: 'binary'` is converted to the RAML `file` type
   - the JSON schema `type: string` with a `pattern` that matches exactly one of the RAML date types will be converted in the matching RAML date type
