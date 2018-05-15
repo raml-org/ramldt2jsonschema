@@ -79,7 +79,7 @@ var filePath = join(__dirname, 'api.raml')
 var includesPath = '/different/path/to/includes/'
 var ramlData = fs.readFileSync(filePath).toString()
 
-raml2json.setBasePath(includesPath)
+raml2json.dt2js.setBasePath(includesPath)
 raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
   if (err) {
     console.log(err)
