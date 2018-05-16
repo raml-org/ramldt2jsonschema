@@ -52,83 +52,63 @@ npm install ramldt2jsonschema --save
 #### dt2js
 
 ```js
-var raml2json = require('ramldt2jsonschema')
-var join = require('path').join
-var fs = require('fs')
+const raml2json = require('ramldt2jsonschema')
+const join = require('path').join
+const fs = require('fs')
 
-var filePath = join(__dirname, 'api.raml')
-var ramlData = fs.readFileSync(filePath).toString()
+const filePath = join(__dirname, 'api.raml')
+const ramlData = fs.readFileSync(filePath).toString()
 
-raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log(JSON.stringify(schema, null, 2))
-})
+const schema = raml2json.dt2js(ramlData, 'Cat')
+console.log(JSON.stringify(schema, null, 2))
 ```
 
 NOTE: when the inputed RAML contains `!include`s and those includes are not in the same directory as the script it is being ran from, you can use `dt2js.setBasePath()` to specify a different base path.
 
 ```js
-var raml2json = require('ramldt2jsonschema')
-var join = require('path').join
-var fs = require('fs')
+const raml2json = require('ramldt2jsonschema')
+const join = require('path').join
+const fs = require('fs')
 
-var filePath = join(__dirname, 'api.raml')
-var includesPath = '/different/path/to/includes/'
-var ramlData = fs.readFileSync(filePath).toString()
+const filePath = join(__dirname, 'api.raml')
+const includesPath = '/different/path/to/includes/'
+const ramlData = fs.readFileSync(filePath).toString()
 
 raml2json.dt2js.setBasePath(includesPath)
-raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log(JSON.stringify(schema, null, 2))
-})
+const schema = raml2json.dt2js(ramlData, 'Cat')
+console.log(JSON.stringify(schema, null, 2))
 ```
 
 #### js2dt
 
 ```js
-var raml2json = require('ramldt2jsonschema')
-var join = require('path').join
-var fs = require('fs')
+const raml2json = require('ramldt2jsonschema')
+const join = require('path').join
+const fs = require('fs')
 
-var filePath = join(__dirname, 'schema.json')
-var jsonData = fs.readFileSync(filePath).toString()
+const filePath = join(__dirname, 'schema.json')
+const jsonData = fs.readFileSync(filePath).toString()
 
-raml2json.js2dt(jsonData, 'Person', function (err, raml) {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log('#%RAML 1.0 Library\n')
-  console.log(raml)
-})
+const raml = raml2json.js2dt(jsonData, 'Person')
+
+console.log(`#%RAML 1.0 Library\n${yaml.safeDump({ types: raml }, {'noRefs': true})}`)
 ```
 
 ### Producing jsonschema Draft 04
 Use the function `raml2json.setDraft04()`
 
-```
-var raml2json = require('ramldt2jsonschema')
-var join = require('path').join
-var fs = require('fs')
+```js
+const raml2json = require('ramldt2jsonschema')
+const join = require('path').join
+const fs = require('fs')
 
-var filePath = join(__dirname, 'api.raml')
-var ramlData = fs.readFileSync(filePath).toString()
+const filePath = join(__dirname, 'api.raml')
+const ramlData = fs.readFileSync(filePath).toString()
 
 raml2json.setDraft04()
 
-raml2json.dt2js(ramlData, 'Cat', function (err, schema) {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log(JSON.stringify(schema, null, 2))
-})
+const schema = raml2json.dt2js(ramlData, 'Cat')
+console.log(JSON.stringify(schema, null, 2))
 ```
 
 
