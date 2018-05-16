@@ -22,8 +22,8 @@
     "url": "https://github.com/raml-org/ramldt2jsonschema/issues"
   },
   "bin": {
-    "dt2js": "src/dt2js_cli.js",
-    "js2dt": "src/js2dt_cli.js"
+    "dt2js": "bin/dt2js.js",
+    "js2dt": "bin/js2dt.js"
   },
   "scripts": {
     "lint": "standard",
@@ -42,7 +42,7 @@
     "yaml-ast-parser": "0.0.40"
   },
   "devDependencies": {
-    "ajv": "^6.4.0",
+    "ajv": "^6.5.0",
     "chai": "^4.1.2",
     "istanbul": "^0.4.5",
     "mocha": "^5.1.1",

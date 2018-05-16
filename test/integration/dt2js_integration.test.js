@@ -24,10 +24,12 @@ const fs = require('fs')
 const dt2js = rewire('../../src/dt2js')
 const getRAMLContext = dt2js.__get__('getRAMLContext')
 
+const cli = require('../../src/dt2js_cli')
+
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
-const ajv = new Ajv({ allErrors: true, schemaId: 'id' })
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
+const ajv = new Ajv({ allErrors: true, schemaId: '$id' })
+ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'))
 
 /**
  * Log JSON validation errors.
@@ -52,30 +54,17 @@ describe('dt2js integration test', () => {
      */
     context(`for file ${filepath}`, () => {
       const ramlData = fs.readFileSync(filepath).toString()
-      dt2js.setBasePath(__dirname)
-      const ctx = getRAMLContext(ramlData, __dirname)
+      dt2js.setBasePath(EXAMPLES_FOLDER)
+      const ctx = getRAMLContext(ramlData, EXAMPLES_FOLDER)
+
       for (const typeName in ctx) {
         it(`should convert ${typeName}`, () => {
-          const schema = dt2js.dt2js(ramlData, typeName)
+          const schema = cli(filepath, typeName)
           const valid = ajv.validateSchema(schema)
           if (!valid) {
             logValidationError()
             throw new Error('Invalid json')
           }
-          // dt2js.dt2js(ramlData, typeName, function (err, schema) {
-          //   if (err) return done(err)
-          //
-          //   try {
-          //     const valid = ajv.validateSchema(schema)
-          //     if (!valid) {
-          //       logValidationError()
-          //       return done(new Error('Invalid json'))
-          //     }
-          //   } catch (error) {
-          //     return done(error)
-          //   }
-          //   done()
-          // })
         })
       }
     })

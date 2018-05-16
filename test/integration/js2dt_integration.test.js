@@ -15,11 +15,11 @@
  * Tests are launched by running this file with nodejs.
  */
 
-const { js2dt } = require('../../src/js2dt')
-const helpers = require('./helpers')
 const path = require('path')
 const parser = require('raml-1-parser')
-const fs = require('fs')
+const helpers = require('./helpers')
+
+const cli = require('../../src/js2dt_cli')
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'json')
 
@@ -43,15 +43,10 @@ describe('js2dt integration test', () => {
      * with raml-1-parser.
      */
     it(`should convert ${filepath}`, () => {
-      const jsonData = fs.readFileSync(filepath).toString()
       const typeName = 'TestType'
-
-      let raml = js2dt(jsonData, typeName)
-
-      console.log(raml)
+      const raml = cli(filepath, typeName)
 
       try {
-        raml = '#%RAML 1.0 Library\n' + raml
         parser.parseRAMLSync(raml, {'rejectOnErrors': true})
       } catch (error) {
         logValidationError(error)
