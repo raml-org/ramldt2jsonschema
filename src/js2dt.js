@@ -82,7 +82,7 @@ class RamlConverter {
           outType.type = 'object'
         }
       }
-    } else if (typeof type === 'boolean') {
+    } else if (typeof type === 'boolean' && type === true) {
       outType.type = 'any'
     } else {
       throw new Error('invalid type')
