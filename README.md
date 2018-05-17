@@ -1,7 +1,6 @@
 # ramldt2jsonschema
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/raml-org/ramldt2jsonschema.svg)](https://greenkeeper.io/)
-
 [![NPM version][npm-image]][npm-url]
 [![NPM downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
@@ -93,25 +92,6 @@ const raml = raml2json.js2dt(jsonData, 'Person')
 
 console.log(`#%RAML 1.0 Library\n${yaml.safeDump({ types: raml }, {'noRefs': true})}`)
 ```
-
-### Producing jsonschema Draft 04
-Use the function `raml2json.setDraft04()`
-
-```js
-const raml2json = require('ramldt2jsonschema')
-const join = require('path').join
-const fs = require('fs')
-
-const filePath = join(__dirname, 'api.raml')
-const ramlData = fs.readFileSync(filePath).toString()
-
-raml2json.setDraft04()
-
-const schema = raml2json.dt2js(ramlData, 'Cat')
-console.log(JSON.stringify(schema, null, 2))
-```
-
-
 
 ### Limitations
 

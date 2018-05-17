@@ -1,4 +1,4 @@
-/* global describe, it, context, before, after */
+/* global describe, it, context */
 
 const { expect, assert } = require('chai')
 const join = require('path').join
@@ -446,20 +446,5 @@ describe('When property with name "items".', function () {
     const schema = dt2js.dt2js(ramlData, 'Foo')
     expect(schema.required).to.deep.equal(['items', 'total_count'])
     return cb()
-  })
-})
-describe('When setDraft04() is used.', function () {
-  var convert
-  before(function () {
-    dt2js.setDraft04()
-    convert = dt2js.__get__('dt2js')
-  })
-  after(function () {
-    dt2js.__set__({draft: '06'})
-  })
-  it('should have a draft04 schema declaration.', function () {
-    var ramlData = fs.readFileSync(DUPLICATE_REQUIRED_ENTRY).toString()
-    const schema = convert(ramlData, 'Foo')
-    expect(schema['$schema']).to.equal('http://json-schema.org/draft-04/schema#')
   })
 })

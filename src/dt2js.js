@@ -197,14 +197,6 @@ function setBasePath (path) {
 }
 
 /**
- * output draft04 compliant jsonschema
- *
- */
-function setDraft04 () {
-  draft = '04'
-}
-
-/**
  * Convert RAML data type to JSON schema.
  *
  * @param  {string} ramlData - RAML file content.
@@ -444,4 +436,3 @@ function schemaForm (data, reqStack = [], prop) {
 
 module.exports.dt2js = dt2js
 module.exports.setBasePath = setBasePath
-module.exports.setDraft04 = setDraft04
