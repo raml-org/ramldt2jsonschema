@@ -1114,7 +1114,7 @@ describe('draft06 changes', function () {
         'type': 'object',
         'properties': {
           'list': true,
-          'forbiden': false,
+          // 'forbiden': false,
           'description': {},
           'forSale': {
             'type': 'boolean',

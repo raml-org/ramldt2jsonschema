@@ -85,7 +85,7 @@ class RamlConverter {
     } else if (typeof type === 'boolean' && type === true) {
       outType.type = 'any'
     } else {
-      throw new Error('invalid type')
+      throw new Error(`Invalid type / Cannot convert: { ${prop}: ${JSON.stringify(type)} }`)
     }
 
     if (type['$ref']) {
