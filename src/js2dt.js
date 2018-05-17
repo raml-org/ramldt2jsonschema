@@ -1,8 +1,7 @@
 'use strict'
 
-var yaml = require('js-yaml')
-var constants = require('./constants')
-var utils = require('./utils')
+const constants = require('./constants')
+const utils = require('./utils')
 
 /**
  * This callback accepts results converting JSON schema to RAML data type.
@@ -17,278 +16,232 @@ var utils = require('./utils')
  *
  * @param  {string} jsonData - JSON file content.
  * @param  {string} typeName - Name of RAML data type to hold converted data.
- * @param  {conversionCallback} cb - Callback to be called with converted value.
  */
-function js2dt (jsonData, typeName, cb) {
-  try {
-    var emitter = new RAMLEmitter(JSON.parse(jsonData), typeName)
-    var ramledData = emitter.emit()
-  } catch (error) {
-    cb(error, null)
-    return
-  }
-  cb(null, yaml.safeDump(ramledData, {'noRefs': true}))
+function js2dt (jsonData, typeName) {
+  const data = JSON.parse(jsonData)
+
+  const raml = new RamlConverter(data, typeName).toRaml()
+
+  return raml
 }
 
-/**
- * Holds functions to convert JSON schema to RAML data type.
- *
- * @param  {Object} data
- * @param  {string} typeName - Name of RAML data type to hold converted data.
- */
-function RAMLEmitter (data, typeName) {
-  this.data = data
-  this.mainTypeName = typeName
-  this.types = {}
+const whitelist = {
+  all: {'description': 'description'},
+  number: {'minimum': 'minimum', 'maximum': 'maximum'},
+  string: {'pattern': 'pattern', 'format': 'pattern'}
+}
 
-  /**
-   * Process definitions, delete them from data and add processed
-   * values to `this.types`.
-   */
-  this.processDefinitions = function () {
-    var defsData = this.translateDefinitions(this.data.definitions)
-    delete this.data.definitions
-    this.types = utils.updateObjWith(this.types, defsData)
+class RamlConverter {
+  constructor (data = {}, typeName = '') {
+    this.data = data
+    this.draft = data.$schema ? data.$schema.match(/\/draft-(\d\d)\//) : '06'
+    this.typeName = typeName
+    this.types = {}
   }
 
   /**
-   * Process main data and save result in `this.types`.
-   */
-  this.processMainData = function () {
-    delete this.data['$schema']
-    delete this.data['$id']
-    this.types[this.mainTypeName] = this.ramlForm(this.data, [])
-  }
-
-  /**
-   * Run conversion process and emit results.
-   */
-  this.emit = function () {
-    this.processDefinitions()
-    this.processMainData()
-    return {'types': this.types}
-  }
-
-  /**
-   * Convert JSON schema to a library with RAML data type.
+   * main function to convert to raml
    *
-   * @param  {Object} data - Data to be converted.
-   * @param  {Array} reqStack - Stack of required properties.
-   * @param  {string} [prop] - Property name nested objects of which are processed.
-   * @returns  {Object}
+   * @return {Object}
    */
-  this.ramlForm = function (data, reqStack, prop) {
-    if (prop === 'properties') {
-      // handle schema boolean true and empty schemas
-      var properties = {}
-      Object.keys(data).map(function (key) {
-        if (data[key] === true || (typeof data[key] === 'object' && Object.keys(data[key]).length === 0)) {
-          properties[key] = {type: 'any'}
-        } else {
-          properties[key] = data[key]
+  toRaml () {
+    if (typeof this.data !== 'object') {
+      return {[this.typeName]: this.data}
+    }
+
+    Object.assign(this.types, this.parseDefinitions(this.data.definitions))
+
+    this.types[this.typeName] = this.parseType(this.data)
+    return this.types
+  }
+
+  /**
+   * Parse types in the JSON schema
+   *
+   * @param {Object} type - a type in the schema
+   * @param {?boolean} required - if the type is required
+   * @param {string} prop - prop name
+   * @returns {Object}
+   */
+  parseType (type, required = undefined, prop = undefined) {
+    const outType = {}
+
+    if (required) {
+      outType.required = required
+    }
+
+    if (typeof type === 'string') {
+      outType.type = type
+    } else if (typeof type === 'object') {
+      if (Object.keys(type).length === 0) {
+        outType.type = 'any'
+      } else if (type.type != null) {
+        outType.type = type.type
+      } else {
+        if (type.properties) {
+          outType.type = 'object'
         }
-      })
-      data = properties
-    }
-    if (prop !== 'properties') {
-      // Drop the following json schema keywords:
-      var dropKeywords = [
-        'dependencies',
-        'additionalItems',
-        'propertyNames'
-      ]
-      dropKeywords.map(function (word) { delete data[word] })
-
-      data = convertExclusives(data)
-      // convert json schema title to raml displayName
-      if (data.title) {
-        data.displayName = data.title
-        delete data.title
       }
-      // strip json schema contains keyword
-      if (data.contains) {
-        delete data.contains
+    } else if (typeof type === 'boolean' && type === true) {
+      outType.type = 'any'
+    } else {
+      throw new Error(`Invalid type / Cannot convert: { ${prop}: ${JSON.stringify(type)} }`)
+    }
+
+    if (type['$ref']) {
+      return this.parseType(convertRef(type), required, prop)
+    }
+
+    const combsKey = getCombinationsKey(type)
+    if (combsKey && outType.type) {
+      outType[combsKey] = type[combsKey]
+      setCombinationsTypes(outType, combsKey)
+    }
+
+    if (type.const) {
+      outType.enum = [ type.const ]
+    }
+
+    switch (outType.type) {
+      case 'object': {
+        outType.properties = this.parseProps(type.properties, type.required)
+        convertAdditionalProperties(outType, type.additionalProperties)
+        break
       }
-      if (data.const) {
-        data.enum = [data.const]
-        delete data.const
+      case 'array': {
+        if (typeof outType.items === 'object') {
+          outType.items = this.parseType(type.items, true, prop + 'Items')
+        } else if (Array.isArray(type.items)) {
+          outType.items = type.items.map(i => this.parseType(i, true, prop + 'Item' + i))
+        }
+        break
       }
-    }
-    data = convertAdditionalProperties(data)
-
-    if (!(data instanceof Object)) {
-      return data
-    }
-    var isObj = data.type === 'object'
-    if (isObj) {
-      reqStack.push({
-        'reqs': data.required || [],
-        'props': Object.keys(data.properties || {})
-      })
-      delete data.required
-    }
-
-    var combsKey = getCombinationsKey(data)
-    if (combsKey && data.type) {
-      data = setCombinationsTypes(data, combsKey)
-    }
-
-    if (isFileType(data)) {
-      data = convertFileType(data)
-    }
-
-    var updateWith = this.processNested(prop, data, reqStack)
-    data = utils.updateObjWith(data, updateWith)
-
-    if (isObj) {
-      reqStack.pop()
-    }
-    var lastEl = reqStack[reqStack.length - 1]
-    if (lastEl && prop && prop !== 'properties') {
-      if (lastEl.reqs.indexOf(prop) === -1) {
-        data['required'] = false
+      case 'string': {
+        if (isFileType(type)) {
+          outType.media = type.media
+          convertFileType(outType)
+        }
+        break
+      }
+      case 'number': {
+        if (typeof type.minimum === 'number') outType.minimum = type.minimum
+        if (typeof type.maximum === 'number') outType.maximum = type.maximum
+        if (this.draft !== '04') {
+          if (typeof type.exclusiveMinimum === 'number') outType.minimum = type.exclusiveMinimum
+          if (typeof type.exclusiveMaximum === 'number') outType.maximum = type.exclusiveMaximum
+        }
+        break
+      }
+      default: {
+        // nothing for now
+        break
       }
     }
 
-    if (data['$ref'] && prop !== 'properties') {
-      data = convertRef(data)
-    } else if (data.type) {
-      data = convertType(data)
-      data = convertDateType(data)
-      // convert defined formats to regex patterns
-      data = convertDefinedFormat(data)
-      data = convertPatternProperties(data)
+    if (type.title) {
+      outType.displayName = type.title
     }
+
+    const transfer = Object.assign({}, whitelist.all, whitelist[outType.type])
+
+    Object.keys(type).forEach(key => {
+      if (transfer[key]) {
+        outType[transfer[key]] = type[key]
+      }
+    })
+
+    convertType(outType)
+    convertDateType(outType)
+    // convert defined formats to regex patterns
+    convertDefinedFormat(outType)
+    convertPatternProperties(outType)
+
     if (combsKey) {
-      data = this.processCombinations(data, combsKey, prop)
+      outType[combsKey] = type[combsKey]
+      this.processCombinations(outType, combsKey, prop)
     }
-    // if property is only a type definition, use <property>: <type> shorthand
-    var keys = Object.keys(data)
-    if (keys.length === 1 && keys[0] === 'type') {
-      data = data[keys[0]]
-    }
-    return data
+
+    return outType
   }
 
   /**
-   * convert exclusiveMinimum and exclusiveMaximum
-   * to minimum and maximum
    *
-   * @param  {Object} data - current data
-   * @returns  {Object} converted data
+   * @param {Object} props - properties
+   * @param {Array} reqs - required props
+   * @param {boolean} dropRequire - drop the require prop ( for definitions )
+   *
+   * @return {Object}
    */
-  function convertExclusives (data) {
-    if (data.exclusiveMaximum !== undefined && typeof data.exclusiveMaximum !== 'boolean') {
-      data.maximum = data.exclusiveMaximum
-    }
-    if (data.exclusiveMinimum !== undefined && typeof data.exclusiveMinimum !== 'boolean') {
-      data.minimum = data.exclusiveMinimum
-    }
-    delete data.exclusiveMinimum
-    delete data.exclusiveMaximum
-    return data
-  }
+  parseProps (props = {}, reqs = [], dropRequire = false) {
+    return Object.keys(props).reduce((acc, pn) => {
+      const type = this.parseType(props[pn], reqs.includes(pn), pn)
 
-  /**
-   * convert additionalProperties from jsonSchema to raml form
-   *
-   * @param  {Object} data - current data
-   * @returns  {Object} raml form
-   */
-  function convertAdditionalProperties (data) {
-    if (data.hasOwnProperty('additionalProperties')) {
-      var val = data
-      if (typeof data.additionalProperties === 'boolean') val = data.additionalProperties
-      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length === 0) val = true
-      if (typeof data.additionalProperties === 'object' && Object.keys(data.additionalProperties).length > 0) {
-        var type = data.additionalProperties.type
-        data.properties['//'] = {type: type}
-        val = false
+      if (!dropRequire && !type.required) {
+        pn += '?'
       }
-      data.additionalProperties = val
-    }
-    return data
+      delete type.required
+
+      return Object.assign(acc, {[pn]: Object.keys(type).length === 1 ? type.type : type})
+    }, {})
   }
 
   /**
-   * Process definitions the same way main type is processed
-   * (using ramlForm).
+   * Parse definitions ( and capitalize the names )
    *
-   * @param  {Object} defs - JSON 'definitions' object.
-   * @returns  {Object}
+   * @param {Object} definitions
+   *
+   * @return {Object}
    */
-  this.translateDefinitions = function (defs) {
-    var defsData = {}
-    if (!defs) {
-      return defsData
-    }
-    for (var key in defs) {
-      defsData[utils.capitalize(key)] = this.ramlForm(defs[key], [])
-    }
-    return defsData
+  parseDefinitions (definitions) {
+    const defs = this.parseProps(definitions, [], true)
+    return Object.keys(defs)
+      .reduce((acc, key) => Object.assign(acc, {[utils.capitalize(key)]: defs[key]}), {})
   }
 
   /**
-   * Call `ramlForm` for each element of array.
+   * Process combinations by creating new types
    *
-   * @param  {Array} arr
-   * @param  {Array} reqStack - Stack of required properties.
-   * @returns  {Array}
-   */
-  this.processArray = function (arr, reqStack) {
-    var accum = []
-    arr.forEach(function (el) {
-      accum.push(this.ramlForm(el, reqStack))
-    }.bind(this))
-    return accum
-  }
-
-  /**
-   * Call `ramlForm` for all nested objects.
+   * @param data - the type the combinations are on
+   * @param combsKey - the type of the combination
+   * @param prop - properties
    *
-   * @param  {Object} data
-   * @param  {Array} reqStack - Stack of required properties.
-   * @returns  {Object}
+   * @return {Object}
    */
-  this.processNested = function (prop, data, reqStack) {
-    var updateWith = {}
-    for (var key in data) {
-      var val = data[key]
-
-      if (val instanceof Array) {
-        updateWith[key] = this.processArray(val, reqStack)
-        continue
-      }
-
-      if (val instanceof Object) {
-        var raml = this.ramlForm(val, reqStack, key)
-        if (raml.required === false && key !== '//' && prop === 'properties') {
-          delete raml.required
-          updateWith[key + '?'] = raml
-          delete data[key]
-        } else {
-          delete raml.required
-          updateWith[key] = raml
-        }
-        continue
-      }
-    }
-    return updateWith
-  }
-
-  this.processCombinations = function (data, combsKey, prop) {
-    prop = prop ? utils.capitalize(prop) : this.mainTypeName
-    var combSchemas = data[combsKey]
-    var superTypes = []
-    combSchemas.forEach(function (el, ind) {
-      var name = prop + 'ParentType' + ind.toString()
+  processCombinations (data, combsKey, prop) {
+    prop = prop ? utils.capitalize(prop) : this.typeName
+    const combSchemas = data[combsKey]
+    const superTypes = []
+    combSchemas.forEach((el, ind) => {
+      const name = prop + 'ParentType' + ind.toString()
       superTypes.push(name)
-      this.types[name] = el
-    }.bind(this))
+      this.types[name] = this.parseType(el)
+    })
     delete data[combsKey]
     data.type = getCombinationTypes(superTypes, combsKey)
     return data
   }
+}
+
+/**
+ * convert additionalProperties from jsonSchema to raml form
+ *
+ * @param  {Object} data - current data
+ * @param  {*} additionalProperties - potential additional properties
+ * @returns  {Object} raml form
+ */
+function convertAdditionalProperties (data, additionalProperties) {
+  if (additionalProperties !== undefined) {
+    let val = data
+    if (typeof additionalProperties === 'boolean') val = additionalProperties
+    if (typeof additionalProperties === 'object' && Object.keys(additionalProperties).length === 0) val = true
+    if (typeof additionalProperties === 'object' && Object.keys(additionalProperties).length > 0) {
+      const type = additionalProperties.type
+      data.properties['//'] = {type: type}
+      val = false
+    }
+    data.additionalProperties = val
+  }
+  return data
 }
 
 /**
@@ -313,8 +266,8 @@ function convertType (data) {
  */
 function isFileType (data) {
   return (!!(data.type === 'string' &&
-          data.media &&
-          data.media.binaryEncoding === 'binary'))
+             data.media &&
+             data.media.binaryEncoding === 'binary'))
 }
 
 /**
@@ -325,7 +278,7 @@ function isFileType (data) {
  */
 function convertFileType (data) {
   data['type'] = 'file'
-  var anyOf = data.media.anyOf
+  const anyOf = data.media.anyOf
   if (anyOf && anyOf.length > 0) {
     data['fileTypes'] = []
     anyOf.forEach(function (el) {
@@ -351,7 +304,7 @@ function convertDateType (data) {
   if (!(data.type === 'string' && data.pattern)) {
     return data
   }
-  var pattern = data.pattern
+  const pattern = data.pattern
   delete data.pattern
   switch (pattern) {
     case constants.dateOnlyPattern:
@@ -387,7 +340,7 @@ function convertDefinedFormat (data) {
   if (!(data.type === 'string' && data.format)) {
     return data
   }
-  var format = data.format
+  const format = data.format
   delete data.format
   switch (format) {
     case 'date-time':
@@ -434,7 +387,7 @@ function convertPatternProperties (data) {
     return data
   }
   data.properties = data.properties || {}
-  var patternProperties = data.patternProperties
+  const patternProperties = data.patternProperties
   delete data.patternProperties
   Object.keys(patternProperties).map(function (pattern) {
     data.properties['/' + pattern + '/'] = patternProperties[pattern]

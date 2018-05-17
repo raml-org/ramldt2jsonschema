@@ -1,7 +1,7 @@
 'use strict'
 
-var dt2js = require('./dt2js')
-var js2dt = require('./js2dt')
+const dt2js = require('./dt2js')
+const js2dt = require('./js2dt')
 
 module.exports.dt2js = dt2js.dt2js
 module.exports.dt2js.setBasePath = dt2js.setBasePath

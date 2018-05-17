@@ -1,25 +1,8 @@
-#!/usr/bin/env node
 'use strict'
 
-var js2dt = require('./js2dt')
-var utils = require('./utils')
-var program = require('commander')
-var fs = require('fs')
-
-/**
- * Callback to write RAML data to console.
- *
- * @param  {Error} err
- * @param  {string} raml
- */
-function writeToConsole (err, raml) {
-  if (err) {
-    console.log(err)
-    return
-  }
-  console.log('#%RAML 1.0 Library\n')
-  console.log(raml)
-}
+const yaml = require('js-yaml')
+const fs = require('fs')
+const js2dt = require('./js2dt')
 
 /**
  * Just call js2dt.
@@ -28,17 +11,22 @@ function writeToConsole (err, raml) {
  * @param  {string} ramlTypeName
  */
 function js2dtCLI (jsonFile, ramlTypeName) {
-  var jsonData = fs.readFileSync(jsonFile).toString()
-  if (ramlTypeName === undefined) {
-    ramlTypeName = utils.inferRAMLTypeName(jsonFile)
+  const jsonData = fs.readFileSync(jsonFile).toString()
+
+  if (ramlTypeName != null) {
+    const raml = js2dt.js2dt(jsonData, ramlTypeName)
+    return `#%RAML 1.0 Library\n${yaml.safeDump({ types: raml }, {'noRefs': true})}`
+  } else {
+    const typeName = 'this__should__be__the__only__type'
+    const raml = js2dt.js2dt(jsonData, typeName)
+
+    const keys = Object.keys(raml)
+    if (keys.length !== 1 || !keys.includes(typeName)) {
+      throw new Error(`There is more than one type (${JSON.stringify(keys)}), please specify a name for the raml library`)
+    }
+
+    return `#%RAML 1.0 DataType\n${yaml.safeDump(raml[typeName], {'noRefs': true})}`
   }
-  js2dt.js2dt(jsonData, ramlTypeName, writeToConsole)
 }
 
-program
-  .arguments('<jsonFile> <ramlTypeName>')
-  .description('Convert JSON schema to RAML Data Type. ' +
-               'Writes to standard output.')
-  .action(js2dtCLI)
-
-program.parse(process.argv)
+module.exports = js2dtCLI

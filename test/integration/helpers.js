@@ -1,6 +1,7 @@
 'use strict'
 
-var fs = require('fs')
+const fs = require('fs')
+const path = require('path')
 
 /**
  * List files in folder.
@@ -10,15 +11,13 @@ var fs = require('fs')
  * @param  {Array} fileList
  * @returns  {Array}
  */
-function getFiles (dir, fileList) {
-  fileList = fileList || []
-
-  var files = fs.readdirSync(dir)
-  for (var i in files) {
+function getFiles (dir, fileList = []) {
+  const files = fs.readdirSync(dir)
+  for (const i in files) {
     if (!files.hasOwnProperty(i)) {
       continue
     }
-    var name = dir + '/' + files[i]
+    const name = path.join(dir, files[i])
     if (fs.statSync(name).isDirectory()) {
       getFiles(name, fileList)
     } else {

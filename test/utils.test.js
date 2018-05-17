@@ -1,11 +1,11 @@
 /* global describe, it */
 
-var expect = require('chai').expect
-var utils = require('../src/utils')
+const expect = require('chai').expect
+const utils = require('../src/utils')
 
 describe('utils.updateObjWith()', function () {
   it('should update first object with second', function () {
-    var obj = utils.updateObjWith(
+    const obj = utils.updateObjWith(
       {'a': 1, 'b': 2}, {'a': 3, 'c': 4})
     expect(obj).to.have.property('a', 3)
     expect(obj).to.have.property('b', 2)
@@ -25,13 +25,13 @@ describe('utils.typeNameFromRef()', function () {
   it('should get type name from $ref string', function () {
     expect(utils.typeNameFromRef('foo')).to.be.equal('Foo')
     expect(utils.typeNameFromRef('#/definitions/address'))
-        .to.be.equal('Address')
+      .to.be.equal('Address')
   })
 })
 
 describe('utils.inferRAMLTypeName()', function () {
   it('should infer type name from file name', function () {
-    var name = utils.inferRAMLTypeName('docs/json/cat.json')
+    const name = utils.inferRAMLTypeName('docs/json/cat.json')
     expect(name).to.be.equal('Cat')
   })
 })
