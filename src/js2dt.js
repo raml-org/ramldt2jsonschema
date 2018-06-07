@@ -1,15 +1,22 @@
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
+const request = require('sync-request')
 const constants = require('./constants')
 const utils = require('./utils')
 
+let basePath = process.cwd()
+
 /**
- * This callback accepts results converting JSON schema to RAML data type.
+ * Set basePath to something other than cwd
  *
- * @callback conversionCallback
- * @param {Error} err
- * @param {string} raml
+ * @param  {string} path - The path to be used as root for includes
+ *
  */
+function setBasePath (path) {
+  basePath = path
+}
 
 /**
  * Convert JSON schema to RAML data type.
@@ -404,9 +411,18 @@ function convertPatternProperties (data) {
  * @returns  {Object}
  */
 function convertRef (data) {
-  data['type'] = utils.typeNameFromRef(data['$ref'])
+  let loc = data['$ref']
+  let split = loc.split('#')
   delete data['$ref']
-  return data
+
+  if (loc[0] === '#') {
+    data['type'] = utils.typeNameFromRef(loc)
+    return data
+  } else if (loc.slice(0, 4) === 'http') {
+    return request('GET', split[0]).getBody('utf8')
+  } else {
+    return fs.readFileSync(path.join(basePath, split[0]))
+  }
 }
 
 function getCombinationsKey (data) {
@@ -437,3 +453,4 @@ function getCombinationTypes (types, combsKey) {
 }
 
 module.exports.js2dt = js2dt
+module.exports.setBasePath = setBasePath
