@@ -19,6 +19,7 @@ const path = require('path')
 const parser = require('raml-1-parser')
 const helpers = require('./helpers')
 
+const js2dt = require('../../src/js2dt')
 const cli = require('../../src/js2dt_cli')
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'json')
@@ -44,6 +45,7 @@ describe('js2dt integration test', () => {
      */
     it(`should convert ${filepath}`, () => {
       const typeName = 'TestType'
+      js2dt.setBasePath(EXAMPLES_FOLDER)
       const raml = cli(filepath, typeName)
 
       try {

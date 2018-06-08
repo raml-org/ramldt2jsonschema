@@ -44,8 +44,6 @@ function logValidationError () {
   })
 }
 
-// FIXME: commented out line in complex_homeanimal.raml
-
 describe('dt2js integration test', () => {
   helpers.forEachFileIn(EXAMPLES_FOLDER, (filepath) => {
     /**
