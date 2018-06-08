@@ -419,9 +419,9 @@ function convertRef (data) {
     data['type'] = utils.typeNameFromRef(loc)
     return data
   } else if (loc.slice(0, 4) === 'http') {
-    return request('GET', split[0]).getBody('utf8')
+    return JSON.parse(request('GET', split[0]).getBody('utf8'))
   } else {
-    return fs.readFileSync(path.join(basePath, split[0]))
+    return JSON.parse(fs.readFileSync(path.join(basePath, split[0])))
   }
 }
 
