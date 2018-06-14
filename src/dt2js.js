@@ -146,6 +146,8 @@ function traverse (obj, ast, rootFileDir, libraries) {
         // If it's raml or yaml, parse it as raml
       } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(location)) > -1 || ramlContentTypes.indexOf(contentType) > -1) {
         currentNode.value = yap.load(include)
+        if(currentNode.value.errors.length > 0)
+          throw new Error('Invalid RAML data in one of the included files');
         recurse(keys, currentNode.value, newNodeFileDir)
         // If it's anything else, just add it as a string.
       } else {
