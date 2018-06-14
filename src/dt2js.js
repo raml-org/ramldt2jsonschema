@@ -105,8 +105,8 @@ function resolveInclude (rootFileDir, nodeFileDir, location) {
     return [include, contentType, nodeFileDir]
   } else {
     const include = fs.readFileSync(path.join(nodeFileDir, location))
-    const newNodeFileDir =  path.join(
-      location.charAt(0) === '/' ? rootFileDir : nodeFileDir, 
+    const newNodeFileDir = path.join(
+      location.charAt(0) === '/' ? rootFileDir : nodeFileDir,
       path.dirname(location)
     )
     return [include, null, newNodeFileDir]
@@ -133,7 +133,7 @@ function traverse (obj, ast, rootFileDir, libraries) {
     if (currentNode.value && currentNode.value.kind === 5) {
       const location = currentNode.value.value
       const [include, contentType, newNodeFileDir] = resolveInclude(rootFileDir, nodeFileDir, location)
-            // If it's json, parse it
+      // If it's json, parse it
       const ramlContentTypes = [
         'application/raml+yaml',
         'text/yaml',
@@ -146,8 +146,9 @@ function traverse (obj, ast, rootFileDir, libraries) {
         // If it's raml or yaml, parse it as raml
       } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(location)) > -1 || ramlContentTypes.indexOf(contentType) > -1) {
         currentNode.value = yap.load(include)
-        if(currentNode.value.errors.length > 0)
-          throw new Error('Invalid RAML data in one of the included files');
+        if (currentNode.value.errors.length > 0) {
+          throw new Error('Invalid RAML data in one of the included files')
+        }
         recurse(keys, currentNode.value, newNodeFileDir)
         // If it's anything else, just add it as a string.
       } else {
