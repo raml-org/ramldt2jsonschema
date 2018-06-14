@@ -97,15 +97,19 @@ function libraryOrValue (libraries, value) {
   }
 }
 
-function resolveInclude (rootFileDir, location) {
+function resolveInclude (rootFileDir, nodeFileDir, location) {
   if (location.slice(0, 4) === 'http') {
     const res = request('GET', location)
     const include = res.getBody('utf8')
     const contentType = res.headers['content-type'].split(';')[0]
-    return [include, contentType]
+    return [include, contentType, nodeFileDir]
   } else {
-    const include = fs.readFileSync(path.join(rootFileDir, location))
-    return [include, null]
+    const include = fs.readFileSync(path.join(nodeFileDir, location))
+    const newNodeFileDir =  path.join(
+      location.charAt(0) === '/' ? rootFileDir : nodeFileDir, 
+      path.dirname(location)
+    )
+    return [include, null, newNodeFileDir]
   }
 }
 
@@ -121,15 +125,15 @@ function resolveInclude (rootFileDir, location) {
  * @returns  {Object} - js object representing raml
  */
 function traverse (obj, ast, rootFileDir, libraries) {
-  function recurse (keys, currentNode) {
+  function recurse (keys, currentNode, nodeFileDir) {
     if (currentNode.key) {
       keys = keys.concat([currentNode.key.value])
     }
     // kind 5 is an include
     if (currentNode.value && currentNode.value.kind === 5) {
       const location = currentNode.value.value
-      const [include, contentType] = resolveInclude(rootFileDir, location)
-      // If it's json, parse it
+      const [include, contentType, newNodeFileDir] = resolveInclude(rootFileDir, nodeFileDir, location)
+            // If it's json, parse it
       const ramlContentTypes = [
         'application/raml+yaml',
         'text/yaml',
@@ -142,7 +146,7 @@ function traverse (obj, ast, rootFileDir, libraries) {
         // If it's raml or yaml, parse it as raml
       } else if (['.raml', '.yaml', '.yml'].indexOf(path.extname(location)) > -1 || ramlContentTypes.indexOf(contentType) > -1) {
         currentNode.value = yap.load(include)
-        recurse(keys, currentNode.value)
+        recurse(keys, currentNode.value, newNodeFileDir)
         // If it's anything else, just add it as a string.
       } else {
         currentNode.value = include
@@ -162,7 +166,7 @@ function traverse (obj, ast, rootFileDir, libraries) {
     // an object that needs further traversal
     } else if (currentNode.mappings) {
       for (let i = 0; i < currentNode.mappings.length; i++) {
-        recurse(keys, currentNode.mappings[i])
+        recurse(keys, currentNode.mappings[i], nodeFileDir)
       }
     } else if (currentNode.key && currentNode.key.value === 'examples') {
       const vals = currentNode.value.mappings.map(function (el) {
@@ -172,11 +176,11 @@ function traverse (obj, ast, rootFileDir, libraries) {
     // an object that needs further traversal
     } else if (currentNode.value && currentNode.value.mappings) {
       for (let o = 0; o < currentNode.value.mappings.length; o++) {
-        recurse(keys, currentNode.value.mappings[o])
+        recurse(keys, currentNode.value.mappings[o], nodeFileDir)
       }
     }
   }
-  recurse([], ast)
+  recurse([], ast, rootFileDir)
 }
 /**
  * This callback accepts results converting RAML data type to JSON schema.
