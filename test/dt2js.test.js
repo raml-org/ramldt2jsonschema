@@ -383,10 +383,6 @@ describe('dt2js.schemaForm()', function () {
     expect(schema).to.have.nested.property('properties.photo.media')
     expect(schema).to.have.nested.property('properties.dob.type', 'string')
   })
-})
-
-describe('dt2js.schemaForm()', function () {
-  const schemaForm = dt2js.__get__('schemaForm')
   it('should interpret absence of `required` as required: true', function () {
     const data = {
       'type': 'object',
@@ -414,6 +410,40 @@ describe('dt2js.schemaForm()', function () {
       .to.have.nested.property('properties.key1.default', 1)
     expect(schema)
       .to.have.nested.property('properties.key3.default', true)
+  })
+  it('should not add non-types properties without `required` to required list', function () {
+    const data = {
+      'type': 'object',
+      'example': {
+        'key1': {
+          'key11': 'lorem ipsum'
+        },
+        'key2': 'lorem ipsum'
+      },
+      'properties': {
+        'key1': {
+          'type': 'object',
+          'required': false,
+          'properties': {
+            'key11': {
+              'type': 'string',
+              'required': true
+            }
+          }
+        },
+        'key2': {
+          'type': 'string',
+          'required': true
+        }
+      }
+    }
+    const schema = schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['key2'])
+    expect(schema)
+      .to.have.nested.property('properties.key1.required').and
+      .to.be.deep.equal(['key11'])
   })
 })
 describe('Converting an array of union type', function () {
