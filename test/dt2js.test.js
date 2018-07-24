@@ -13,6 +13,7 @@ const ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
 const UNION_TEST = join(__dirname, 'examples/union_test2.raml')
 const DUPLICATE_REQUIRED_ENTRY = join(__dirname, 'examples/duplicate_required_entry_test.raml')
 const TYPE_CONVERSION_TEST = join(__dirname, 'examples/type_conversion_test.raml')
+const REQUIRED_TEST = join(__dirname, 'examples/required_test.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   const ramlData = fs.readFileSync(RAML_FILE).toString()
@@ -476,5 +477,13 @@ describe('When property with name "items".', function () {
     const schema = dt2js.dt2js(ramlData, 'Foo')
     expect(schema.required).to.deep.equal(['items', 'total_count'])
     return cb()
+  })
+})
+describe('File with diferent kind of required types', function () {
+  it('should set required for `require: true` or without `required` types', function () {
+    const ramlData = fs.readFileSync(REQUIRED_TEST).toString()
+    const schema = dt2js.dt2js(ramlData, 'randomObject')
+    const expected = require(join(__dirname, 'examples/required_test_result.json'))
+    expect(schema).to.deep.equal(expected)
   })
 })
