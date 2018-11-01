@@ -33,6 +33,6 @@
     },
     "category": { "type": "string" },
     "description": { "type": "string" },
-    "geo": { "$ref": "http://json-schema.org/geo" }
+    "geo": { "$ref": "https://raw.githubusercontent.com/json-schema-org/json-schema-org.github.io/2b751eba4cc6c9d978b516acd06c4f0a6350f7fd/example/geo.json" }
   }
 }

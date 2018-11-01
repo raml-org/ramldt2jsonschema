@@ -14,6 +14,8 @@ const UNION_TEST = join(__dirname, 'examples/union_test2.raml')
 const DUPLICATE_REQUIRED_ENTRY = join(__dirname, 'examples/duplicate_required_entry_test.raml')
 const TYPE_CONVERSION_TEST = join(__dirname, 'examples/type_conversion_test.raml')
 const REQUIRED_TEST = join(__dirname, 'examples/required_test.raml')
+const MALFORMED_INCLUDES_TEST = join(__dirname, 'examples/malformed_includes_test/rootLibrary.raml')
+const RELATIVE_PATH_TEST = join(__dirname, 'examples/relative_path_test/mainFolder/rootLibrary.raml')
 
 describe('dt2js.getRAMLContext()', function () {
   const ramlData = fs.readFileSync(RAML_FILE).toString()
@@ -77,6 +79,33 @@ describe('dt2js.dt2js()', function () {
     it('should omit it from required array', function () {
       const schema = dt2js.dt2js(raml, 'Person')
       expect(schema).to.have.property('required').and.to.deep.equal(['name'])
+    })
+  })
+
+  context('when parsing a library that includes external files', function () {
+    const raml = fs.readFileSync(MALFORMED_INCLUDES_TEST).toString()
+    it('should throw an error if the included file contains invalid RAML data', function () {
+      let potentialError
+      dt2js.setBasePath('test/examples/malformed_includes_test')
+      try {
+        dt2js.dt2js(raml, 'Example')
+      } catch (error) {
+        potentialError = error
+      }
+      expect(potentialError).to.not.equal(null)
+      expect(potentialError).to.be.an('Error')
+      expect(potentialError.message).to.equal('Invalid RAML data in one of the included files')
+    })
+  })
+
+  context('when parsing a library that includes external files using relative paths', function () {
+    const raml = fs.readFileSync(RELATIVE_PATH_TEST).toString()
+    it('should correctly parse all referenced files', function () {
+      dt2js.setBasePath('test/examples/relative_path_test/mainFolder')
+      const result = dt2js.dt2js(raml, 'Example')
+      expect(result).to.have.nested.property('properties.foo')
+      expect(result).to.have.nested.property('properties.bar')
+      expect(result).to.have.nested.property('properties.bar.properties.baz')
     })
   })
 })
