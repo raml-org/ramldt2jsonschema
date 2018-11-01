@@ -1,0 +1,7 @@
+#%RAML 1.0 Library
+types:
+  Example: 
+    properties:
+      foo:
+        type: string
+      bar: !include ../secondaryFolder/referencedFile.raml
