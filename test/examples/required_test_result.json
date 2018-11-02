@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "example": {
+    "key1": {
+      "key11": "lorem ipsum"
+    },
+    "key2": {},
+    "key3": {
+      "key32": "lorem ipsum"
+    }
+  },
+  "properties": {
+    "key1": {
+      "type": "object",
+      "properties": {
+        "key11": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true,
+      "required": [
+        "key11"
+      ]
+    },
+    "key2": {
+      "type": "object",
+      "properties": {
+        "key21": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "key3": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {}
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {}
+    }
+  },
+  "additionalProperties": true,
+  "required": [
+    "key2",
+    "key3"
+  ],
+  "$schema": "http://json-schema.org/draft-06/schema#"
+}

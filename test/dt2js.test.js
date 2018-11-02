@@ -13,6 +13,7 @@ const ARRAY_OF_UNION_TEST = join(__dirname, 'examples/union_test.raml')
 const UNION_TEST = join(__dirname, 'examples/union_test2.raml')
 const DUPLICATE_REQUIRED_ENTRY = join(__dirname, 'examples/duplicate_required_entry_test.raml')
 const TYPE_CONVERSION_TEST = join(__dirname, 'examples/type_conversion_test.raml')
+const REQUIRED_TEST = join(__dirname, 'examples/required_test.raml')
 const MALFORMED_INCLUDES_TEST = join(__dirname, 'examples/malformed_includes_test/rootLibrary.raml')
 const RELATIVE_PATH_TEST = join(__dirname, 'examples/relative_path_test/mainFolder/rootLibrary.raml')
 
@@ -412,10 +413,6 @@ describe('dt2js.schemaForm()', function () {
     expect(schema).to.have.nested.property('properties.photo.media')
     expect(schema).to.have.nested.property('properties.dob.type', 'string')
   })
-})
-
-describe('dt2js.schemaForm()', function () {
-  const schemaForm = dt2js.__get__('schemaForm')
   it('should interpret absence of `required` as required: true', function () {
     const data = {
       'type': 'object',
@@ -443,6 +440,40 @@ describe('dt2js.schemaForm()', function () {
       .to.have.nested.property('properties.key1.default', 1)
     expect(schema)
       .to.have.nested.property('properties.key3.default', true)
+  })
+  it('should not add non-types properties without `required` to required list', function () {
+    const data = {
+      'type': 'object',
+      'example': {
+        'key1': {
+          'key11': 'lorem ipsum'
+        },
+        'key2': 'lorem ipsum'
+      },
+      'properties': {
+        'key1': {
+          'type': 'object',
+          'required': false,
+          'properties': {
+            'key11': {
+              'type': 'string',
+              'required': true
+            }
+          }
+        },
+        'key2': {
+          'type': 'string',
+          'required': true
+        }
+      }
+    }
+    const schema = schemaForm(data, [])
+    expect(schema)
+      .to.have.property('required').and
+      .to.be.deep.equal(['key2'])
+    expect(schema)
+      .to.have.nested.property('properties.key1.required').and
+      .to.be.deep.equal(['key11'])
   })
 })
 describe('Converting an array of union type', function () {
@@ -475,5 +506,13 @@ describe('When property with name "items".', function () {
     const schema = dt2js.dt2js(ramlData, 'Foo')
     expect(schema.required).to.deep.equal(['items', 'total_count'])
     return cb()
+  })
+})
+describe('File with diferent kind of required types', function () {
+  it('should set required for `require: true` or without `required` types', function () {
+    const ramlData = fs.readFileSync(REQUIRED_TEST).toString()
+    const schema = dt2js.dt2js(ramlData, 'randomObject')
+    const expected = require(join(__dirname, 'examples/required_test_result.json'))
+    expect(schema).to.deep.equal(expected)
   })
 })
