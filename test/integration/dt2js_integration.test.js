@@ -36,7 +36,7 @@ ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'))
  */
 function logValidationError () {
   const sep = '||'
-  const errorsText = ajv.errorsText(ajv.errors, {'separator': sep})
+  const errorsText = ajv.errorsText(ajv.errors, { 'separator': sep })
   const errors = errorsText.split(sep)
   console.log('FAIL (JSON validation):')
   errors.forEach(function (el) {

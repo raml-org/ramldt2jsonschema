@@ -1,7 +1,7 @@
 'use strict'
 
 const yap = require('yaml-ast-parser')
-const {canonicalForm, expandedForm} = require('datatype-expansion')
+const { canonicalForm, expandedForm } = require('datatype-expansion')
 const constants = require('./constants')
 const utils = require('./utils')
 const fs = require('fs')
@@ -262,7 +262,7 @@ function convertType (data) {
       // If union of arrays
       if (Array.isArray(data.anyOf) && data.anyOf[0].type === 'array') {
         const items = data.anyOf.map(function (e) { return e.items })
-        data.items = {anyOf: []}
+        data.items = { anyOf: [] }
         data.items.anyOf = items
         data['type'] = 'array'
         delete data.anyOf
@@ -288,11 +288,11 @@ function convertType (data) {
  */
 function convertFileType (data) {
   data['type'] = 'string'
-  data['media'] = {'binaryEncoding': 'binary'}
+  data['media'] = { 'binaryEncoding': 'binary' }
   if (data.fileTypes) {
     data['media']['anyOf'] = []
     data.fileTypes.forEach(function (el) {
-      data['media']['anyOf'].push({'mediaType': el})
+      data['media']['anyOf'].push({ 'mediaType': el })
     })
     delete data.fileTypes
   }

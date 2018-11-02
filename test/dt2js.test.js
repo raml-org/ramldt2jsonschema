@@ -144,7 +144,7 @@ describe('dt2js.processArray()', function () {
   const processArray = dt2js.__get__('processArray')
   it('should transform each element of array', function () {
     const result = processArray(
-      [{'type': 'union'}, {'type': 'nil'}], [])
+      [{ 'type': 'union' }, { 'type': 'nil' }], [])
     expect(result).to.have.lengthOf(2)
     expect(result).to.have.nested.property('[0].type', 'object')
     expect(result).to.have.nested.property('[1].type', 'null')
@@ -154,22 +154,22 @@ describe('dt2js.processArray()', function () {
 describe('dt2js.convertType()', function () {
   const convertType = dt2js.__get__('convertType')
   it('should change type `union` to `object`', function () {
-    const obj = convertType({'type': 'union'})
-    expect(obj).to.deep.equal({'type': 'object'})
+    const obj = convertType({ 'type': 'union' })
+    expect(obj).to.deep.equal({ 'type': 'object' })
   })
   it('should change type `nil` to `null`', function () {
-    const obj = convertType({'type': 'nil'})
-    expect(obj).to.deep.equal({'type': 'null'})
+    const obj = convertType({ 'type': 'nil' })
+    expect(obj).to.deep.equal({ 'type': 'null' })
   })
   it('should change type `file` to `string` with `media` keyword', function () {
-    const obj = convertType({'type': 'file'})
+    const obj = convertType({ 'type': 'file' })
     expect(obj).to.deep.equal(
-      {'type': 'string', 'media': {'binaryEncoding': 'binary'}})
+      { 'type': 'string', 'media': { 'binaryEncoding': 'binary' } })
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      const obj = convertType({'type': 'foobar'})
-      expect(obj).to.deep.equal({'type': 'foobar'})
+      const obj = convertType({ 'type': 'foobar' })
+      expect(obj).to.deep.equal({ 'type': 'foobar' })
     })
   })
 })
@@ -177,8 +177,8 @@ describe('dt2js.convertType()', function () {
 describe('dt2js.convertFileType()', function () {
   const convertFileType = dt2js.__get__('convertFileType')
   it('should change type `file` to `string` with `media` keyword', function () {
-    const expected = {'type': 'string', 'media': {'binaryEncoding': 'binary'}}
-    const obj = convertFileType({'type': 'file'})
+    const expected = { 'type': 'string', 'media': { 'binaryEncoding': 'binary' } }
+    const obj = convertFileType({ 'type': 'file' })
     expect(obj).to.deep.equal(expected)
   })
   context('when data contains `fileTypes` param', function () {
@@ -188,8 +188,8 @@ describe('dt2js.convertFileType()', function () {
         'media': {
           'binaryEncoding': 'binary',
           'anyOf': [
-            {'mediaType': 'image/jpeg'},
-            {'mediaType': 'image/png'}
+            { 'mediaType': 'image/jpeg' },
+            { 'mediaType': 'image/png' }
           ]
         }
       }
@@ -205,17 +205,17 @@ describe('dt2js.convertFileType()', function () {
 describe('dt2js.convertDateType()', function () {
   const convertDateType = dt2js.__get__('convertDateType')
   it('should change type `date-only` to `string` with pattern', function () {
-    const obj = convertDateType({'type': 'date-only'})
+    const obj = convertDateType({ 'type': 'date-only' })
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.dateOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
-    const obj = convertDateType({'type': 'time-only'})
+    const obj = convertDateType({ 'type': 'time-only' })
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.timeOnlyPattern)
   })
   it('should change type `time-only` to `string` with pattern', function () {
-    const obj = convertDateType({'type': 'datetime-only'})
+    const obj = convertDateType({ 'type': 'datetime-only' })
     expect(obj).to.have.property('type', 'string')
     expect(obj).to.have.property('pattern', constants.dateTimeOnlyPattern)
   })
@@ -223,15 +223,15 @@ describe('dt2js.convertDateType()', function () {
     const data = [
       {
         'setTo': 'undefined',
-        'input': {'type': 'datetime'},
+        'input': { 'type': 'datetime' },
         'pattern': constants.RFC3339DatetimePattern
       }, {
         'setTo': 'rfc3339',
-        'input': {'type': 'datetime', 'format': 'rfc3339'},
+        'input': { 'type': 'datetime', 'format': 'rfc3339' },
         'pattern': constants.RFC3339DatetimePattern
       }, {
         'setTo': 'rfc2616',
-        'input': {'type': 'datetime', 'format': 'rfc2616'},
+        'input': { 'type': 'datetime', 'format': 'rfc2616' },
         'pattern': constants.RFC2616DatetimePattern
       }
     ]
@@ -248,8 +248,8 @@ describe('dt2js.convertDateType()', function () {
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      const obj = convertDateType({'type': 'foobar'})
-      expect(obj).to.deep.equal({'type': 'foobar'})
+      const obj = convertDateType({ 'type': 'foobar' })
+      expect(obj).to.deep.equal({ 'type': 'foobar' })
     })
   })
 })
@@ -261,12 +261,12 @@ describe('dt2js.convertPatternProperties()', function () {
       const obj = convertPatternProperties({
         properties: {
           beep: 'boop',
-          '/^note\\d+$/': {type: 'string'}
+          '/^note\\d+$/': { type: 'string' }
         }
       })
       expect(obj).to.not.have.deep.property('properties./^note\\d+$/')
       expect(obj).to.deep.equal({
-        properties: {beep: 'boop'},
+        properties: { beep: 'boop' },
         patternProperties: {
           '^note\\d+$': { type: 'string' }
         }
@@ -279,7 +279,7 @@ describe('dt2js.convertDisplayName()', function () {
   const convertDisplayName = dt2js.__get__('convertDisplayName')
   context('When a RAML displayName is given', function () {
     it('should replace it with a JSON Schema title', function () {
-      const obj = convertDisplayName({type: 'beep boop', displayName: 'Beep Boop'})
+      const obj = convertDisplayName({ type: 'beep boop', displayName: 'Beep Boop' })
       expect(obj).to.have.property('title', 'Beep Boop')
       expect(obj).to.not.have.property('displayName')
     })
@@ -289,7 +289,7 @@ describe('dt2js.convertDisplayName()', function () {
 describe('dt2js.processNested()', function () {
   const processNested = dt2js.__get__('processNested')
   it('should process nested arrays', function () {
-    const data = {'foo': [{'type': 'union'}]}
+    const data = { 'foo': [{ 'type': 'union' }] }
     const result = processNested(data, [])
     expect(result)
       .to.have.property('foo').and
@@ -297,7 +297,7 @@ describe('dt2js.processNested()', function () {
     expect(result).to.have.nested.property('foo[0].type', 'object')
   })
   it('should process nested objects', function () {
-    const data = {'foo': {'type': 'union'}}
+    const data = { 'foo': { 'type': 'union' } }
     const result = processNested(data, [])
     expect(result)
       .to.have.property('foo').and
@@ -305,7 +305,7 @@ describe('dt2js.processNested()', function () {
     expect(result).to.have.nested.property('foo.type', 'object')
   })
   it('should return empty object if no nesting is present', function () {
-    const result = processNested({'type': 'union'}, [])
+    const result = processNested({ 'type': 'union' }, [])
     expect(result).to.be.deep.equal({})
   })
 })
@@ -382,11 +382,11 @@ describe('dt2js.schemaForm()', function () {
         'bio': {
           'type': 'object',
           'properties': {
-            'event': {'type': 'date-only'}
+            'event': { 'type': 'date-only' }
           }
         },
         'siblings': {
-          'anyOf': [{'type': 'nil'}]
+          'anyOf': [{ 'type': 'nil' }]
         }
       }
     }
@@ -400,9 +400,9 @@ describe('dt2js.schemaForm()', function () {
     const data = {
       'type': 'union',
       'properties': {
-        'name': {'type': 'nil'},
-        'photo': {'type': 'file'},
-        'dob': {'type': 'date-only'}
+        'name': { 'type': 'nil' },
+        'photo': { 'type': 'file' },
+        'dob': { 'type': 'date-only' }
       }
     }
     const schema = schemaForm(data, [])

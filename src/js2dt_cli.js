@@ -15,7 +15,7 @@ function js2dtCLI (jsonFile, ramlTypeName) {
 
   if (ramlTypeName != null) {
     const raml = js2dt.js2dt(jsonData, ramlTypeName)
-    return `#%RAML 1.0 Library\n${yaml.safeDump({ types: raml }, {'noRefs': true})}`
+    return `#%RAML 1.0 Library\n${yaml.safeDump({ types: raml }, { 'noRefs': true })}`
   } else {
     const typeName = 'this__should__be__the__only__type'
     const raml = js2dt.js2dt(jsonData, typeName)
@@ -25,7 +25,7 @@ function js2dtCLI (jsonFile, ramlTypeName) {
       throw new Error(`There is more than one type (${JSON.stringify(keys)}), please specify a name for the raml library`)
     }
 
-    return `#%RAML 1.0 DataType\n${yaml.safeDump(raml[typeName], {'noRefs': true})}`
+    return `#%RAML 1.0 DataType\n${yaml.safeDump(raml[typeName], { 'noRefs': true })}`
   }
 }
 

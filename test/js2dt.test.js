@@ -312,13 +312,13 @@ describe('js2dt.js2dt()', function () {
 describe('js2dt.convertType()', function () {
   const convertType = js2dt.__get__('convertType')
   it('should change type `null` to `nil`', function () {
-    const obj = convertType({'type': 'null'})
-    expect(obj).to.deep.equal({'type': 'nil'})
+    const obj = convertType({ 'type': 'null' })
+    expect(obj).to.deep.equal({ 'type': 'nil' })
   })
   context('when does not match any type', function () {
     it('should return object not changed', function () {
-      const obj = convertType({'type': 'foobar'})
-      expect(obj).to.deep.equal({'type': 'foobar'})
+      const obj = convertType({ 'type': 'foobar' })
+      expect(obj).to.deep.equal({ 'type': 'foobar' })
     })
   })
 })
@@ -328,7 +328,7 @@ describe('js2dt.isFileType()', function () {
   it('should return true for valid file types', function () {
     const data = {
       'type': 'string',
-      'media': {'binaryEncoding': 'binary'}
+      'media': { 'binaryEncoding': 'binary' }
     }
     expect(isFileType(data)).to.equal(true)
   })
@@ -336,7 +336,7 @@ describe('js2dt.isFileType()', function () {
     it('should return false', function () {
       const data = {
         'type': 'asd',
-        'media': {'binaryEncoding': 'binary'}
+        'media': { 'binaryEncoding': 'binary' }
       }
       expect(isFileType(data)).to.equal(false)
     })
@@ -353,7 +353,7 @@ describe('js2dt.isFileType()', function () {
     it('should return false', function () {
       const data = {
         'type': 'asd',
-        'media': {'binaryEncoding': 'asdasd'}
+        'media': { 'binaryEncoding': 'asdasd' }
       }
       expect(isFileType(data)).to.equal(false)
     })
@@ -363,8 +363,8 @@ describe('js2dt.isFileType()', function () {
 describe('js2dt.convertFileType()', function () {
   const convertFileType = js2dt.__get__('convertFileType')
   it('should just change type to `file` and remove media', function () {
-    const res = convertFileType({'type': 'foo', 'media': 1})
-    expect(res).to.be.deep.equal({'type': 'file'})
+    const res = convertFileType({ 'type': 'foo', 'media': 1 })
+    expect(res).to.be.deep.equal({ 'type': 'file' })
   })
   context('when anyOf contains data', function () {
     it('should move mediaTypes to fileTypes', function () {
@@ -372,9 +372,9 @@ describe('js2dt.convertFileType()', function () {
         'type': 'foo',
         'media': {
           'anyOf': [
-            {'mediaType': 'image/png'},
-            {'mediaType': 'image/jpeg'},
-            {'foo': 'bar'}
+            { 'mediaType': 'image/png' },
+            { 'mediaType': 'image/jpeg' },
+            { 'foo': 'bar' }
           ]
         }
       })
@@ -389,11 +389,11 @@ describe('js2dt.convertFileType()', function () {
           'type': 'foo',
           'media': {
             'anyOf': [
-              {'foo': 'bar'}
+              { 'foo': 'bar' }
             ]
           }
         })
-        expect(res).to.be.deep.equal({'type': 'file'})
+        expect(res).to.be.deep.equal({ 'type': 'file' })
       })
     })
   })
@@ -405,7 +405,7 @@ describe('js2dt.convertDateType()', function () {
     context('when pattern matches date-only', function () {
       it('should change type to `date-only` and remove pattern', function () {
         const obj = convertDateType({
-          'type': 'string', 'pattern': constants.dateOnlyPattern})
+          'type': 'string', 'pattern': constants.dateOnlyPattern })
         expect(obj).to.have.property('type', 'date-only')
         expect(obj).to.not.have.property('pattern')
       })
@@ -413,7 +413,7 @@ describe('js2dt.convertDateType()', function () {
     context('when pattern matches time-only', function () {
       it('should change type to `time-only` and remove pattern', function () {
         const obj = convertDateType({
-          'type': 'string', 'pattern': constants.timeOnlyPattern})
+          'type': 'string', 'pattern': constants.timeOnlyPattern })
         expect(obj).to.have.property('type', 'time-only')
         expect(obj).to.not.have.property('pattern')
       })
@@ -421,7 +421,7 @@ describe('js2dt.convertDateType()', function () {
     context('when pattern matches datetime-only', function () {
       it('should change type to `datetime-only` and remove pattern', function () {
         const obj = convertDateType({
-          'type': 'string', 'pattern': constants.dateTimeOnlyPattern})
+          'type': 'string', 'pattern': constants.dateTimeOnlyPattern })
         expect(obj).to.have.property('type', 'datetime-only')
         expect(obj).to.not.have.property('pattern')
       })
@@ -429,7 +429,7 @@ describe('js2dt.convertDateType()', function () {
     context('when pattern matches datetime and format is rfc3339', function () {
       it('should change type to `datetime` with `format` of rfc3339 and del pattern', function () {
         const obj = convertDateType({
-          'type': 'string', 'pattern': constants.RFC3339DatetimePattern})
+          'type': 'string', 'pattern': constants.RFC3339DatetimePattern })
         expect(obj).to.have.property('type', 'datetime')
         expect(obj).to.have.property('format', constants.RFC3339)
         expect(obj).to.not.have.property('pattern')
@@ -438,7 +438,7 @@ describe('js2dt.convertDateType()', function () {
     context('when pattern matches datetime and format is rfc2616', function () {
       it('should change type to `datetime` with `format` of rfc2616 and del pattern', function () {
         const obj = convertDateType({
-          'type': 'string', 'pattern': constants.RFC2616DatetimePattern})
+          'type': 'string', 'pattern': constants.RFC2616DatetimePattern })
         expect(obj).to.have.property('type', 'datetime')
         expect(obj).to.have.property('format', constants.RFC2616)
         expect(obj).to.not.have.property('pattern')
@@ -447,20 +447,20 @@ describe('js2dt.convertDateType()', function () {
   })
   context('when type is not string', function () {
     it('should return object not changed', function () {
-      const obj = convertDateType({'type': 'foobar', 'pattern': 'asd'})
-      expect(obj).to.deep.equal({'type': 'foobar', 'pattern': 'asd'})
+      const obj = convertDateType({ 'type': 'foobar', 'pattern': 'asd' })
+      expect(obj).to.deep.equal({ 'type': 'foobar', 'pattern': 'asd' })
     })
   })
   context('when no pattern present', function () {
     it('should return object not changed', function () {
-      const obj = convertDateType({'type': 'string'})
-      expect(obj).to.deep.equal({'type': 'string'})
+      const obj = convertDateType({ 'type': 'string' })
+      expect(obj).to.deep.equal({ 'type': 'string' })
     })
   })
   context('pattern does not match date[time]', function () {
     it('should return object not changed', function () {
-      const obj = convertDateType({'type': 'string', 'pattern': 'asd'})
-      expect(obj).to.deep.equal({'type': 'string', 'pattern': 'asd'})
+      const obj = convertDateType({ 'type': 'string', 'pattern': 'asd' })
+      expect(obj).to.deep.equal({ 'type': 'string', 'pattern': 'asd' })
     })
   })
 })
@@ -549,14 +549,14 @@ describe('js2dt.convertPatternProperties()', function () {
           '/': {}
         },
         'patternProperties': {
-          '^(/[^/]+)+$': {type: 'string'},
+          '^(/[^/]+)+$': { type: 'string' },
           'p': {}
         }
       })
       expect(raml).to.deep.equal({
         'properties': {
           '/': {},
-          '/^(/[^/]+)+$/': {type: 'string'},
+          '/^(/[^/]+)+$/': { type: 'string' },
           '/p/': {}
         }
       })
@@ -567,9 +567,9 @@ describe('js2dt.convertPatternProperties()', function () {
 describe('js2dt.convertRef()', function () {
   const convertRef = js2dt.__get__('convertRef')
   it('should replace $ref with type name', function () {
-    const data = {'$ref': '#/definitions/username'}
+    const data = { '$ref': '#/definitions/username' }
     const raml = convertRef(data)
-    expect(raml).to.be.deep.equal({'type': 'Username'})
+    expect(raml).to.be.deep.equal({ 'type': 'Username' })
   })
 })
 
@@ -656,12 +656,12 @@ describe('js2dt.RamlConverter.parseType()', function () {
           'properties': {
             'event': {
               'type': 'string',
-              'media': {'binaryEncoding': 'binary'}
+              'media': { 'binaryEncoding': 'binary' }
             }
           }
         },
         'siblings': {
-          'foo': [{'type': 'null'}]
+          'foo': [{ 'type': 'null' }]
         }
       }
     }
@@ -676,7 +676,7 @@ describe('js2dt.RamlConverter.parseType()', function () {
   context('when $ref IS present in input data', function () {
     const emitter = new RamlConverter()
     it('should replace $ref with defined type name', function () {
-      const data = {'$ref': '#/definitions/username'}
+      const data = { '$ref': '#/definitions/username' }
       const raml = emitter.parseType(data, false)
       expect(raml).to.be.deep.equal({ type: 'Username' })
     })
@@ -686,12 +686,12 @@ describe('js2dt.RamlConverter.parseType()', function () {
     it('should change types', function () {
       const data = {
         'properties': {
-          'name': {'type': 'null'},
+          'name': { 'type': 'null' },
           'photo': {
             'type': 'string',
-            'media': {'binaryEncoding': 'binary'}
+            'media': { 'binaryEncoding': 'binary' }
           },
-          'dob': {'type': 'string', 'pattern': constants.dateOnlyPattern}
+          'dob': { 'type': 'string', 'pattern': constants.dateOnlyPattern }
         }
       }
       const raml = emitter.parseType(data, false)
@@ -708,8 +708,8 @@ describe('js2dt.RamlConverter.parseType()', function () {
       const data = {
         'type': 'string',
         'anyOf': [
-          {'pattern': 'foo'},
-          {'pattern': 'bar'}
+          { 'pattern': 'foo' },
+          { 'pattern': 'bar' }
         ]
       }
       expect(emitter)
@@ -745,8 +745,8 @@ describe('js2dt.RamlConverter.translateDefinitions()', function () {
         'address': {
           'type': 'object',
           'properties': {
-            'street': {'type': 'string'},
-            'city': {'type': 'null'}
+            'street': { 'type': 'string' },
+            'city': { 'type': 'null' }
           },
           'required': ['street']
         }
@@ -765,8 +765,8 @@ describe.skip('js2dt.RamlConverter.processArray()', function () {
   const emitter = new RamlConverter()
   it('should transform each element of array', function () {
     const result = emitter.processArray([
-      {'type': 'null'},
-      {'type': 'string', 'media': {'binaryEncoding': 'binary'}}
+      { 'type': 'null' },
+      { 'type': 'string', 'media': { 'binaryEncoding': 'binary' } }
     ], [])
     console.log(result)
     expect(result).to.have.lengthOf(2)
@@ -779,7 +779,7 @@ describe.skip('js2dt.RamlConverter.processArray()', function () {
 describe.skip('js2dt.RamlConverter.processNested()', function () {
   it('should process nested arrays', function () {
     const emitter = new RamlConverter()
-    const data = {'foo': [{'type': 'null'}]}
+    const data = { 'foo': [{ 'type': 'null' }] }
     const result = emitter.processNested(null, data, [])
     expect(result)
       .to.have.property('foo').and
@@ -788,7 +788,7 @@ describe.skip('js2dt.RamlConverter.processNested()', function () {
   })
   it('should process nested objects', function () {
     const emitter = new RamlConverter()
-    const data = {'foo': {'type': 'null'}}
+    const data = { 'foo': { 'type': 'null' } }
     const result = emitter.processNested(null, data, [])
     expect(result)
       .to.have.property('foo').and
@@ -797,21 +797,21 @@ describe.skip('js2dt.RamlConverter.processNested()', function () {
   })
   it('should return empty object if no nesting is present', function () {
     const emitter = new RamlConverter()
-    const result = emitter.processNested({'type': 'null'}, [])
+    const result = emitter.processNested({ 'type': 'null' }, [])
     expect(result).to.be.deep.equal({})
   })
 })
 
 describe('js2dt.RamlConverter() init', function () {
   it('should assign properties properly', function () {
-    const emitter = new RamlConverter({'foo': 1}, 'Bar')
+    const emitter = new RamlConverter({ 'foo': 1 }, 'Bar')
     expect(emitter).to.have.property('typeName', 'Bar')
     expect(emitter)
       .to.have.property('types').and
       .to.be.deep.equal({})
     expect(emitter)
       .to.have.property('data').and
-      .to.be.deep.equal({'foo': 1})
+      .to.be.deep.equal({ 'foo': 1 })
   })
 })
 
@@ -822,7 +822,7 @@ describe('js2dt.RamlConverter.processDefinitions()', function () {
         'address': {
           'type': 'object',
           'properties': {
-            'city': {'type': 'null'}
+            'city': { 'type': 'null' }
           }
         }
       }
@@ -844,7 +844,7 @@ describe('js2dt.RamlConverter.processMainData()', function () {
       '$schema': '23123123',
       'type': 'object',
       'properties': {
-        'city': {'type': 'null'}
+        'city': { 'type': 'null' }
       }
     }
     const emitter = new RamlConverter(data, 'Address')
@@ -861,7 +861,7 @@ describe('js2dt.RamlConverter.emit()', function () {
     const data = {
       'type': 'object',
       'properties': {
-        'city': {'type': 'null'}
+        'city': { 'type': 'null' }
       }
     }
     const emitter = new RamlConverter(data, 'Address')
@@ -874,8 +874,8 @@ describe('js2dt.RamlConverter.processCombinations()', function () {
   it('should convert anyOf into RAML union', function () {
     const data = {
       'anyOf': [
-        {'type': 'string'},
-        {'type': 'number'}
+        { 'type': 'string' },
+        { 'type': 'number' }
       ]
     }
     const emitter = new RamlConverter(data)
@@ -893,8 +893,8 @@ describe('js2dt.RamlConverter.processCombinations()', function () {
   it('should convert oneOf into RAML union', function () {
     const data = {
       'oneOf': [
-        {'type': 'string'},
-        {'type': 'number'}
+        { 'type': 'string' },
+        { 'type': 'number' }
       ]
     }
     const emitter = new RamlConverter(data)
@@ -912,8 +912,8 @@ describe('js2dt.RamlConverter.processCombinations()', function () {
   it('should convert allOf into RAML multiple inheritance', function () {
     const data = {
       'allOf': [
-        {'type': 'string'},
-        {'type': 'number'}
+        { 'type': 'string' },
+        { 'type': 'number' }
       ]
     }
     const emitter = new RamlConverter(data)
@@ -934,8 +934,8 @@ describe('js2dt.RamlConverter.processCombinations()', function () {
     it('should use main type name', function () {
       const data = {
         'anyOf': [
-          {'type': 'string'},
-          {'type': 'number'}
+          { 'type': 'string' },
+          { 'type': 'number' }
         ]
       }
       const emitter = new RamlConverter(data, 'Cat')
@@ -956,9 +956,9 @@ describe('js2dt.RamlConverter.processCombinations()', function () {
 describe('js2dt.getCombinationsKey()', function () {
   const getCombinationsKey = js2dt.__get__('getCombinationsKey')
   it('should return proper combinations key', function () {
-    expect(getCombinationsKey({'anyOf': 1})).to.be.equal('anyOf')
-    expect(getCombinationsKey({'allOf': 1})).to.be.equal('allOf')
-    expect(getCombinationsKey({'oneOf': 1})).to.be.equal('oneOf')
+    expect(getCombinationsKey({ 'anyOf': 1 })).to.be.equal('anyOf')
+    expect(getCombinationsKey({ 'allOf': 1 })).to.be.equal('allOf')
+    expect(getCombinationsKey({ 'oneOf': 1 })).to.be.equal('oneOf')
   })
   context('when object does not contain any combinations prop', function () {
     it('should return undefined', function () {
@@ -973,8 +973,8 @@ describe('js2dt.setCombinationsTypes()', function () {
     const data = {
       'type': 'string',
       'anyOf': [
-        {'pattern': 'x'},
-        {'type': 'number'}
+        { 'pattern': 'x' },
+        { 'type': 'number' }
       ]
     }
     const res = setCombinationsTypes(data, 'anyOf')

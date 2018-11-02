@@ -49,7 +49,7 @@ describe('js2dt integration test', () => {
       const raml = cli(filepath, typeName)
 
       try {
-        parser.parseRAMLSync(raml, {'rejectOnErrors': true})
+        parser.parseRAMLSync(raml, { 'rejectOnErrors': true })
       } catch (error) {
         logValidationError(error)
         throw error

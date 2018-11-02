@@ -33,9 +33,9 @@ function js2dt (jsonData, typeName) {
 }
 
 const whitelist = {
-  all: {'description': 'description'},
-  number: {'minimum': 'minimum', 'maximum': 'maximum'},
-  string: {'pattern': 'pattern', 'format': 'pattern'}
+  all: { 'description': 'description' },
+  number: { 'minimum': 'minimum', 'maximum': 'maximum' },
+  string: { 'pattern': 'pattern', 'format': 'pattern' }
 }
 
 class RamlConverter {
@@ -53,7 +53,7 @@ class RamlConverter {
    */
   toRaml () {
     if (typeof this.data !== 'object') {
-      return {[this.typeName]: this.data}
+      return { [this.typeName]: this.data }
     }
 
     Object.assign(this.types, this.parseDefinitions(this.data.definitions))
@@ -188,7 +188,7 @@ class RamlConverter {
       }
       delete type.required
 
-      return Object.assign(acc, {[pn]: Object.keys(type).length === 1 ? type.type : type})
+      return Object.assign(acc, { [pn]: Object.keys(type).length === 1 ? type.type : type })
     }, {})
   }
 
@@ -202,7 +202,7 @@ class RamlConverter {
   parseDefinitions (definitions) {
     const defs = this.parseProps(definitions, [], true)
     return Object.keys(defs)
-      .reduce((acc, key) => Object.assign(acc, {[utils.capitalize(key)]: defs[key]}), {})
+      .reduce((acc, key) => Object.assign(acc, { [utils.capitalize(key)]: defs[key] }), {})
   }
 
   /**
@@ -243,7 +243,7 @@ function convertAdditionalProperties (data, additionalProperties) {
     if (typeof additionalProperties === 'object' && Object.keys(additionalProperties).length === 0) val = true
     if (typeof additionalProperties === 'object' && Object.keys(additionalProperties).length > 0) {
       const type = additionalProperties.type
-      data.properties['//'] = {type: type}
+      data.properties['//'] = { type: type }
       val = false
     }
     data.additionalProperties = val
