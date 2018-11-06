@@ -108,6 +108,9 @@ class RamlConverter {
     if (type.const) {
       outType.enum = [ type.const ]
     }
+    if (type.enum) {
+      outType.enum = type.enum
+    }
 
     switch (outType.type) {
       case 'object': {
