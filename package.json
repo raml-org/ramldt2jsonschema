@@ -40,7 +40,7 @@
     "deep-get-set": "^1.1.0",
     "js-yaml": "^3.10.0",
     "sync-request": "^6.0.0",
-    "yaml-ast-parser": "0.0.41"
+    "yaml-ast-parser": "0.0.42"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
