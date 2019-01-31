@@ -216,7 +216,7 @@ function dt2js (ramlData, typeName) {
   if (ctx[typeName] === undefined) throw new Error('type ' + typeName + ' does not exist')
 
   const expanded = expandedForm(ctx[typeName], ctx)
-  const canonical = canonicalForm(expanded)
+  const canonical = canonicalForm(expanded, { hoistUnions: false })
 
   let schema = schemaForm(canonical)
   schema = addRootKeywords(schema)
