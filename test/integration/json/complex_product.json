@@ -21,7 +21,7 @@
         },
         "importedAt": {
           "allOf": [
-            {"type": "string", "pattern": "^(\\d{2})(:)(\\d{2})(:)(\\d{2})(\\.\\d+)?$"},
+            {"type": "string", "pattern": "^(\\d{2})(:)(\\d{2})(:)(\\d{2})(\\.\\d+)?"},
             {"type": "string", "minLength": 3}
           ]
         },
