@@ -116,7 +116,7 @@ class RamlConverter {
         break
       }
       case 'array': {
-        if (typeof outType.items === 'object') {
+        if (typeof type.items === 'object') {
           outType.items = this.parseType(type.items, true, prop + 'Items')
         } else if (Array.isArray(type.items)) {
           outType.items = type.items.map(i => this.parseType(i, true, prop + 'Item' + i))
