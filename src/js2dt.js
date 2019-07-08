@@ -109,6 +109,10 @@ class RamlConverter {
       outType.enum = [ type.const ]
     }
 
+    if (type.enum) {
+      outType.enum = type.enum
+    }
+
     switch (outType.type) {
       case 'object': {
         outType.properties = this.parseProps(type.properties, type.required)

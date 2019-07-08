@@ -17,6 +17,7 @@ describe('js2dt.js2dt()', function () {
       const data = js2dt.js2dt(jsonData, 'Product')
       expect(data).to.be.a('object')
       expect(data).to.have.nested.property('Product')
+      expect(data).to.have.nested.property('Address.properties.state.enum.0', 'AA')
       expect(data).to.not.have.property('$schema')
     })
     it('should retain boolean additionalProperties as boolean', function () {
@@ -38,6 +39,7 @@ describe('js2dt.js2dt()', function () {
         'additionalProperties': false
       }
       const data = js2dt.js2dt(JSON.stringify(jsdata), 'Product')
+      expect(data).to.have.nested.deep.property('Product.properties.list?.items.0.enum', ['NW', 'NE', 'SW', 'SE'])
       expect(data).to.have.nested.property('Product.additionalProperties.', false)
     })
     it('should change additionalProperties: {} to true', function () {
