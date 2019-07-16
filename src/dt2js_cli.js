@@ -1,20 +1,19 @@
 'use strict'
 
 const fs = require('fs')
-const path = require('path')
 const dt2js = require('./dt2js')
 
 /**
- * Just call dt2js.
+ * Delegates converting RAML data type -> JSON Schema to dt2js.
  *
- * @param  {string} ramlFile
- * @param  {string} ramlTypeName
+ * @param  {string} ramlFilePath - RAML file path.
+ * @param  {string} typeName - Name of the type to be converted.
+ * @return {string} JSON Schema containing converted type.
  */
-function dt2jsCLI (ramlFile, ramlTypeName) {
-  const rootFileDir = ramlFile.split(path.sep).slice(0, -1).join(path.sep)
-  const ramlData = fs.readFileSync(ramlFile).toString()
-  dt2js.setBasePath(rootFileDir)
-  return dt2js.dt2js(ramlData, ramlTypeName)
+async function dt2jsCLI (ramlFilePath, typeName) {
+  const ramlData = fs.readFileSync(ramlFilePath).toString()
+  const result = await dt2js.dt2js(ramlData, typeName)
+  return JSON.stringify(result, null, 2)
 }
 
 module.exports = dt2jsCLI
