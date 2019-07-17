@@ -8,6 +8,8 @@ program
   .arguments('<ramlFile> <ramlTypeName>')
   .description('Convert a RAML data type into JSON schema. ' +
                'Writes to standard output.')
-  .action((f, t) => console.log(cli(f, t)))
+  .action(async (f, t) => {
+    console.log(await cli(f, t))
+  })
 
 program.parse(process.argv)

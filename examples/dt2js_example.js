@@ -8,8 +8,9 @@ const filePath = join(__dirname, '../test/integration/raml/complex_cat.raml')
 const ramlData = fs.readFileSync(filePath).toString()
 
 async function main () {
+  let schema
   try {
-    const schema = await r2j.dt2js(ramlData, 'Cat')
+    schema = await r2j.dt2js(ramlData, 'Cat')
   } catch (err) {
     console.log(err)
     return

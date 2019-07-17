@@ -9,8 +9,9 @@ const filePath = join(__dirname, '../test/integration/json/complex_cat.json')
 const jsonData = fs.readFileSync(filePath).toString()
 
 async function main () {
+  let raml
   try {
-    const raml = await r2j.js2dt(jsonData, 'Cat')
+    raml = await r2j.js2dt(jsonData, 'Cat')
   } catch (err) {
     console.log(err)
     return
