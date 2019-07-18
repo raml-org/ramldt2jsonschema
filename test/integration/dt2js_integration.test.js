@@ -16,19 +16,16 @@
  */
 
 const path = require('path')
-const rewire = require('rewire')
 const Ajv = require('ajv')
-const fs = require('fs')
+const wap = require('webapi-parser').WebApiParser
 
 const helpers = require('../helpers')
-const dt2js = rewire('../../src/dt2js')
-const cli = require('../../src/dt2js_cli')
+const dt2jsCLI = require('../../src/dt2js_cli')
 
-const getRAMLContext = dt2js.__get__('getRAMLContext')
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
-const ajv = new Ajv({ allErrors: true, schemaId: '$id' })
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'))
+const ajv = new Ajv({ allErrors: true, schemaId: 'id' })
+ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
 
 /**
  * Log JSON validation errors.
@@ -43,27 +40,44 @@ function logValidationError () {
   })
 }
 
-describe('dt2js integration test', () => {
-  helpers.forEachFileIn(EXAMPLES_FOLDER, (filepath) => {
-    /**
-     * Test file by running js2dt script on it and then validating
-     * with raml-1-parser.
-     */
-    context(`for file ${filepath}`, () => {
-      const ramlData = fs.readFileSync(filepath).toString()
-      dt2js.setBasePath(EXAMPLES_FOLDER)
-      const ctx = getRAMLContext(ramlData, EXAMPLES_FOLDER)
+function loadExamplesData () {
+  const modelsProms = helpers.getFiles(EXAMPLES_FOLDER)
+    .map(filepath => {
+      return wap.raml10.parse(`file://${filepath}`)
+    })
+  return Promise.all(modelsProms)
+    .then(models => {
+      return models.map(model => {
+        return {
+          fpath: model.location.replace('file://', ''),
+          names: model.declares.map(dec => dec.name.value())
+        }
+      })
+    })
+}
 
-      for (const typeName in ctx) {
-        it(`should convert ${typeName}`, () => {
-          const schema = cli(filepath, typeName)
-          const valid = ajv.validateSchema(schema)
-          if (!valid) {
-            logValidationError()
-            throw new Error('Invalid json')
-          }
+/**
+ * Test each file by running dt2js script on it and then validating
+ * output with ajv.
+ */
+async function defineTests () {
+  const examplesData = await loadExamplesData()
+  describe('dt2js integration test', () => {
+    examplesData.forEach(data => {
+      context(`for file ${data.fpath}`, () => {
+        data.names.forEach(typeName => {
+          it(`should convert ${typeName}`, async () => {
+            const schema = await dt2jsCLI(data.fpath, typeName)
+            const valid = ajv.validateSchema(schema)
+            if (!valid) {
+              logValidationError()
+              throw new Error('Invalid json')
+            }
+          })
         })
-      }
+      })
     })
   })
-})
+}
+
+defineTests()

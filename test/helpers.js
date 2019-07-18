@@ -38,3 +38,4 @@ function forEachFileIn (path, cb) {
 }
 
 module.exports.forEachFileIn = forEachFileIn
+module.exports.getFiles = getFiles
