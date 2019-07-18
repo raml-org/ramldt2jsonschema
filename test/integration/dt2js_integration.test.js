@@ -15,17 +15,16 @@
  * Tests are launched by running this file with nodejs.
  */
 
-const helpers = require('./helpers')
 const path = require('path')
 const rewire = require('rewire')
 const Ajv = require('ajv')
 const fs = require('fs')
 
+const helpers = require('../helpers')
 const dt2js = rewire('../../src/dt2js')
-const getRAMLContext = dt2js.__get__('getRAMLContext')
-
 const cli = require('../../src/dt2js_cli')
 
+const getRAMLContext = dt2js.__get__('getRAMLContext')
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
 const ajv = new Ajv({ allErrors: true, schemaId: '$id' })

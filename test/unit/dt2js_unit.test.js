@@ -1,10 +1,8 @@
 /* global describe, it, context */
 
 const { expect } = require('chai')
-const join = require('path').join
 const rewire = require('rewire')
 const dt2js = rewire('../../src/dt2js')
-const fs = require('fs')
 
 describe('dt2js.fixFileTypeProperties()', function () {
   const fixFileTypeProperties = dt2js.__get__('fixFileTypeProperties')

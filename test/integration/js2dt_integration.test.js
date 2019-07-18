@@ -17,8 +17,8 @@
 
 const path = require('path')
 const parser = require('raml-1-parser')
-const helpers = require('./helpers')
 
+const helpers = require('../helpers')
 const js2dt = require('../../src/js2dt')
 const cli = require('../../src/js2dt_cli')
 
