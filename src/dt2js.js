@@ -41,7 +41,7 @@ function fixFileTypeProperties (obj) {
     const fileTypes = obj['x-amf-fileTypes'] || []
     if (fileTypes.length > 0) {
       obj.media.anyOf = fileTypes.map(el => {
-        return {mediaType: el}
+        return { mediaType: el }
       })
     }
   }
