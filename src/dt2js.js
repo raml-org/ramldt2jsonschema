@@ -29,11 +29,11 @@ async function dt2js (ramlData, typeName) {
  * @return {object} Fixed object.
  */
 function fixFileTypeProperties (obj) {
-  if (obj.constructor !== Object) {
+  if (!obj || obj.constructor !== Object) {
     return obj
   }
 
-  if (obj && obj.type === 'file') {
+  if (obj.type === 'file') {
     obj.type = 'string'
     obj.media = {
       contentEncoding: 'binary'
@@ -55,7 +55,7 @@ function fixFileTypeProperties (obj) {
  * @return {object} Fixed object.
  */
 function replaceAmfProperties (obj) {
-  if (obj.constructor !== Object) {
+  if (!obj || obj.constructor !== Object) {
     return obj
   }
 
