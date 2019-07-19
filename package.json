@@ -39,6 +39,7 @@
     "datatype-expansion": "^0.3.5",
     "deep-get-set": "^1.1.0",
     "js-yaml": "^3.10.0",
+    "lodash": "^4.17.15",
     "sync-request": "^6.0.0",
     "yaml-ast-parser": "0.0.41"
   },
