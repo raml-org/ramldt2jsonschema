@@ -19,7 +19,6 @@ const path = require('path')
 const wap = require('webapi-parser').WebApiParser
 
 const helpers = require('../helpers')
-const js2dt = require('../../src/js2dt')
 const js2dtCLI = require('../../src/js2dt_cli')
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'json')

@@ -21,7 +21,7 @@ async function js2dt (jsonData, typeName) {
       responses: {
         200: {
           schema: {
-           '$ref': `#/definitions/${typeName}`
+            '$ref': `#/definitions/${typeName}`
           }
         }
       }

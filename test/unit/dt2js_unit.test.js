@@ -13,7 +13,7 @@ describe('dt2js.fixFileTypeProperties()', function () {
     })
   })
   it('should ignore objects without "type: file" pair', function () {
-    const data = {foo: 1}
+    const data = { foo: 1 }
     expect(fixFileTypeProperties(data)).to.equal(data)
   })
   it('should convert object with "type: file" to draft4 binary', function () {
