@@ -27,19 +27,6 @@ const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 const ajv = new Ajv({ allErrors: true, schemaId: 'id' })
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
 
-/**
- * Log JSON validation errors.
- */
-function logValidationError () {
-  const sep = '||'
-  const errorsText = ajv.errorsText(ajv.errors, { 'separator': sep })
-  const errors = errorsText.split(sep)
-  console.log('FAIL (JSON validation):')
-  errors.forEach(function (el) {
-    console.log('-', el)
-  })
-}
-
 function loadExamplesData () {
   const modelsProms = helpers.getFiles(EXAMPLES_FOLDER)
     .map(filepath => {
@@ -68,10 +55,11 @@ async function defineTests () {
         data.names.forEach(typeName => {
           it(`should convert ${typeName}`, async () => {
             const schema = await dt2jsCLI(data.fpath, typeName)
-            const valid = ajv.validateSchema(schema)
+            const valid = ajv.validateSchema(JSON.parse(schema))
             if (!valid) {
-              logValidationError()
-              throw new Error('Invalid json')
+              const errorsText = ajv.errorsText(
+                ajv.errors, { 'separator': '; ' })
+              throw new Error(`Invalid json: ${errorsText}`)
             }
           })
         })
