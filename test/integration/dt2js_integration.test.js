@@ -37,7 +37,9 @@ function loadExamplesData () {
       return models.map(model => {
         return {
           fpath: model.location.replace('file://', ''),
-          names: model.declares.map(dec => dec.name.value())
+          names: model.declares
+            .map(dec => dec.values ? dec.name.value() : undefined)
+            .filter(name => !!name)
         }
       })
     })
