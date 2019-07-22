@@ -82,7 +82,7 @@
       "example": "fluffy",
       "xml": {
         "attribute": false,
-        "wrapped": true,
+        "wrapped": false,
         "name": "cat",
         "prefix": "animal"
       }
