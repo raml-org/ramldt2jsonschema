@@ -59,11 +59,13 @@ function replaceAmfProperties (obj) {
     return obj
   }
 
-  return Object.fromEntries(Object.entries(obj).map(([k, v]) => {
+  const newObj = {}
+  Object.entries(obj).map(([k, v]) => {
     k = k.startsWith('x-amf-facet-') ? k.replace('x-amf-facet-', '') : k
     k = k.startsWith('x-amf-') ? k.replace('x-amf-', '') : k
-    return [k, v]
-  }))
+    newObj[k] = v
+  })
+  return newObj
 }
 
 module.exports.dt2js = dt2js
