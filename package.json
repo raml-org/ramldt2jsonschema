@@ -35,7 +35,7 @@
   "dependencies": {
     "commander": "^2.19.0",
     "js-yaml": "^3.13.1",
-    "webapi-parser": "^0.1.0"
+    "webapi-parser": "^0.2.0"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
