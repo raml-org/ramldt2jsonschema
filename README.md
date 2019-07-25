@@ -6,7 +6,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 6, and back. (dt2js can still be used to produce draft04 documents if used programatically)
+CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back. Uses [webapi-parser](https://github.com/raml-org/webapi-parser) under the hood to do the conversion.
 
 ## Usage
 
@@ -51,66 +51,52 @@ npm install ramldt2jsonschema --save
 #### dt2js
 
 ```js
-const raml2json = require('ramldt2jsonschema')
+const r2j = require('ramldt2jsonschema')
 const join = require('path').join
 const fs = require('fs')
 
-const filePath = join(__dirname, 'api.raml')
+const filePath = join(__dirname, 'complex_cat.raml')
 const ramlData = fs.readFileSync(filePath).toString()
 
-const schema = raml2json.dt2js(ramlData, 'Cat')
-console.log(JSON.stringify(schema, null, 2))
-```
+async function main () {
+  let schema
+  try {
+    schema = await r2j.dt2js(ramlData, 'Cat')
+  } catch (err) {
+    console.log(err)
+    return
+  }
+  console.log(JSON.stringify(schema, null, 2))
+}
 
-NOTE: when the inputed RAML contains `!include`s and those includes are not in the same directory as the script it is being ran from, you can use `dt2js.setBasePath()` to specify a different base path.
-
-```js
-const raml2json = require('ramldt2jsonschema')
-const join = require('path').join
-const fs = require('fs')
-
-const filePath = join(__dirname, 'api.raml')
-const includesPath = '/different/path/to/includes/'
-const ramlData = fs.readFileSync(filePath).toString()
-
-raml2json.dt2js.setBasePath(includesPath)
-const schema = raml2json.dt2js(ramlData, 'Cat')
-console.log(JSON.stringify(schema, null, 2))
+main()
 ```
 
 #### js2dt
 
 ```js
-const raml2json = require('ramldt2jsonschema')
+const r2j = require('ramldt2jsonschema')
 const join = require('path').join
 const fs = require('fs')
+const yaml = require('js-yaml')
 
-const filePath = join(__dirname, 'schema.json')
+const filePath = join(__dirname, 'complex_cat.json')
 const jsonData = fs.readFileSync(filePath).toString()
 
-const raml = raml2json.js2dt(jsonData, 'Person')
+async function main () {
+  let raml
+  try {
+    raml = await r2j.js2dt(jsonData, 'Cat')
+  } catch (err) {
+    console.log(err)
+    return
+  }
+  console.log('#%RAML 1.0 Library\n')
+  console.log(yaml.safeDump(raml, { 'noRefs': true }))
+}
 
-console.log(`#%RAML 1.0 Library\n${yaml.safeDump({ types: raml }, {'noRefs': true})}`)
+main()
 ```
-
-### Limitations
-
-- in js2dt,
-  - the following JSON schema properties are not supported and as a result, will not be converted:
-    - `not` (or `false` when used as a schema boolean)
-    - object's `dependencies`
-    - array's `additionalItems`
-    - the `propertyNames` keyword
-    - the `contains` keyword
-  - JSON schema number and integer's `exclusiveMaximum` and `exclusiveMinimum` properties are converted to raml 'maximum' and 'minimum'
-  - the JSON schema `oneOf` property is processed the same way as the JSON schema `anyOf` property, it is converted to the RAML `union` type
-  - the JSON schema `type: 'string'` with `media` and `binaryEncoding: 'binary'` is converted to the RAML `file` type
-  - the JSON schema `type: string` with a `pattern` that matches exactly one of the RAML date types will be converted in the matching RAML date type
-  - the JSON schema `media` property with `anyOf`, elements of which have the property `mediaType` will be converted to `fileTypes` in RAML
-
-- in dt2js,
-  - the following RAML properties are not supported/converted:
-    - annotations
 
 ## License
 
