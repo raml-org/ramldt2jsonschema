@@ -23,7 +23,7 @@ describe('dt2js.fixFileTypeProperties()', function () {
     expect(fixFileTypeProperties(data)).to.deep.equal({
       type: 'string',
       media: {
-        contentEncoding: 'binary'
+        binaryEncoding: 'binary'
       }
     })
   })
@@ -38,7 +38,7 @@ describe('dt2js.fixFileTypeProperties()', function () {
           type: 'string',
           'x-amf-fileTypes': [],
           media: {
-            contentEncoding: 'binary'
+            binaryEncoding: 'binary'
           }
         })
       })
@@ -52,7 +52,7 @@ describe('dt2js.fixFileTypeProperties()', function () {
         type: 'string',
         'x-amf-fileTypes': ['image/png', 'image/jpg'],
         media: {
-          contentEncoding: 'binary',
+          binaryEncoding: 'binary',
           anyOf: [
             { mediaType: 'image/png' },
             { mediaType: 'image/jpg' }

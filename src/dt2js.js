@@ -36,7 +36,7 @@ function fixFileTypeProperties (obj) {
   if (obj.type === 'file') {
     obj.type = 'string'
     obj.media = {
-      contentEncoding: 'binary'
+      binaryEncoding: 'binary'
     }
     const fileTypes = obj['x-amf-fileTypes'] || []
     if (fileTypes.length > 0) {
