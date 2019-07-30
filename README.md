@@ -98,6 +98,21 @@ async function main () {
 main()
 ```
 
+### Limitations
+
+- in js2dt,
+  - the following JSON schema properties are not supported and as a result, will not be converted correctly:
+    - $schema
+    - additionalItems
+    - const
+    - contains
+    - dependencies
+    - id,
+    - $id
+    - patternProperties
+    - propertyNames
+
+
 ## License
 
 Apache 2.0
