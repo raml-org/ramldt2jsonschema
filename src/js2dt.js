@@ -12,7 +12,7 @@ const yaml = require('js-yaml')
  */
 async function js2dt (jsonData, typeName) {
   const schema = {
-    openapi: '2.0',
+    swagger: '2.0',
     definitions: {},
     paths: {}
   }
