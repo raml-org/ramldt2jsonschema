@@ -18,9 +18,11 @@
 const path = require('path')
 const Ajv = require('ajv')
 const wap = require('webapi-parser').WebApiParser
+const { expect } = require('chai')
 
 const helpers = require('../helpers')
 const dt2jsCLI = require('../../src/dt2js_cli')
+const dt2js = require('../../src/dt2js').dt2js
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
@@ -51,18 +53,13 @@ function loadExamplesData () {
  */
 async function defineTests () {
   const examplesData = await loadExamplesData()
-  describe('dt2js integration test', () => {
+  describe('dt2js CLI integration test', () => {
     examplesData.forEach(data => {
       context(`for file ${data.fpath}`, () => {
         data.names.forEach(typeName => {
           it(`should convert ${typeName}`, async () => {
             const schema = await dt2jsCLI(data.fpath, typeName)
-            const valid = ajv.validateSchema(JSON.parse(schema))
-            if (!valid) {
-              const errorsText = ajv.errorsText(
-                ajv.errors, { 'separator': '; ' })
-              throw new Error(`Invalid json: ${errorsText}`)
-            }
+            validateJsonSchema(schema)
           })
         })
       })
@@ -71,3 +68,47 @@ async function defineTests () {
 }
 
 defineTests()
+
+describe('dt2js function integration test', function () {
+  context('when basePath argument is not provided', function () {
+    it('should convert type', async function () {
+      const data = `
+        #%RAML 1.0 Library
+
+        types:
+          PersonAge:
+            type: number
+            minimum: 1
+            maximum: 50
+            format: int32
+      `
+      const schema = await dt2js(data, 'PersonAge')
+      validateJsonSchema(JSON.stringify(schema))
+    })
+  })
+  context('when basePath argument is provided', function () {
+    it('should resolve refs relative to it and convert type', async function () {
+      const data = `
+        #%RAML 1.0 Library
+
+        types:
+          Person: !include simple_person.json
+      `
+      const basePath = path.resolve(__dirname, 'json')
+      const schema = await dt2js(data, 'Person', basePath)
+      const schemaStr = JSON.stringify(schema)
+      validateJsonSchema(schemaStr)
+      expect(schemaStr).to.contain('Age in years')
+      expect(schemaStr).to.contain('firstName')
+    })
+  })
+})
+
+function validateJsonSchema (schemaStr) {
+  const valid = ajv.validateSchema(JSON.parse(schemaStr))
+  if (!valid) {
+    const errorsText = ajv.errorsText(
+      ajv.errors, { 'separator': '; ' })
+    throw new Error(`Invalid json: ${errorsText}`)
+  }
+}

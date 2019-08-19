@@ -1,16 +1,24 @@
 'use strict'
 
 const wap = require('webapi-parser').WebApiParser
+const utils = require('./utils')
 
 /**
  * Converts RAML data type to JSON schema.
  *
  * @param  {string} ramlData - RAML file content.
  * @param  {string} typeName - Name of the type to be converted.
+ * @param  {string} [basePath] - Resolve references relative to this path.
  * @return {object} JSON Schema containing converted type.
  */
-async function dt2js (ramlData, typeName) {
-  const model = await wap.raml10.parse(ramlData)
+async function dt2js (ramlData, typeName, basePath) {
+  let model
+  if (basePath) {
+    const location = utils.genBasePathLocation(basePath, 'raml')
+    model = await wap.raml10.parse(ramlData, location)
+  } else {
+    model = await wap.raml10.parse(ramlData)
+  }
   const resolved = await wap.raml10.resolve(model)
   let jsonSchema = resolved.getDeclarationByName(typeName).toJsonSchema
   jsonSchema = JSON.stringify(
