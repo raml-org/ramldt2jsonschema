@@ -98,6 +98,27 @@ async function main () {
 main()
 ```
 
+#### Resolving references
+
+When input RAML or JSON contains references (`!include`, `uses:`, `$ref`, etc.) and referred files are not in the same directory as the script it is being ran from, you can provide third argument called `basePath` to `dt2js` and `js2dt` to specify a different base path. References then will be resolved relative to the provided path.
+
+Example of using `basePath` argument in dt2js:
+```js
+// Ran from /home/john/where/ever/
+// Reference at /home/john/schemas/simple_person.json
+const raml2json = require('ramldt2jsonschema')
+
+const ramlStr = `
+  #%RAML 1.0 Library
+
+  types:
+    Person: !include simple_person.json
+`
+const basePath = '/home/john/schemas/' // or '../../schemas/'
+const schema = raml2json.dt2js(ramlStr, 'Person', basePath)
+console.log(JSON.stringify(schema, null, 2))
+```
+
 ### Limitations
 
 - in js2dt,
