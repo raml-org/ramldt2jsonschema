@@ -123,15 +123,15 @@ console.log(JSON.stringify(schema, null, 2))
 
 - in js2dt,
   - the following JSON schema properties are not supported and as a result, will not be converted correctly:
+    - dependencies
+  - the following JSON schema properties won't be converted at all:
     - $schema
     - additionalItems
-    - const
     - contains
-    - dependencies
-    - id,
+    - id
     - $id
-    - patternProperties
     - propertyNames
+
 
 
 ## License

@@ -63,12 +63,12 @@ describe('dt2js.fixFileTypeProperties()', function () {
   })
 })
 
-describe('dt2js.replaceAmfProperties()', function () {
-  const replaceAmfProperties = dt2js.__get__('replaceAmfProperties')
+describe('dt2js.removeXAmfProperties()', function () {
+  const removeXAmfProperties = dt2js.__get__('removeXAmfProperties')
   it('should ignore non-objects', function () {
     const data = ['foo', 3, ['zoo'], undefined, null, 3.4]
     data.forEach(el => {
-      expect(replaceAmfProperties(el)).to.equal(el)
+      expect(removeXAmfProperties(el)).to.equal(el)
     })
   })
   it('should remove "x-amf-" prefixes from properties names', function () {
@@ -76,7 +76,7 @@ describe('dt2js.replaceAmfProperties()', function () {
       name: 'john',
       'x-amf-age': 123
     }
-    expect(replaceAmfProperties(data)).to.deep.equal({
+    expect(removeXAmfProperties(data)).to.deep.equal({
       name: 'john',
       age: 123
     })

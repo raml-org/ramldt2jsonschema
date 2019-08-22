@@ -23,7 +23,7 @@ async function dt2js (ramlData, typeName, basePath) {
   let jsonSchema = resolved.getDeclarationByName(typeName).toJsonSchema
   jsonSchema = JSON.stringify(
     JSON.parse(jsonSchema),
-    (key, val) => replaceAmfProperties(fixFileTypeProperties(val)),
+    (key, val) => removeXAmfProperties(fixFileTypeProperties(val)),
     2
   )
   return JSON.parse(jsonSchema)
@@ -62,7 +62,7 @@ function fixFileTypeProperties (obj) {
  * @param  {object} obj - Object to be fixed.
  * @return {object} Fixed object.
  */
-function replaceAmfProperties (obj) {
+function removeXAmfProperties (obj) {
   if (!obj || obj.constructor !== Object) {
     return obj
   }
