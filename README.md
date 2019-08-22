@@ -6,7 +6,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back. Uses [webapi-parser](https://github.com/raml-org/webapi-parser) under the hood to do the conversion.
+CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back. Uses [webapi-parser](https://github.com/raml-org/webapi-parser) under the hood.
 
 ## Usage
 
@@ -100,12 +100,12 @@ main()
 
 #### Resolving references
 
-When input RAML or JSON contains references (`!include`, `uses:`, `$ref`, etc.) and referred files are not in the same directory as the script it is being ran from, you can provide third argument called `basePath` to `dt2js` and `js2dt` to specify a different base path. References then will be resolved relative to the provided path.
+When the input contains external references (`!include`, `uses:`, `$ref`, etc.) and the referred files are not in the same directory as the script it is being ran from, you may provide a third argument `basePath` to both `dt2js` and `js2dt`. All references will then be resolved relative to that base path.
 
 Example of using `basePath` argument in dt2js:
 ```js
-// Ran from /home/john/where/ever/
-// Reference at /home/john/schemas/simple_person.json
+// Script below ran from /home/john/where/ever/
+// Reference is located at /home/john/schemas/simple_person.json
 const raml2json = require('ramldt2jsonschema')
 
 const ramlStr = `
@@ -122,16 +122,15 @@ console.log(JSON.stringify(schema, null, 2))
 ### Limitations
 
 - in js2dt,
-  - the following JSON schema properties are not supported and as a result, will not be converted correctly:
+  - the following JSON Schema properties are not supported and as a result, will not be converted correctly:
     - dependencies
-  - the following JSON schema properties won't be converted at all:
+  - the following JSON Schema properties won't be converted at all:
     - $schema
     - additionalItems
     - contains
     - id
     - $id
     - propertyNames
-
 
 
 ## License
