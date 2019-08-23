@@ -122,7 +122,7 @@ console.log(JSON.stringify(schema, null, 2))
 ### Limitations
 
 - in js2dt,
-  - the following JSON Schema properties are not supported and as a result, will not be converted correctly:
+  - the following JSON Schema properties are not supported and as a result, may not be converted as expected:
     - dependencies
   - the following JSON Schema properties won't be converted at all:
     - $schema
