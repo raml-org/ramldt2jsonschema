@@ -121,11 +121,13 @@ console.log(JSON.stringify(schema, null, 2))
 
 ### Limitations
 
-- in js2dt,
+- in js2dt
   - the following JSON Schema properties are not supported and as a result, may not be converted as expected:
     > dependencies, exclusiveMaximum, exclusiveMinimum, items (array value), allOf, oneOf, not, format (email, hostname, ipv4, ipv6, uri), readOnly
   - the following JSON Schema properties won't be converted at all:
     > $schema, additionalItems, contains, id, $id, propertyNames, definitions, links, fragmentResolution, media, pathStart, targetSchema
+- in dt2js
+  - types with `type: nil` aren't supported and won't be converted
 
 
 ## License

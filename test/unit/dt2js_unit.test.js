@@ -82,3 +82,25 @@ describe('dt2js.removeXAmfProperties()', function () {
     })
   })
 })
+
+describe('dt2js.patchRamlData()', function () {
+  const patchRamlData = dt2js.__get__('patchRamlData')
+  it('should replace RAML tag and add an endpoint', function () {
+    const ramlData = `#%RAML 1.0 Library
+types:
+  Cat:
+    type: string`
+    expect(patchRamlData(ramlData, 'Cat')).to.equal(`#%RAML 1.0
+types:
+  Cat:
+    type: string
+
+/for/conversion/Cat:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Cat`)
+  })
+})

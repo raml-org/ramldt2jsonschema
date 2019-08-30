@@ -12,7 +12,12 @@ const dt2js = require('./dt2js')
  */
 async function dt2jsCLI (ramlFilePath, typeName) {
   const ramlData = fs.readFileSync(ramlFilePath).toString()
-  const result = await dt2js.dt2js(ramlData, typeName)
+  let result
+  try {
+    result = await dt2js.dt2js(ramlData, typeName)
+  } catch (err) {
+    return err.toString()
+  }
   return JSON.stringify(result, null, 2)
 }
 

@@ -13,7 +13,12 @@ const js2dt = require('./js2dt')
  */
 async function js2dtCLI (jsonFilePath, typeName) {
   const jsonData = fs.readFileSync(jsonFilePath).toString()
-  const result = await js2dt.js2dt(jsonData, typeName)
+  let result
+  try {
+    result = await js2dt.js2dt(jsonData, typeName)
+  } catch (err) {
+    return err.toString()
+  }
   return `#%RAML 1.0 Library\n${yaml.safeDump(result, { 'noRefs': true })}`
 }
 

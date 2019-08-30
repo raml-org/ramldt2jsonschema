@@ -12,12 +12,13 @@ const utils = require('./utils')
  * @return {object} JSON Schema containing converted type.
  */
 async function dt2js (ramlData, typeName, basePath) {
+  const patchedData = patchRamlData(ramlData, typeName)
   let model
   if (basePath) {
     const location = utils.genBasePathLocation(basePath, 'raml')
-    model = await wap.raml10.parse(ramlData, location)
+    model = await wap.raml10.parse(patchedData, location)
   } else {
-    model = await wap.raml10.parse(ramlData)
+    model = await wap.raml10.parse(patchedData)
   }
   const resolved = await wap.raml10.resolve(model)
   let jsonSchema = resolved.getDeclarationByName(typeName).toJsonSchema
@@ -27,6 +28,29 @@ async function dt2js (ramlData, typeName, basePath) {
     2
   )
   return JSON.parse(jsonSchema)
+}
+
+/**
+ * Patches RAML string to be a regular RAML API doc with an endpoint.
+ * Is necessary to make it work with resolution.
+ *
+ * @param  {string} ramlData - RAML file content.
+ * @param  {string} typeName - Name of the type to be converted.
+ * @return {string} Patched RAML content.
+ */
+function patchRamlData (ramlData, typeName) {
+  let dataPieces = ramlData.split('\n')
+  dataPieces = dataPieces.filter(p => !!p)
+  dataPieces[0] = '#%RAML 1.0'
+  dataPieces.push(`
+/for/conversion/${typeName}:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: ${typeName}`)
+  return dataPieces.join('\n')
 }
 
 /**

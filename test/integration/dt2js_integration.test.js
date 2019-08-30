@@ -53,7 +53,8 @@ function loadExamplesData () {
  */
 async function defineTests () {
   const examplesData = await loadExamplesData()
-  describe('dt2js CLI integration test', () => {
+  describe('dt2js CLI integration test', function () {
+    this.timeout(20000)
     examplesData.forEach(data => {
       context(`for file ${data.fpath}`, () => {
         data.names.forEach(typeName => {
@@ -73,15 +74,14 @@ describe('dt2js function integration test', function () {
   context('when basePath argument is not provided', function () {
     it('should convert type', async function () {
       const data = `
-        #%RAML 1.0 Library
+#%RAML 1.0 Library
 
-        types:
-          PersonAge:
-            type: number
-            minimum: 1
-            maximum: 50
-            format: int32
-      `
+types:
+  PersonAge:
+    type: number
+    minimum: 1
+    maximum: 50
+    format: int32`
       const schema = await dt2js(data, 'PersonAge')
       validateJsonSchema(JSON.stringify(schema))
     })
@@ -89,11 +89,10 @@ describe('dt2js function integration test', function () {
   context('when basePath argument is provided', function () {
     it('should resolve refs relative to it and convert type', async function () {
       const data = `
-        #%RAML 1.0 Library
+#%RAML 1.0 Library
 
-        types:
-          Person: !include simple_person.json
-      `
+types:
+  Person: !include simple_person.json`
       const basePath = path.resolve(__dirname, 'json')
       const schema = await dt2js(data, 'Person', basePath)
       const schemaStr = JSON.stringify(schema)
