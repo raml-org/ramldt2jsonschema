@@ -76,6 +76,7 @@ function fixFileTypeProperties (obj) {
         return { mediaType: el }
       })
     }
+    delete obj['x-amf-fileTypes']
   }
   return obj
 }
