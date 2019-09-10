@@ -26,7 +26,9 @@ async function dt2js (ramlData, typeName, options = {}) {
   let jsonSchema = resolved.getDeclarationByName(typeName).toJsonSchema
   jsonSchema = JSON.stringify(
     JSON.parse(jsonSchema),
-    (key, val) => removeXAmfProperties(fixFileTypeProperties(val)),
+    (key, val) => fixStructureInconsistencies(
+      removeXAmfProperties(
+        fixFileTypeProperties(val))),
     2
   )
   return migrateDraft(JSON.parse(jsonSchema), options.draft)
@@ -74,6 +76,25 @@ function patchRamlData (ramlData, typeName) {
           application/json:
             type: ${typeName}`)
   return dataPieces.join('\n')
+}
+
+/**
+ * Fixes JSON Schema structure inconsistencies.
+ * In particular:
+ *  - Changes 'examples' value to array (new in draft06);
+ *
+ * @param  {object} obj - Object to be fixed.
+ * @return {object} Fixed object.
+ */
+function fixStructureInconsistencies (obj) {
+  if (!obj || obj.constructor !== Object) {
+    return obj
+  }
+
+  if (obj.examples) {
+    obj.examples = Object.values(obj.examples)
+  }
+  return obj
 }
 
 /**

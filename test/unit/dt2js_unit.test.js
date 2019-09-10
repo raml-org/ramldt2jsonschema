@@ -154,3 +154,36 @@ describe('dt2js.migrateDraft()', function () {
     })
   })
 })
+
+describe('dt2js.fixStructureInconsistencies()', function () {
+  const fixStructureInconsistencies = dt2js.__get__('fixStructureInconsistencies')
+  it('should ignore non-objects', function () {
+    const data = ['foo', 3, ['zoo'], undefined, null, 3.4]
+    data.forEach(el => {
+      expect(fixStructureInconsistencies(el)).to.equal(el)
+    })
+  })
+  it('should ignore objects without "examples" property', function () {
+    const data = { foo: 1 }
+    expect(fixStructureInconsistencies(data)).to.equal(data)
+  })
+  it('should convert object with "examples" object to array', function () {
+    const data = {
+      examples: {
+        catone: 'CatOne',
+        dogone: 'DogOne'
+      }
+    }
+    expect(fixStructureInconsistencies(data)).to.deep.equal({
+      examples: ['CatOne', 'DogOne']
+    })
+  })
+  it('should keep object with "examples" array as is', function () {
+    const data = {
+      examples: ['CatOne', 'DogOne']
+    }
+    expect(fixStructureInconsistencies(data)).to.deep.equal({
+      examples: ['CatOne', 'DogOne']
+    })
+  })
+})

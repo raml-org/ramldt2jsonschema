@@ -27,7 +27,6 @@ const dt2js = require('../../src/dt2js').dt2js
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
 const ajv = new Ajv({ allErrors: true, schemaId: 'id' })
-// ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-07.json'))
 
 function loadExamplesData () {
   const modelsProms = helpers.getFiles(EXAMPLES_FOLDER)
