@@ -12,6 +12,22 @@ function genBasePathLocation (basePath, ext) {
   return `file://${path.resolve(basePath, docName)}`
 }
 
+/**
+ * Validates draft version.
+ *
+ * @param  {string} draft - Output JSON Schema draft version.
+ * throws {Error} If specified draft is not supported.
+ */
+function validateDraft (draft) {
+  const supportedDrafts = ['04', '06', '07']
+  if (supportedDrafts.indexOf(draft) < 0) {
+    throw new Error(
+      `Not supported draft. Supported drafts are: ${supportedDrafts}`)
+  }
+}
+
 module.exports = {
-  genBasePathLocation: genBasePathLocation
+  genBasePathLocation: genBasePathLocation,
+  validateDraft: validateDraft,
+  DEFAULT_DRAFT: '07'
 }

@@ -8,14 +8,16 @@ const utils = require('./utils')
  *
  * @param  {string} ramlData - RAML file content.
  * @param  {string} typeName - Name of the type to be converted.
- * @param  {string} [basePath] - Resolve references relative to this path.
+ * @param  {object} options - Options to use in conversion:
+ *     basePath: Resolve references relative to this path.
+ *     draft: Output JSON Schema draft version.
  * @return {object} JSON Schema containing converted type.
  */
-async function dt2js (ramlData, typeName, basePath) {
+async function dt2js (ramlData, typeName, options = {}) {
   const patchedData = patchRamlData(ramlData, typeName)
   let model
-  if (basePath) {
-    const location = utils.genBasePathLocation(basePath, 'raml')
+  if (options.basePath) {
+    const location = utils.genBasePathLocation(options.basePath, 'raml')
     model = await wap.raml10.parse(patchedData, location)
   } else {
     model = await wap.raml10.parse(patchedData)
@@ -27,7 +29,28 @@ async function dt2js (ramlData, typeName, basePath) {
     (key, val) => removeXAmfProperties(fixFileTypeProperties(val)),
     2
   )
-  return JSON.parse(jsonSchema)
+  return migrateDraft(JSON.parse(jsonSchema), options.draft)
+}
+
+/**
+ * Migrates JSON Schema draft.
+ *
+ * @param  {object} schema - JSON Schema containing converted type.
+ * @param  {string} draft - Output JSON Schema draft version.
+ * @return  {object} JSON Schema with migrated draft version.
+ */
+function migrateDraft (schema, draft = utils.DEFAULT_DRAFT) {
+  utils.validateDraft(draft)
+  if (draft === '04') {
+    return schema
+  }
+
+  const migrate = require('json-schema-migrate')
+  const mSchema = migrate.draft6(schema)
+  if (draft === '07') {
+    mSchema['$schema'] = 'http://json-schema.org/draft-07/schema#'
+  }
+  return mSchema
 }
 
 /**

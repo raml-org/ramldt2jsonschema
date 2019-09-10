@@ -102,3 +102,55 @@ types:
             type: Cat`)
   })
 })
+
+describe('dt2js.migrateDraft()', function () {
+  const schema04 = {
+    'id': '1',
+    '$schema': 'http://json-schema.org/draft-04/schema#',
+    'properties': {
+      'name': {
+        'type': 'string',
+        'enum': ['John']
+      }
+    }
+  }
+  const migrateDraft = dt2js.__get__('migrateDraft')
+  context('when draft is invalid', function () {
+    it('should throw an error', function () {
+      expect(_ => migrateDraft(schema04, '123')).to.throw(Error)
+    })
+  })
+  context('when draft is 04', function () {
+    it('should return schema as is', function () {
+      expect(migrateDraft(schema04, '04')).to.deep.equal(schema04)
+    })
+  })
+  context('when draft is 06', function () {
+    it('should convert schema to draft06', function () {
+      expect(migrateDraft(schema04, '06')).to.deep.equal({
+        '$id': '1',
+        '$schema': 'http://json-schema.org/draft-06/schema#',
+        'properties': {
+          'name': {
+            'type': 'string',
+            'const': 'John'
+          }
+        }
+      })
+    })
+  })
+  context('when draft is 07', function () {
+    it('should convert schema to draft06 and change $schema to 07', function () {
+      expect(migrateDraft(schema04, '07')).to.deep.equal({
+        '$id': '1',
+        '$schema': 'http://json-schema.org/draft-07/schema#',
+        'properties': {
+          'name': {
+            'type': 'string',
+            'const': 'John'
+          }
+        }
+      })
+    })
+  })
+})

@@ -35,6 +35,7 @@
   "dependencies": {
     "commander": "^2.19.0",
     "js-yaml": "^3.13.1",
+    "json-schema-migrate": "^0.2.0",
     "webapi-parser": "^0.2.0"
   },
   "devDependencies": {

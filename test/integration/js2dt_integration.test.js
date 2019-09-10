@@ -74,7 +74,7 @@ describe('js2dt function integration test', function () {
         }
       `
       const basePath = path.resolve(__dirname, 'json')
-      const raml = await js2dt(data, 'Person', basePath)
+      const raml = await js2dt(data, 'Person', { basePath })
       const ramlStr = `#%RAML 1.0 Library\n${yaml.safeDump(raml, { 'noRefs': true })}`
       await validateRamlDataType(ramlStr)
       expect(ramlStr).to.contain('Age in years')

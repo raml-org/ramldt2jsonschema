@@ -27,7 +27,7 @@ const dt2js = require('../../src/dt2js').dt2js
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
 const ajv = new Ajv({ allErrors: true, schemaId: 'id' })
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
+// ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-07.json'))
 
 function loadExamplesData () {
   const modelsProms = helpers.getFiles(EXAMPLES_FOLDER)
@@ -94,7 +94,7 @@ types:
 types:
   Person: !include simple_person.json`
       const basePath = path.resolve(__dirname, 'json')
-      const schema = await dt2js(data, 'Person', basePath)
+      const schema = await dt2js(data, 'Person', { basePath })
       const schemaStr = JSON.stringify(schema)
       validateJsonSchema(schemaStr)
       expect(schemaStr).to.contain('Age in years')
