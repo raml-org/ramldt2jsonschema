@@ -22,7 +22,7 @@ describe('utils.validateDraft()', function () {
     it('should throw error', function () {
       expect(_ => utils.validateDraft('144')).to.throw(
         Error,
-        'Not supported draft. Supported drafts are: 04,06,07')
+        'Unsupported draft version. Supported versions are: 04,06,07')
     })
   })
 })

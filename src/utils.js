@@ -22,7 +22,7 @@ function validateDraft (draft) {
   const supportedDrafts = ['04', '06', '07']
   if (supportedDrafts.indexOf(draft) < 0) {
     throw new Error(
-      `Not supported draft. Supported drafts are: ${supportedDrafts}`)
+      `Unsupported draft version. Supported versions are: ${supportedDrafts}`)
   }
 }
 
