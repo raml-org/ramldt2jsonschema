@@ -1,16 +1,25 @@
 sudo: false
 language: node_js
 
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
 node_js:
   - "8"
   - "lts/*"
   - "node"
 
-cache:
-  directories:
-    - node_modules
-    - $HOME/.npm
+script: npm run test-ci
 
-script: "npm run test-ci"
+after_script: npm install coveralls@2 && cat ./coverage/lcov.info | coveralls
 
-after_script: "npm install coveralls@2 && cat ./coverage/lcov.info | coveralls"
+deploy:
+  provider: npm
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_TOKEN"
+  skip_cleanup: true
+  on:
+    tags: true
+    node: "node"
