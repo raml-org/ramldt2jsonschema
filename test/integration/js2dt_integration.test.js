@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it */
+/* global describe, it, context */
 
 /**
  * Integration testing module (js2dt).
@@ -16,44 +16,77 @@
  */
 
 const path = require('path')
-const parser = require('raml-1-parser')
-const helpers = require('./helpers')
+const wap = require('webapi-parser').WebApiParser
+const yaml = require('js-yaml')
+const { expect } = require('chai')
 
-const js2dt = require('../../src/js2dt')
-const cli = require('../../src/js2dt_cli')
+const helpers = require('../helpers')
+const js2dtCLI = require('../../src/js2dt_cli')
+const js2dt = require('../../src/js2dt').js2dt
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'json')
 
 /**
- * Log RAML validation error.
+ * Test file by running js2dt script on it and then validating
+ * with webapi-parser.
  */
-function logValidationError (error) {
-  console.log('FAIL (RAML validation):')
-  error.parserErrors.forEach(function (el) {
-    const errMessage = '- ' + el.message + ' [' +
-      el.range.start.line + '.' + el.range.start.column + ':' +
-      el.range.end.line + '.' + el.range.end.column + ']'
-    console.log(errMessage)
+async function defineTests () {
+  describe('js2dt CLI integration test', () => {
+    helpers.getFiles(EXAMPLES_FOLDER).forEach(filepath => {
+      it(`should convert ${filepath}`, async () => {
+        const ramlStr = await js2dtCLI(filepath, 'TestType')
+        await validateRamlDataType(ramlStr)
+      })
+    })
   })
 }
 
-describe('js2dt integration test', () => {
-  helpers.forEachFileIn(EXAMPLES_FOLDER, (filepath) => {
-    /**
-     * Test file by running js2dt script on it and then validating
-     * with raml-1-parser.
-     */
-    it(`should convert ${filepath}`, () => {
-      const typeName = 'TestType'
-      js2dt.setBasePath(EXAMPLES_FOLDER)
-      const raml = cli(filepath, typeName)
+defineTests()
 
-      try {
-        parser.parseRAMLSync(raml, { 'rejectOnErrors': true })
-      } catch (error) {
-        logValidationError(error)
-        throw error
-      }
+describe('js2dt function integration test', function () {
+  context('when basePath argument is not provided', function () {
+    it('should convert type', async function () {
+      const data = `
+        {
+          "title": "Person",
+          "properties": {
+            "person":  {
+              "type": "string"
+            }
+          }
+        }
+      `
+      const raml = await js2dt(data, 'Person')
+      const ramlStr = `#%RAML 1.0 Library\n${yaml.safeDump(raml, { 'noRefs': true })}`
+      await validateRamlDataType(ramlStr)
+    })
+  })
+  context('when basePath argument is provided', function () {
+    it('should resolve refs relative to it and convert type', async function () {
+      const data = `
+        {
+          "title": "Person",
+          "properties": {
+            "person": {
+              "$ref": "simple_person.json"
+            }
+          }
+        }
+      `
+      const basePath = path.resolve(__dirname, 'json')
+      const raml = await js2dt(data, 'Person', { basePath })
+      const ramlStr = `#%RAML 1.0 Library\n${yaml.safeDump(raml, { 'noRefs': true })}`
+      await validateRamlDataType(ramlStr)
+      expect(ramlStr).to.contain('Age in years')
+      expect(ramlStr).to.contain('firstName')
     })
   })
 })
+
+async function validateRamlDataType (ramlStr) {
+  const model = await wap.raml10.parse(ramlStr)
+  const report = await wap.raml10.validate(model)
+  if (!report.conforms) {
+    throw new Error(report.toString())
+  }
+}

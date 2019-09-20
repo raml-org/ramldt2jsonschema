@@ -6,8 +6,13 @@ const cli = require('../src/dt2js_cli')
 
 program
   .arguments('<ramlFile> <ramlTypeName>')
+  .option(
+    '--draft <num>',
+    'JSON Shema draft version to convert to. Supported values are: "04", "06" and "07" (default)')
   .description('Convert a RAML data type into JSON schema. ' +
                'Writes to standard output.')
-  .action((f, t) => console.log(JSON.stringify(cli(f, t), null, 2)))
+  .action(async (f, t, opts) => {
+    console.log(await cli(f, t, opts))
+  })
 
 program.parse(process.argv)

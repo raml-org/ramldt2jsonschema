@@ -27,14 +27,4 @@ function getFiles (dir, fileList = []) {
   return fileList
 }
 
-/**
- * Run callback for each file in path.
- *
- */
-function forEachFileIn (path, cb) {
-  getFiles(path).forEach(function (filepath) {
-    cb(filepath)
-  })
-}
-
-module.exports.forEachFileIn = forEachFileIn
+module.exports.getFiles = getFiles

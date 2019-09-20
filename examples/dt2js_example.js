@@ -1,16 +1,21 @@
 'use strict'
 
-var r2j = require('ramldt2jsonschema')
-var join = require('path').join
-var fs = require('fs')
+const r2j = require('ramldt2jsonschema')
+const join = require('path').join
+const fs = require('fs')
 
-var filePath = join(__dirname, '../test/integration/raml/complex_cat.raml')
-var ramlData = fs.readFileSync(filePath).toString()
+const filePath = join(__dirname, '../test/integration/raml/complex_cat.raml')
+const ramlData = fs.readFileSync(filePath).toString()
 
-r2j.dt2js(ramlData, 'Cat', function (err, schema) {
-  if (err) {
+async function main () {
+  let schema
+  try {
+    schema = await r2j.dt2js(ramlData, 'Cat')
+  } catch (err) {
     console.log(err)
     return
   }
   console.log(JSON.stringify(schema, null, 2))
-})
+}
+
+main()
