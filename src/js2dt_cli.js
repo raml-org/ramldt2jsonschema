@@ -19,7 +19,7 @@ async function js2dtCLI (jsonFilePath, typeName) {
   } catch (err) {
     return err.toString()
   }
-  return `#%RAML 1.0 Library\n${yaml.safeDump(result, { 'noRefs': true })}`
+  return `#%RAML 1.0 Library\n${yaml.safeDump(result, { noRefs: true })}`
 }
 
 module.exports = js2dtCLI

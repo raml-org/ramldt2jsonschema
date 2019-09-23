@@ -50,7 +50,7 @@ function migrateDraft (schema, draft = utils.DEFAULT_DRAFT) {
   const migrate = require('json-schema-migrate')
   const mSchema = migrate.draft6(schema)
   if (draft === '07') {
-    mSchema['$schema'] = 'http://json-schema.org/draft-07/schema#'
+    mSchema.$schema = 'http://json-schema.org/draft-07/schema#'
   }
   return mSchema
 }

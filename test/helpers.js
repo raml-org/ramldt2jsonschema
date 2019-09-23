@@ -13,17 +13,14 @@ const path = require('path')
  */
 function getFiles (dir, fileList = []) {
   const files = fs.readdirSync(dir)
-  for (const i in files) {
-    if (!files.hasOwnProperty(i)) {
-      continue
-    }
-    const name = path.join(dir, files[i])
-    if (fs.statSync(name).isDirectory()) {
-      getFiles(name, fileList)
+  files.forEach(fname => {
+    const fpath = path.join(dir, fname)
+    if (fs.statSync(fpath).isDirectory()) {
+      getFiles(fpath, fileList)
     } else {
-      fileList.push(name)
+      fileList.push(fpath)
     }
-  }
+  })
   return fileList
 }
 

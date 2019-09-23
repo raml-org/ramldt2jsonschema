@@ -106,7 +106,7 @@ function validateJsonSchema (schemaStr) {
   const valid = ajv.validateSchema(JSON.parse(schemaStr))
   if (!valid) {
     const errorsText = ajv.errorsText(
-      ajv.errors, { 'separator': '; ' })
+      ajv.errors, { separator: '; ' })
     throw new Error(`Invalid json: ${errorsText}`)
   }
 }

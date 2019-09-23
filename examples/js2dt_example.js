@@ -17,7 +17,7 @@ async function main () {
     return
   }
   console.log('#%RAML 1.0 Library\n')
-  console.log(yaml.safeDump(raml, { 'noRefs': true }))
+  console.log(yaml.safeDump(raml, { noRefs: true }))
 }
 
 main()

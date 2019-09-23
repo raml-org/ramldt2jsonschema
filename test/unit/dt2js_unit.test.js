@@ -105,12 +105,12 @@ types:
 
 describe('dt2js.migrateDraft()', function () {
   const schema04 = {
-    'id': '1',
-    '$schema': 'http://json-schema.org/draft-04/schema#',
-    'properties': {
-      'name': {
-        'type': 'string',
-        'enum': ['John']
+    id: '1',
+    $schema: 'http://json-schema.org/draft-04/schema#',
+    properties: {
+      name: {
+        type: 'string',
+        enum: ['John']
       }
     }
   }
@@ -128,12 +128,12 @@ describe('dt2js.migrateDraft()', function () {
   context('when draft is 06', function () {
     it('should convert schema to draft06', function () {
       expect(migrateDraft(schema04, '06')).to.deep.equal({
-        '$id': '1',
-        '$schema': 'http://json-schema.org/draft-06/schema#',
-        'properties': {
-          'name': {
-            'type': 'string',
-            'const': 'John'
+        $id: '1',
+        $schema: 'http://json-schema.org/draft-06/schema#',
+        properties: {
+          name: {
+            type: 'string',
+            const: 'John'
           }
         }
       })
@@ -142,12 +142,12 @@ describe('dt2js.migrateDraft()', function () {
   context('when draft is 07', function () {
     it('should convert schema to draft06 and change $schema to 07', function () {
       expect(migrateDraft(schema04, '07')).to.deep.equal({
-        '$id': '1',
-        '$schema': 'http://json-schema.org/draft-07/schema#',
-        'properties': {
-          'name': {
-            'type': 'string',
-            'const': 'John'
+        $id: '1',
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        properties: {
+          name: {
+            type: 'string',
+            const: 'John'
           }
         }
       })
