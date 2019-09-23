@@ -23,13 +23,14 @@ This will install two command-line tools:
 #### dt2js
 
 ```
-dt2js <ramlFile> <ramlTypeName>
+dt2js <ramlFile> <ramlTypeName> --draft=[version]
 ```
 
 **Options**
 
 * `<ramlFile>` Path to a file containing at least one RAML data type (e.g. `path/to/api.raml`)
 * `<ramlTypeName>` RAML type name to convert to JSON schema
+* `--draft` Optional JSON Shema draft version to convert to. Supported values are: `04`, `06` and `07` (default)
 
 #### js2dt
 
