@@ -126,8 +126,6 @@ console.log(JSON.stringify(schema, null, 2))
     > dependencies, exclusiveMaximum, exclusiveMinimum, items (array value), allOf, oneOf, not, format (email, hostname, ipv4, ipv6, uri), readOnly
   - the following JSON Schema properties won't be converted at all:
     > $schema, additionalItems, contains, id, $id, propertyNames, definitions, links, fragmentResolution, media, pathStart, targetSchema
-- in dt2js
-  - types with `type: nil` aren't supported and won't be converted
 
 
 ## License
