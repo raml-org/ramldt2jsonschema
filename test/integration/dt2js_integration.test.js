@@ -70,6 +70,16 @@ async function defineTests () {
 defineTests()
 
 describe('dt2js function integration test', function () {
+  context('when using cli', function () {
+    it('should resolve references', async function () {
+      const schema = await dt2jsCLI(
+        path.resolve(__dirname, 'raml/complex-library.raml'),
+        'CatInJson')
+      validateJsonSchema(schema)
+      expect(schema).to.contain('time_of_birth')
+    })
+  })
+
   context('when basePath argument is not provided', function () {
     it('should convert type', async function () {
       const data = `

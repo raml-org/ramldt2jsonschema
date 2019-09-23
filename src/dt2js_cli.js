@@ -11,7 +11,8 @@ const dt2js = require('./dt2js')
  * @param  {object} options - Options to use in conversion.
  * @return {string} JSON Schema containing converted type.
  */
-async function dt2jsCLI (ramlFilePath, typeName, options) {
+async function dt2jsCLI (ramlFilePath, typeName, options = {}) {
+  options.basePath = ramlFilePath
   const ramlData = fs.readFileSync(ramlFilePath).toString()
   let result
   try {

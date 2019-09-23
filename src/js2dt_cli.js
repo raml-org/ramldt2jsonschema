@@ -15,7 +15,7 @@ async function js2dtCLI (jsonFilePath, typeName) {
   const jsonData = fs.readFileSync(jsonFilePath).toString()
   let result
   try {
-    result = await js2dt.js2dt(jsonData, typeName)
+    result = await js2dt.js2dt(jsonData, typeName, { basePath: jsonFilePath })
   } catch (err) {
     return err.toString()
   }

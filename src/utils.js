@@ -8,6 +8,9 @@ const path = require('path')
  * @return {string} Generated location with "file://" prefix.
  */
 function genBasePathLocation (basePath, ext) {
+  if (basePath.endsWith(`.${ext}`)) {
+    return `file://${basePath}`
+  }
   const docName = `basepath_default_doc.${ext}`
   return `file://${path.resolve(basePath, docName)}`
 }

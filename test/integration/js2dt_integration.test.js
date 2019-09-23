@@ -44,6 +44,16 @@ async function defineTests () {
 defineTests()
 
 describe('js2dt function integration test', function () {
+  context('when using cli', function () {
+    it('should resolve references', async function () {
+      const ramlStr = await js2dtCLI(
+        path.resolve(__dirname, 'json/person_include.json'),
+        'Person')
+      await validateRamlDataType(ramlStr)
+      expect(ramlStr).to.contain('Age in years')
+    })
+  })
+
   context('when basePath argument is not provided', function () {
     it('should convert type', async function () {
       const data = `

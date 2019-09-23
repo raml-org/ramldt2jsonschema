@@ -8,6 +8,12 @@ describe('utils.genBasePathLocation()', function () {
     const loc = utils.genBasePathLocation('/tmp', 'xml')
     expect(loc).to.equal('file:///tmp/basepath_default_doc.xml')
   })
+  context('when provided path ends with extension', function () {
+    it('should return passed value with a "file://" prefix', function () {
+      const loc = utils.genBasePathLocation('/tmp/foo.xml', 'xml')
+      expect(loc).to.equal('file:///tmp/foo.xml')
+    })
+  })
 })
 
 describe('utils.validateDraft()', function () {
