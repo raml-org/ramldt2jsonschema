@@ -1,53 +1,36 @@
-'use strict'
+const path = require('path')
 
 /**
- * Merge second object into first one.
+ * Generate default location for basePath.
  *
- * @param  {Object} obj
- * @param  {Object} upd
- * @returns  {Object}
+ * @param  {string} basePath - Path to generate location for.
+ * @param  {string} ext - Generated location document extension.
+ * @return {string} Generated location with "file://" prefix.
  */
-function updateObjWith (obj, upd) {
-  for (const key in upd) {
-    obj[key] = upd[key]
+function genBasePathLocation (basePath, ext) {
+  if (basePath.endsWith(`.${ext}`)) {
+    return `file://${basePath}`
   }
-  return obj
+  const docName = `basepath_default_doc.${ext}`
+  return `file://${path.resolve(basePath, docName)}`
 }
 
 /**
- * Capitalize string.
+ * Validates draft version.
  *
- * @param  {String} str
- * @returns  {string}
+ * @param  {string} draft - Output JSON Schema draft version.
+ * throws {Error} If specified draft is not supported.
  */
-function capitalize (str) {
-  return str[0].toUpperCase() + str.slice(1)
+function validateDraft (draft) {
+  const supportedDrafts = ['04', '06', '07']
+  if (supportedDrafts.indexOf(draft) < 0) {
+    throw new Error(
+      `Unsupported draft version. Supported versions are: ${supportedDrafts}`)
+  }
 }
 
-/**
- * Get RAML type name from $ref string.
- *
- * @param  {String} ref
- * @returns  {string}
- */
-function typeNameFromRef (ref) {
-  const name = ref.replace(/^.*[\\/]/, '')
-  return capitalize(name)
+module.exports = {
+  genBasePathLocation: genBasePathLocation,
+  validateDraft: validateDraft,
+  DEFAULT_DRAFT: '07'
 }
-
-/**
- * Infer RAML type name from file name
- *
- * @param  {string} fileName - File in which type is located.
- * @returns  {string}
- */
-function inferRAMLTypeName (fileName) {
-  const cleanName = fileName.replace(/^.*[\\/]/, '')
-  const filename = cleanName.split('.')[0]
-  return capitalize(filename)
-}
-
-module.exports.updateObjWith = updateObjWith
-module.exports.capitalize = capitalize
-module.exports.typeNameFromRef = typeNameFromRef
-module.exports.inferRAMLTypeName = inferRAMLTypeName
