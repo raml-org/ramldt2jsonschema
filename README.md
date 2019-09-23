@@ -100,7 +100,7 @@ main()
 
 #### Resolving references
 
-When the input contains external references (`!include`, `uses:`, `$ref`, etc.) and the referred files are not in the same directory as the script it is being ran from, you may provide a third argument `basePath` to both `dt2js` and `js2dt`. All references will then be resolved relative to that base path.
+When the input contains external references (`!include`, `uses:`, `$ref`, etc.) and the referred files are not in the same directory as the script it is being ran from, you may provide a third argument to both `dt2js` and `js2dt`. The argument must be an object with a `basePath` key. All references will then be resolved relative to that base path.
 
 Example of using `basePath` argument in dt2js:
 ```js
@@ -115,7 +115,7 @@ const ramlStr = `
     Person: !include simple_person.json
 `
 const basePath = '/home/john/schemas/' // or '../../schemas/'
-const schema = raml2json.dt2js(ramlStr, 'Person', basePath)
+const schema = raml2json.dt2js(ramlStr, 'Person', { basePath: basePath })
 console.log(JSON.stringify(schema, null, 2))
 ```
 
