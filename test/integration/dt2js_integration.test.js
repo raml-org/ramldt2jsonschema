@@ -110,6 +110,25 @@ types:
       expect(schemaStr).to.contain('firstName')
     })
   })
+  context('when type is defined using schema inclusion and draft is 04', function () {
+    it('should include $schema property in output', async function () {
+      const data = `
+#%RAML 1.0 Library
+
+types:
+  Person:
+    type: !include simple_person.json
+    description: hello`
+      const basePath = path.resolve(__dirname, 'json')
+      const schema = await dt2js(data, 'Person', { basePath })
+      const schemaStr = JSON.stringify(schema)
+      validateJsonSchema(schemaStr)
+      expect(schemaStr).to.contain('Age in years')
+      expect(schemaStr).to.contain('firstName')
+      expect(schemaStr).to.contain('hello')
+      expect(schemaStr).to.contain('$schema')
+    })
+  })
 })
 
 function validateJsonSchema (schemaStr) {
