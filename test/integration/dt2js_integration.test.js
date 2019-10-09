@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, context */
+/* global describe, it, context, beforeEach, afterEach */
 
 /**
  * Integration testing module (dt2js).
@@ -19,10 +19,11 @@ const path = require('path')
 const Ajv = require('ajv')
 const wap = require('webapi-parser').WebApiParser
 const { expect } = require('chai')
+const rewire = require('rewire')
 
 const helpers = require('../helpers')
 const dt2jsCLI = require('../../src/dt2js_cli')
-const dt2js = require('../../src/dt2js').dt2js
+const dt2jsMod = rewire('../../src/dt2js')
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'raml')
 
@@ -71,6 +72,7 @@ async function defineTests () {
 defineTests()
 
 describe('dt2js function integration test', function () {
+  const dt2js = dt2jsMod.__get__('dt2js')
   context('when using cli', function () {
     it('should resolve references', async function () {
       const schema = await dt2jsCLI(
@@ -129,6 +131,51 @@ types:
       expect(schemaStr).to.contain('draft-04')
       expect(schemaStr).to.contain('hello')
       expect(schemaStr).to.contain('$schema')
+    })
+  })
+})
+
+describe('dt2js function integration test with --validation option', function () {
+  const dt2js = dt2jsMod.__get__('dt2js')
+  const data = `
+#%RAML 1.0 Library
+
+types:
+  PersonAge:
+    type: number
+    minimum: 1
+    maximum: 50
+    format: int32`
+  let revert
+  beforeEach(function () {
+    revert = dt2jsMod.__set__({
+      migrateDraft: function (name) {
+        return {
+          $schema: 'http://json-schema.org/draft-04/schema',
+          required: 'asdasdasd'
+        }
+      }
+    })
+  })
+  afterEach(function () { revert() })
+  context('when --validation option is passed', function () {
+    it('should validate output json schema', async function () {
+      try {
+        await dt2js(data, 'PersonAge', { validate: true })
+        throw new Error('Expected to fail')
+      } catch (e) {
+        expect(e.message).to.equal(
+          'Invalid JSON Schema: data.required should be array')
+      }
+    })
+  })
+  context('when --validation option is NOT passed', function () {
+    it('should not validate output json schema', async function () {
+      try {
+        await dt2js(data, 'PersonAge')
+      } catch (e) {
+        throw new Error('Expected to succeed')
+      }
     })
   })
 })

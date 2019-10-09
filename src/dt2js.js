@@ -11,6 +11,7 @@ const utils = require('./utils')
  * @param  {object} options - Options to use in conversion:
  *     basePath: Resolve references relative to this path.
  *     draft: Output JSON Schema draft version.
+ *     validate: Validate output JSON Schema with Ajv.
  * @return {object} JSON Schema containing converted type.
  */
 async function dt2js (ramlData, typeName, options = {}) {
@@ -32,7 +33,11 @@ async function dt2js (ramlData, typeName, options = {}) {
         fixFileTypeProperties(val))),
     2
   )
-  return migrateDraft(JSON.parse(jsonSchema), options.draft)
+  const finalSchema = migrateDraft(JSON.parse(jsonSchema), options.draft)
+  if (options.validate) {
+    validateJsonSchema(finalSchema)
+  }
+  return finalSchema
 }
 
 /**
@@ -144,6 +149,36 @@ function removeXAmfProperties (obj) {
     newObj[k] = v
   })
   return newObj
+}
+
+/**
+ * Validates JSON Schema.
+ *
+ * @param  {object} obj - JSON Schema object.
+ * @throws {Error} Invalid JSON Schema.
+ * @throws {Error} Validation requires "ajv" to be installed.
+ */
+function validateJsonSchema (obj) {
+  let Ajv
+  try {
+    Ajv = require('ajv')
+  } catch (err) {
+    throw new Error(
+      `Validation requires "ajv" to be installed. ${err.message}`)
+  }
+  const ajv = new Ajv({ allErrors: true, schemaId: 'auto' })
+
+  if (obj.$schema.indexOf('draft-04') > -1) {
+    ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'))
+  } else if (obj.$schema.indexOf('draft-06') > -1) {
+    ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'))
+  }
+
+  const valid = ajv.validateSchema(obj)
+  if (!valid) {
+    const errorsText = ajv.errorsText(ajv.errors, { separator: '; ' })
+    throw new Error(`Invalid JSON Schema: ${errorsText}`)
+  }
 }
 
 module.exports.dt2js = dt2js

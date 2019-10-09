@@ -1,4 +1,4 @@
-/* global describe, it, context */
+/* global describe, it, context, beforeEach, afterEach */
 
 const { expect } = require('chai')
 const rewire = require('rewire')
@@ -184,6 +184,64 @@ describe('dt2js.fixStructureInconsistencies()', function () {
     }
     expect(fixStructureInconsistencies(data)).to.deep.equal({
       examples: ['CatOne', 'DogOne']
+    })
+  })
+})
+
+describe('dt2js.validateJsonSchema()', function () {
+  const validateJsonSchema = dt2js.__get__('validateJsonSchema')
+  context('when invalid draft-04 json schema passed', function () {
+    it('should validate it and throw an error', function () {
+      const schema = {
+        $schema: 'http://json-schema.org/draft-04/schema',
+        required: 'asdasdasd'
+      }
+      expect(_ => validateJsonSchema(schema)).to.throw(
+        Error,
+        'Invalid JSON Schema: data.required should be array')
+    })
+  })
+  context('when valid draft-04 json schema passed', function () {
+    it('should not throw an error', function () {
+      const schema = {
+        $schema: 'http://json-schema.org/draft-04/schema',
+        required: ['asdasdasd']
+      }
+      expect(_ => validateJsonSchema(schema)).to.not.throw(
+        Error,
+        'Invalid JSON Schema: data.required should be array')
+    })
+  })
+  it('should support draft-06 schema', function () {
+    const schema = { $schema: 'http://json-schema.org/draft-06/schema' }
+    expect(_ => validateJsonSchema(schema)).to.not.throw(Error)
+  })
+  it('should support draft-07 schema', function () {
+    const schema = { $schema: 'http://json-schema.org/draft-07/schema' }
+    expect(_ => validateJsonSchema(schema)).to.not.throw(Error)
+  })
+  it('should not support other drafts', function () {
+    const schema = { $schema: 'http://json-schema.org/draft-03/schema' }
+    expect(_ => validateJsonSchema(schema)).to.throw(
+      Error,
+      'no schema with key or ref "http://json-schema.org/draft-03/schema')
+  })
+  context('when ajv is not installed', function () {
+    let revert
+    beforeEach(function () {
+      revert = dt2js.__set__({
+        require: function (name) { throw new Error('hi') }
+      })
+    })
+    afterEach(function () { revert() })
+    it('should throw an error', function () {
+      const schema = {
+        $schema: 'http://json-schema.org/draft-04/schema',
+        required: ['asdasdasd']
+      }
+      expect(_ => validateJsonSchema(schema)).to.throw(
+        Error,
+        'Validation requires "ajv" to be installed. hi')
     })
   })
 })
