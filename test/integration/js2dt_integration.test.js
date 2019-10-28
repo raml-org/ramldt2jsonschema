@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, context */
+/* global describe, it, context, beforeEach, afterEach */
 
 /**
  * Integration testing module (js2dt).
@@ -16,13 +16,15 @@
  */
 
 const path = require('path')
-const wap = require('webapi-parser').WebApiParser
 const yaml = require('js-yaml')
 const { expect } = require('chai')
+const rewire = require('rewire')
 
 const helpers = require('../helpers')
 const js2dtCLI = require('../../src/js2dt_cli')
-const js2dt = require('../../src/js2dt').js2dt
+const js2dtMod = rewire('../../src/js2dt')
+const js2dt = js2dtMod.__get__('js2dt')
+const wap = require('webapi-parser').WebApiParser
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'json')
 
@@ -89,6 +91,51 @@ describe('js2dt function integration test', function () {
       await validateRamlDataType(ramlStr)
       expect(ramlStr).to.contain('Age in years')
       expect(ramlStr).to.contain('firstName')
+    })
+  })
+})
+
+describe('js2dt function integration test with --validation option', function () {
+  const data = `
+    {
+      "title": "Person",
+      "properties": {
+        "person":  {
+          "type": "string"
+        }
+      }
+    }
+  `
+  let revert
+  beforeEach(function () {
+    revert = js2dtMod.__set__({
+      getDeclarationByName: () => `
+#%RAML 1.0 Library
+types:
+  Cat:
+    type: number
+    maximum: asd`
+    })
+  })
+  afterEach(function () { revert() })
+  context('when --validation option is passed', function () {
+    it('should validate output RAML', async function () {
+      try {
+        await js2dt(data, 'PersonAge', { validate: true })
+        throw new Error('Expected to fail')
+      } catch (e) {
+        expect(e.message).to.equal(
+          'Invalid RAML: maximum facet for a RAML scalar type must be a number')
+      }
+    })
+  })
+  context('when --validation option is NOT passed', function () {
+    it('should not validate output RAML', async function () {
+      try {
+        await js2dt(data, 'PersonAge')
+      } catch (e) {
+        throw new Error('Expected to succeed')
+      }
     })
   })
 })
