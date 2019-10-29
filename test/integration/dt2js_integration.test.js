@@ -135,7 +135,7 @@ types:
   })
 })
 
-describe('dt2js function integration test with --validation option', function () {
+describe('dt2js function integration test with --validate option', function () {
   const dt2js = dt2jsMod.__get__('dt2js')
   const data = `
 #%RAML 1.0 Library
@@ -158,7 +158,7 @@ types:
     })
   })
   afterEach(function () { revert() })
-  context('when --validation option is passed', function () {
+  context('when --validate option is passed', function () {
     it('should validate output json schema', async function () {
       try {
         await dt2js(data, 'PersonAge', { validate: true })
@@ -169,7 +169,7 @@ types:
       }
     })
   })
-  context('when --validation option is NOT passed', function () {
+  context('when --validate option is NOT passed', function () {
     it('should not validate output json schema', async function () {
       try {
         await dt2js(data, 'PersonAge')

@@ -95,7 +95,7 @@ describe('js2dt function integration test', function () {
   })
 })
 
-describe('js2dt function integration test with --validation option', function () {
+describe('js2dt function integration test with --validate option', function () {
   const data = `
     {
       "title": "Person",
@@ -118,7 +118,7 @@ types:
     })
   })
   afterEach(function () { revert() })
-  context('when --validation option is passed', function () {
+  context('when --validate option is passed', function () {
     it('should validate output RAML', async function () {
       try {
         await js2dt(data, 'PersonAge', { validate: true })
@@ -129,7 +129,7 @@ types:
       }
     })
   })
-  context('when --validation option is NOT passed', function () {
+  context('when --validate option is NOT passed', function () {
     it('should not validate output RAML', async function () {
       try {
         await js2dt(data, 'PersonAge')

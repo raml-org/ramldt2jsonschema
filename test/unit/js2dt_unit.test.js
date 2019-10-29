@@ -22,7 +22,7 @@ types:
       }
     })
   })
-  context('when valida RAML is passed', function () {
+  context('when valid RAML is passed', function () {
     it('should not throw error', async function () {
       try {
         await validateRaml(`
