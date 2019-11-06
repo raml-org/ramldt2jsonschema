@@ -7,7 +7,7 @@ const js2dt = rewire('../../src/js2dt')
 describe('js2dt.validateRaml()', function () {
   const validateRaml = js2dt.__get__('validateRaml')
   context('when invalid RAML is passed', function () {
-    it('should an error', async function () {
+    it('should throw an error', async function () {
       try {
         await validateRaml(`
 #%RAML 1.0 Library
