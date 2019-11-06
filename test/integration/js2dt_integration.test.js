@@ -98,10 +98,10 @@ describe('js2dt function integration test', function () {
 describe('js2dt function integration test with --validate option', function () {
   const data = `
     {
-      "title": "Person",
+      "title": "PersonAge",
       "properties": {
         "person":  {
-          "type": "string"
+          "type": "number"
         }
       }
     }
@@ -112,7 +112,7 @@ describe('js2dt function integration test with --validate option', function () {
       getDeclarationByName: () => `
 #%RAML 1.0 Library
 types:
-  Cat:
+  PersonAge:
     type: number
     maximum: asd`
     })
