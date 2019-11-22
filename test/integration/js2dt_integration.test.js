@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, context, beforeEach, afterEach */
+/* global describe, it, context */
 
 /**
  * Integration testing module (js2dt).
@@ -101,23 +101,12 @@ describe('js2dt function integration test with --validate option', function () {
       "title": "PersonAge",
       "properties": {
         "person":  {
-          "type": "number"
+          "type": "number",
+          "x-something": "foo"
         }
       }
     }
   `
-  let revert
-  beforeEach(function () {
-    revert = js2dtMod.__set__({
-      getDeclarationByName: () => `
-#%RAML 1.0 Library
-types:
-  PersonAge:
-    type: number
-    maximum: asd`
-    })
-  })
-  afterEach(function () { revert() })
   context('when --validate option is passed', function () {
     it('should validate output RAML', async function () {
       try {
@@ -125,7 +114,7 @@ types:
         throw new Error('Expected to fail')
       } catch (e) {
         expect(e.message).to.equal(
-          'Invalid RAML: maximum facet for a RAML scalar type must be a number')
+          'Invalid RAML: type is mandatory for a RAML annotationType')
       }
     })
   })
