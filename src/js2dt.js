@@ -52,7 +52,12 @@ async function js2dt (jsonData, typeName, options = {}) {
 
 /* Wrapper function to ease testing */
 function getDeclarationByName (model, typeName) {
-  return model.getDeclarationByName(typeName).toRamlDatatype
+  try {
+    return model.getDeclarationByName(typeName).toRamlDatatype
+  } catch (err) {
+    throw new Error(
+      `Failed to convert to RAML Library: ${err.toString()}`)
+  }
 }
 
 /**
