@@ -30,7 +30,8 @@
     "lint": "standard",
     "test-unit": "nyc mocha -R spec --bail test/unit/*.test.js",
     "test-integration": "nyc mocha -R spec --bail test/integration/*.test.js",
-    "test": "npm run lint && npm run test-unit && npm run test-integration"
+    "test-all": "nyc mocha -R spec --bail test/**/*.test.js",
+    "test": "npm run lint && npm run test-all"
   },
   "dependencies": {
     "commander": "^3.0.1",
