@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, context, beforeEach, afterEach */
+/* global describe, it, context */
 
 /**
  * Integration testing module (dt2js).
@@ -142,22 +142,11 @@ describe('dt2js function integration test with --validate option', function () {
 
 types:
   PersonAge:
-    type: number
-    minimum: 1
-    maximum: 50
-    format: int32`
-  let revert
-  beforeEach(function () {
-    revert = dt2jsMod.__set__({
-      migrateDraft: function (name) {
-        return {
-          $schema: 'http://json-schema.org/draft-04/schema',
-          required: 'asdasdasd'
-        }
-      }
-    })
-  })
-  afterEach(function () { revert() })
+    type: string
+    enum: 4
+  PersonName:
+    type: string
+`
   context('when --validate option is passed', function () {
     it('should validate output json schema', async function () {
       try {
@@ -165,14 +154,14 @@ types:
         throw new Error('Expected to fail')
       } catch (e) {
         expect(e.message).to.equal(
-          'Invalid JSON Schema: data.required should be array')
+          "schema is invalid: data.definitions['PersonAge'].enum should NOT have less than 1 items")
       }
     })
   })
   context('when --validate option is NOT passed', function () {
     it('should not validate output json schema', async function () {
       try {
-        await dt2js(data, 'PersonAge')
+        await dt2js(data, 'PersonName')
       } catch (e) {
         throw new Error('Expected to succeed')
       }
