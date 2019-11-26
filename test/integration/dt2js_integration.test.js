@@ -150,11 +150,11 @@ types:
   context('when --validate option is passed', function () {
     it('should validate output json schema', async function () {
       try {
-        await dt2js(data, 'PersonAge', { validate: true })
+        await dt2js(data, 'PersonAge', { validate: true, draft: '04' })
         throw new Error('Expected to fail')
       } catch (e) {
         expect(e.message).to.equal(
-          "schema is invalid: data.definitions['PersonAge'].enum should NOT have less than 1 items")
+          "Invalid JSON Schema: data.definitions['PersonAge'].enum should NOT have fewer than 1 items")
       }
     })
   })
