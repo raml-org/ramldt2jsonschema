@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, context, beforeEach, afterEach */
+/* global describe, it, context */
 
 /**
  * Integration testing module (dt2js).
@@ -135,44 +135,33 @@ types:
   })
 })
 
-describe('dt2js function integration test with --validation option', function () {
+describe('dt2js function integration test with --validate option', function () {
   const dt2js = dt2jsMod.__get__('dt2js')
   const data = `
 #%RAML 1.0 Library
 
 types:
   PersonAge:
-    type: number
-    minimum: 1
-    maximum: 50
-    format: int32`
-  let revert
-  beforeEach(function () {
-    revert = dt2jsMod.__set__({
-      migrateDraft: function (name) {
-        return {
-          $schema: 'http://json-schema.org/draft-04/schema',
-          required: 'asdasdasd'
-        }
-      }
-    })
-  })
-  afterEach(function () { revert() })
-  context('when --validation option is passed', function () {
+    type: string
+    enum: 4
+  PersonName:
+    type: string
+`
+  context('when --validate option is passed', function () {
     it('should validate output json schema', async function () {
       try {
-        await dt2js(data, 'PersonAge', { validate: true })
+        await dt2js(data, 'PersonAge', { validate: true, draft: '04' })
         throw new Error('Expected to fail')
       } catch (e) {
         expect(e.message).to.equal(
-          'Invalid JSON Schema: data.required should be array')
+          "Invalid JSON Schema: data.definitions['PersonAge'].enum should NOT have fewer than 1 items")
       }
     })
   })
-  context('when --validation option is NOT passed', function () {
+  context('when --validate option is NOT passed', function () {
     it('should not validate output json schema', async function () {
       try {
-        await dt2js(data, 'PersonAge')
+        await dt2js(data, 'PersonName')
       } catch (e) {
         throw new Error('Expected to succeed')
       }

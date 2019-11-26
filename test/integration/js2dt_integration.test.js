@@ -16,13 +16,15 @@
  */
 
 const path = require('path')
-const wap = require('webapi-parser').WebApiParser
 const yaml = require('js-yaml')
 const { expect } = require('chai')
+const rewire = require('rewire')
 
 const helpers = require('../helpers')
 const js2dtCLI = require('../../src/js2dt_cli')
-const js2dt = require('../../src/js2dt').js2dt
+const js2dtMod = rewire('../../src/js2dt')
+const js2dt = js2dtMod.__get__('js2dt')
+const wap = require('webapi-parser').WebApiParser
 
 const EXAMPLES_FOLDER = path.join(__dirname, 'json')
 
@@ -89,6 +91,40 @@ describe('js2dt function integration test', function () {
       await validateRamlDataType(ramlStr)
       expect(ramlStr).to.contain('Age in years')
       expect(ramlStr).to.contain('firstName')
+    })
+  })
+})
+
+describe('js2dt function integration test with --validate option', function () {
+  const data = `
+    {
+      "title": "PersonAge",
+      "properties": {
+        "person":  {
+          "type": "number",
+          "x-something": "foo"
+        }
+      }
+    }
+  `
+  context('when --validate option is passed', function () {
+    it('should validate output RAML', async function () {
+      try {
+        await js2dt(data, 'PersonAge', { validate: true })
+        throw new Error('Expected to fail')
+      } catch (e) {
+        expect(e.message).to.equal(
+          'Invalid RAML: type is mandatory for a RAML annotationType')
+      }
+    })
+  })
+  context('when --validate option is NOT passed', function () {
+    it('should not validate output RAML', async function () {
+      try {
+        await js2dt(data, 'PersonAge')
+      } catch (e) {
+        throw new Error('Expected to succeed')
+      }
     })
   })
 })

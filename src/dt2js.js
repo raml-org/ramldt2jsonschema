@@ -24,8 +24,14 @@ async function dt2js (ramlData, typeName, options = {}) {
     model = await wap.raml10.parse(patchedData)
   }
   const resolved = await wap.raml10.resolve(model)
-  let jsonSchema = resolved.getDeclarationByName(typeName)
-    .buildJsonSchema()
+  let jsonSchema
+  try {
+    jsonSchema = resolved.getDeclarationByName(typeName)
+      .buildJsonSchema()
+  } catch (err) {
+    throw new Error(
+      `Failed to convert to JSON Schema: ${err.toString()}`)
+  }
   jsonSchema = JSON.stringify(
     JSON.parse(jsonSchema),
     (key, val) => fixStructureInconsistencies(

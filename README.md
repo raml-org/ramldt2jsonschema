@@ -36,13 +36,14 @@ dt2js <ramlFile> <ramlTypeName> --draft=[version] [--validate]
 #### js2dt
 
 ```
-js2dt <jsonFile> <ramlTypeName>
+js2dt <jsonFile> <ramlTypeName> [--validate]
 ```
 
 **Options**
 
 * `<jsonFile>` Path to a JSON schema file (e.g. `path/to/schema.json`)
 * `<ramlTypeName>` RAML type name to give to the exported RAML data type
+* `--validate` Validate output RAML with webapi-parser. Throws an error if it is invalid. (default: false)
 
 ### Locally (JavaScript)
 
