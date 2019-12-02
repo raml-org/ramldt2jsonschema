@@ -37,7 +37,7 @@
     "commander": "^4.0.0",
     "js-yaml": "^3.13.1",
     "json-schema-migrate": "^0.2.0",
-    "webapi-parser": "^0.3.1"
+    "webapi-parser": "^0.4.0"
   },
   "devDependencies": {
     "ajv": "^6.5.4",
