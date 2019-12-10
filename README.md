@@ -129,6 +129,7 @@ console.log(JSON.stringify(schema, null, 2))
     > dependencies, exclusiveMaximum, exclusiveMinimum, items (array value), allOf, oneOf, not, format (email, hostname, ipv4, ipv6, uri), readOnly
   - the following JSON Schema properties won't be converted at all:
     > $schema, additionalItems, contains, id, $id, propertyNames, definitions, links, fragmentResolution, media, pathStart, targetSchema
+  - array `items` property is not properly converted to RAML when it's value is an array of schemas (see #111)
 
 
 ## License
