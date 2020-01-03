@@ -34,7 +34,7 @@
     "test": "npm run lint && npm run test-all"
   },
   "dependencies": {
-    "commander": "^4.0.0",
+    "commander": "^4.0.1",
     "js-yaml": "^3.13.1",
     "json-schema-migrate": "^0.2.0",
     "webapi-parser": "^0.4.0"
@@ -42,8 +42,8 @@
   "devDependencies": {
     "ajv": "^6.5.4",
     "chai": "^4.1.2",
-    "mocha": "^6.2.0",
-    "nyc": "^14.1.1",
+    "mocha": "^6.2.2",
+    "nyc": "^15.0.0",
     "rewire": "^4.0.1",
     "standard": "^14.3.1"
   }
