@@ -9,7 +9,7 @@ notifications:
 node_js:
   - "10"
   - "12"
-  - "13"
+  - "14"
   - "node"
 
 script: npm run test
