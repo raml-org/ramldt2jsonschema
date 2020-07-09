@@ -1,6 +1,6 @@
 {
   "name": "ramldt2jsonschema",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Converts a RAML data type into JSON schema, and back",
   "main": "src/index.js",
   "author": "MuleSoft, Inc.",
