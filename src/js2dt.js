@@ -36,7 +36,7 @@ async function js2dt (jsonData, typeName, options = {}) {
 
   let model
   if (options.basePath) {
-    const location = utils.genBasePathLocation(options.basePath, 'json')
+    const location = utils.basePathToURL(options.basePath, 'json')
     model = await wap.oas20.parse(schemaString, location)
   } else {
     model = await wap.oas20.parse(schemaString)

@@ -1,18 +1,18 @@
 const path = require('path')
+const url = require('url')
 
 /**
- * Generate default location for basePath.
+ * Convert file path to file URL adding default file name if missing.
  *
  * @param  {string} basePath - Path to generate location for.
  * @param  {string} ext - Generated location document extension.
  * @return {string} Generated location with "file://" prefix.
  */
-function genBasePathLocation (basePath, ext) {
-  if (basePath.endsWith(`.${ext}`)) {
-    return `file://${basePath}`
+function basePathToURL (basePath, ext) {
+  if (!basePath.endsWith(`.${ext}`)) {
+    basePath = path.join(basePath, `basepath_default_doc.${ext}`)
   }
-  const docName = `basepath_default_doc.${ext}`
-  return `file://${path.resolve(basePath, docName)}`
+  return url.pathToFileURL(basePath.replace(/\\/g, '/')).href
 }
 
 /**
@@ -30,7 +30,7 @@ function validateDraft (draft) {
 }
 
 module.exports = {
-  genBasePathLocation: genBasePathLocation,
+  basePathToURL: basePathToURL,
   validateDraft: validateDraft,
   DEFAULT_DRAFT: '07'
 }

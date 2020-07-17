@@ -18,7 +18,7 @@ async function dt2js (ramlData, typeName, options = {}) {
   const patchedData = patchRamlData(ramlData, typeName)
   let model
   if (options.basePath) {
-    const location = utils.genBasePathLocation(options.basePath, 'raml')
+    const location = utils.basePathToURL(options.basePath, 'raml')
     model = await wap.raml10.parse(patchedData, location)
   } else {
     model = await wap.raml10.parse(patchedData)

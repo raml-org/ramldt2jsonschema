@@ -3,16 +3,24 @@
 const { expect } = require('chai')
 const utils = require('../../src/utils')
 
-describe('utils.genBasePathLocation()', function () {
+describe('utils.basePathToURL()', function () {
   it('should generate base path location', function () {
-    const loc = utils.genBasePathLocation('/tmp', 'xml')
+    const loc = utils.basePathToURL('/tmp', 'xml')
     expect(loc).to.equal('file:///tmp/basepath_default_doc.xml')
   })
   context('when provided path ends with extension', function () {
     it('should return passed value with a "file://" prefix', function () {
-      const loc = utils.genBasePathLocation('/tmp/foo.xml', 'xml')
+      const loc = utils.basePathToURL('/tmp/foo.xml', 'xml')
       expect(loc).to.equal('file:///tmp/foo.xml')
     })
+  })
+  it('should handle Windows-like back slashes properly', function () {
+    const loc = utils.basePathToURL('\\tmp:\\Users\\John', 'xml')
+    expect(loc).to.equal('file:///tmp:/Users/John/basepath_default_doc.xml')
+  })
+  it('should handle Windows-like back slashes with filename properly', function () {
+    const loc = utils.basePathToURL('\\tmp:\\Users\\John\\doc.xml', 'xml')
+    expect(loc).to.equal('file:///tmp:/Users/John/doc.xml')
   })
 })
 
