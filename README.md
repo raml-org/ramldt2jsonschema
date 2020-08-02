@@ -6,7 +6,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-CLI & Library to convert a RAML 1.0 DataType to a JSON Schema Draft 4, and back. Uses [webapi-parser](https://github.com/raml-org/webapi-parser) under the hood.
+CLI & Library to convert a RAML 1.0 DataType to a JSON Schema, and back. Uses [webapi-parser](https://github.com/raml-org/webapi-parser) under the hood.
 
 ## Usage
 
