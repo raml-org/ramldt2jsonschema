@@ -42,7 +42,7 @@
   "devDependencies": {
     "ajv": "^6.12.3",
     "chai": "^4.1.2",
-    "mocha": "^8.0.1",
+    "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "rewire": "^5.0.0",
     "standard": "^14.3.4"
